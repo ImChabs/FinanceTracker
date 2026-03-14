@@ -69,6 +69,7 @@ description: Implement one bounded development block in this repository, verify 
 - Name archive files with a zero-padded numeric prefix followed by a short slug, for example `001-block-01-project-foundation-and-app-shell.md`.
 - Continue numbering from the highest existing numeric prefix already present in `handoff-history/`.
 - Keep it short, specific, and actionable.
+- Include an `Execution Recommendation` section in every generated handoff.
 - Include:
   - `Next block name`
   - `Objective`
@@ -76,7 +77,28 @@ description: Implement one bounded development block in this repository, verify 
   - `Constraints`
   - `What not to change`
   - `Done criteria`
+- Format the execution recommendation as:
+  - `## Execution Recommendation`
+  - `- Recommended reasoning effort: <low|medium|high|xhigh>`
+  - `- Rationale: <brief explanation>`
 - Base the next block on the current state of the codebase after your changes, not on the original request.
+
+## Execution Recommendation Guidance
+
+- Every generated handoff must include an `Execution Recommendation` section.
+- Allowed values are exactly:
+  - `low`
+  - `medium`
+  - `high`
+  - `xhigh`
+- Choose the recommendation by evaluating the expected complexity of the next block.
+- Use the rubric below as guidance, not as a rigid formula.
+- Always include a brief one-line rationale.
+- Decision rubric:
+  - `low`: small, mechanical, low-risk work
+  - `medium`: default for normal implementation blocks
+  - `high`: meaningful ambiguity, multi-layer coordination, or harder verification
+  - `xhigh`: hardest cases with deep coordination, difficult debugging, or major tradeoffs
 
 ## Final Response Format
 
