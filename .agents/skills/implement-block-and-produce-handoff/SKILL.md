@@ -13,6 +13,8 @@ description: Implement one bounded development block in this repository, verify 
 - Use `docs/blueprint.md` as the source of truth for product goal, feature roadmap, high-level application scope, and long-term project direction.
 - Read `handoff/next-block.md` if it exists.
 - Use `handoff/next-block.md` as the source of truth for the immediate next block.
+- Treat `handoff/next-block.md` as the only live source of truth for the immediate next block unless the user explicitly says otherwise.
+- Treat `handoff-history/` as archival only and never as the source of truth unless the user explicitly requests historical lookup.
 - Resolve the current block by combining repository rules from `AGENTS.md`, product direction from `docs/blueprint.md`, and immediate scope from `handoff/next-block.md`.
 - Do not restate or override repository rules from `AGENTS.md`.
 
@@ -21,6 +23,7 @@ description: Implement one bounded development block in this repository, verify 
 - Complete exactly one development block per chat/thread.
 - Implement only the requested scope, plus small adjacent fixes required to make the block correct and verifiable.
 - Leave a concise handoff for the next block at `handoff/next-block.md`.
+- Archive each completed handoff as a separate history file under `handoff-history/`.
 
 ## Workflow
 
@@ -35,6 +38,7 @@ description: Implement one bounded development block in this repository, verify 
 6. If verification fails because of block changes, fix issues that are in scope or are a small required adjacent correction.
 7. Summarize the result clearly.
 8. Overwrite `handoff/next-block.md` with the next-block handoff.
+9. Write a second archival copy of that same handoff into `handoff-history/` as a new file without overwriting prior history files.
 
 ## Scope Control
 
@@ -52,10 +56,18 @@ description: Implement one bounded development block in this repository, verify 
 - If verification cannot be completed, say so explicitly.
 - If verification exposes issues caused by the block changes, attempt to fix them when they remain within scope or are a small required adjacent fix.
 
-## Handoff File
+## Handoff Files
 
 - Create the `handoff` directory first if it does not already exist.
+- Create the `handoff-history` directory first if it does not already exist.
 - Always create or overwrite `handoff/next-block.md`.
+- `handoff/next-block.md` remains the only live source of truth for the immediate next block.
+- Always write a second archival copy of the generated handoff into `handoff-history/`.
+- `handoff-history/` is archival only and must not be used as the source of truth unless explicitly requested.
+- Never overwrite or delete prior files in `handoff-history/`.
+- Use one file per archived handoff, not a cumulative history file.
+- Name archive files with a zero-padded numeric prefix followed by a short slug, for example `001-block-01-project-foundation-and-app-shell.md`.
+- Continue numbering from the highest existing numeric prefix already present in `handoff-history/`.
 - Keep it short, specific, and actionable.
 - Include:
   - `Next block name`
