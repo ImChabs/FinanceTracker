@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.newfinancetracker.R
 import com.example.newfinancetracker.core.app.FinanceTrackerApplication
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
+import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryDeleteButton
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryFormScreen
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryFormState
 
@@ -69,6 +71,35 @@ fun RecurringEntryEditScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (state.isDeleteConfirmationVisible) {
+        AlertDialog(
+            onDismissRequest = { onAction(RecurringEntryEditAction.DeleteDismissed) },
+            title = {
+                Text(text = stringResource(R.string.recurring_edit_delete_confirm_title))
+            },
+            text = {
+                Text(text = stringResource(R.string.recurring_edit_delete_confirm_body))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { onAction(RecurringEntryEditAction.DeleteConfirmed) }
+                ) {
+                    Text(
+                        text = stringResource(R.string.recurring_edit_delete_confirm_action),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { onAction(RecurringEntryEditAction.DeleteDismissed) }
+                ) {
+                    Text(text = stringResource(R.string.recurring_edit_delete_cancel))
+                }
+            }
+        )
+    }
+
     when {
         state.isLoading -> {
             RecurringEntryEditLoadingScreen(
@@ -92,7 +123,7 @@ fun RecurringEntryEditScreen(
                 formState = state.form,
                 showValidationErrors = state.showValidationErrors,
                 hasSaveError = state.hasSaveError,
-                isSaving = state.isSaving,
+                isSaving = state.isSaving || state.isDeleting,
                 onNavigateBack = onNavigateBack,
                 onNameChanged = { onAction(RecurringEntryEditAction.NameChanged(it)) },
                 onAmountChanged = { onAction(RecurringEntryEditAction.AmountChanged(it)) },
@@ -107,6 +138,24 @@ fun RecurringEntryEditScreen(
                 onActiveChanged = { onAction(RecurringEntryEditAction.ActiveChanged(it)) },
                 onNotesChanged = { onAction(RecurringEntryEditAction.NotesChanged(it)) },
                 onSaveClicked = { onAction(RecurringEntryEditAction.SaveClicked) },
+                destructiveAction = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (state.hasDeleteError) {
+                            Text(
+                                text = stringResource(R.string.recurring_edit_delete_error),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        RecurringEntryDeleteButton(
+                            label = stringResource(R.string.recurring_edit_delete),
+                            enabled = state.canDelete,
+                            onClick = { onAction(RecurringEntryEditAction.DeleteClicked) }
+                        )
+                    }
+                },
                 modifier = modifier
             )
         }

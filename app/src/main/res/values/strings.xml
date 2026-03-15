@@ -46,6 +46,12 @@
     <string name="recurring_edit_title">Edit recurring entry</string>
     <string name="recurring_edit_back">Back</string>
     <string name="recurring_edit_save">Save changes</string>
+    <string name="recurring_edit_delete">Delete recurring entry</string>
+    <string name="recurring_edit_delete_error">Unable to delete the recurring entry. Please try again.</string>
+    <string name="recurring_edit_delete_confirm_title">Delete this recurring entry?</string>
+    <string name="recurring_edit_delete_confirm_body">This will permanently remove the saved entry from your dashboard.</string>
+    <string name="recurring_edit_delete_confirm_action">Delete</string>
+    <string name="recurring_edit_delete_cancel">Keep entry</string>
     <string name="recurring_edit_loading">Loading saved entry...</string>
     <string name="recurring_edit_missing_title">This recurring entry is no longer available</string>
     <string name="recurring_edit_missing_body">The saved entry could not be found. It may have been removed or changed elsewhere.</string>

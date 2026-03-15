@@ -13,4 +13,7 @@ sealed interface RecurringEntryEditAction {
     data class BillingFrequencyChanged(val value: BillingFrequency) : RecurringEntryEditAction
     data class ActiveChanged(val value: Boolean) : RecurringEntryEditAction
     data object SaveClicked : RecurringEntryEditAction
+    data object DeleteClicked : RecurringEntryEditAction
+    data object DeleteDismissed : RecurringEntryEditAction
+    data object DeleteConfirmed : RecurringEntryEditAction
 }

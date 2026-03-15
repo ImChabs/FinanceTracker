@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +51,7 @@ fun RecurringEntryFormScreen(
     onActiveChanged: (Boolean) -> Unit,
     onNotesChanged: (String) -> Unit,
     onSaveClicked: () -> Unit,
+    destructiveAction: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -220,7 +222,28 @@ fun RecurringEntryFormScreen(
             ) {
                 Text(text = saveLabel)
             }
+
+            destructiveAction?.invoke()
         }
+    }
+}
+
+@Composable
+fun RecurringEntryDeleteButton(
+    label: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = MaterialTheme.colorScheme.error
+        ),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(text = label)
     }
 }
 

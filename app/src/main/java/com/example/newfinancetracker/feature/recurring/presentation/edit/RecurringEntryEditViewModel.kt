@@ -61,6 +61,27 @@ class RecurringEntryEditViewModel(
                 }
             }
 
+            RecurringEntryEditAction.DeleteClicked -> {
+                _state.update { currentState ->
+                    if (!currentState.canDelete) {
+                        currentState
+                    } else {
+                        currentState.copy(
+                            isDeleteConfirmationVisible = true,
+                            hasDeleteError = false
+                        )
+                    }
+                }
+            }
+
+            RecurringEntryEditAction.DeleteConfirmed -> deleteRecurringEntry()
+
+            RecurringEntryEditAction.DeleteDismissed -> {
+                _state.update { currentState ->
+                    currentState.copy(isDeleteConfirmationVisible = false)
+                }
+            }
+
             is RecurringEntryEditAction.NameChanged -> {
                 updateFormState { currentState ->
                     currentState.copy(name = action.value)
@@ -97,7 +118,8 @@ class RecurringEntryEditViewModel(
         _state.update { currentState ->
             currentState.copy(
                 form = transform(currentState.form),
-                hasSaveError = false
+                hasSaveError = false,
+                hasDeleteError = false
             )
         }
     }
@@ -108,7 +130,9 @@ class RecurringEntryEditViewModel(
                 currentState.copy(
                     isLoading = true,
                     hasSaveError = false,
-                    isMissingEntry = false
+                    hasDeleteError = false,
+                    isMissingEntry = false,
+                    isDeleteConfirmationVisible = false
                 )
             }
 
@@ -126,7 +150,8 @@ class RecurringEntryEditViewModel(
                     currentState.copy(
                         form = entry.toFormState(),
                         isLoading = false,
-                        isMissingEntry = false
+                        isMissingEntry = false,
+                        isDeleteConfirmationVisible = false
                     )
                 }
             }
@@ -160,6 +185,39 @@ class RecurringEntryEditViewModel(
                     state.copy(
                         isSaving = false,
                         hasSaveError = true
+                    )
+                }
+            }
+        }
+    }
+
+    private fun deleteRecurringEntry() {
+        val currentState = _state.value
+        if (!currentState.canDelete) {
+            return
+        }
+
+        viewModelScope.launch {
+            _state.update { state ->
+                state.copy(
+                    isDeleting = true,
+                    hasDeleteError = false,
+                    isDeleteConfirmationVisible = false
+                )
+            }
+
+            runCatching {
+                recurringEntryRepository.deleteRecurringEntry(entryId)
+            }.onSuccess {
+                _state.update { state ->
+                    state.copy(isDeleting = false)
+                }
+                _effects.emit(RecurringEntryEditEffect.NavigateBack)
+            }.onFailure {
+                _state.update { state ->
+                    state.copy(
+                        isDeleting = false,
+                        hasDeleteError = true
                     )
                 }
             }
