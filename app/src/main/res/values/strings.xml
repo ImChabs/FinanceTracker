@@ -43,4 +43,11 @@
     <string name="recurring_create_frequency_quarterly">Quarterly</string>
     <string name="recurring_create_frequency_yearly">Yearly</string>
     <string name="recurring_create_save_error">Unable to save the recurring entry. Please try again.</string>
+    <string name="recurring_edit_title">Edit recurring entry</string>
+    <string name="recurring_edit_back">Back</string>
+    <string name="recurring_edit_save">Save changes</string>
+    <string name="recurring_edit_loading">Loading saved entry...</string>
+    <string name="recurring_edit_missing_title">This recurring entry is no longer available</string>
+    <string name="recurring_edit_missing_body">The saved entry could not be found. It may have been removed or changed elsewhere.</string>
+    <string name="recurring_edit_back_to_dashboard">Back to dashboard</string>
 </resources>

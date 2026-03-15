@@ -1,10 +1,11 @@
-package com.example.newfinancetracker.feature.recurring.presentation.create
+package com.example.newfinancetracker.feature.recurring.presentation.edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.newfinancetracker.feature.recurring.domain.repository.RecurringEntryRepository
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryFormState
+import com.example.newfinancetracker.feature.recurring.presentation.form.toFormState
 import com.example.newfinancetracker.feature.recurring.presentation.form.toRecurringEntry
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,19 +16,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class RecurringEntryCreateViewModel(
+class RecurringEntryEditViewModel(
+    private val entryId: Long,
     private val recurringEntryRepository: RecurringEntryRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(RecurringEntryCreateState())
-    val state: StateFlow<RecurringEntryCreateState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(RecurringEntryEditState(entryId = entryId))
+    val state: StateFlow<RecurringEntryEditState> = _state.asStateFlow()
 
-    private val _effects = MutableSharedFlow<RecurringEntryCreateEffect>()
-    val effects: SharedFlow<RecurringEntryCreateEffect> = _effects.asSharedFlow()
+    private val _effects = MutableSharedFlow<RecurringEntryEditEffect>()
+    val effects: SharedFlow<RecurringEntryEditEffect> = _effects.asSharedFlow()
 
-    fun onAction(action: RecurringEntryCreateAction) {
+    init {
+        loadRecurringEntry()
+    }
+
+    fun onAction(action: RecurringEntryEditAction) {
         when (action) {
-            is RecurringEntryCreateAction.ActiveChanged -> {
+            is RecurringEntryEditAction.ActiveChanged -> {
                 _state.update { currentState ->
                     currentState.copy(
                         form = currentState.form.copy(isActive = action.value)
@@ -35,13 +41,13 @@ class RecurringEntryCreateViewModel(
                 }
             }
 
-            is RecurringEntryCreateAction.AmountChanged -> {
+            is RecurringEntryEditAction.AmountChanged -> {
                 updateFormState { currentState ->
                     currentState.copy(amount = action.value)
                 }
             }
 
-            is RecurringEntryCreateAction.BillingFrequencyChanged -> {
+            is RecurringEntryEditAction.BillingFrequencyChanged -> {
                 _state.update { currentState ->
                     currentState.copy(
                         form = currentState.form.copy(billingFrequency = action.value)
@@ -49,33 +55,33 @@ class RecurringEntryCreateViewModel(
                 }
             }
 
-            is RecurringEntryCreateAction.CategoryChanged -> {
+            is RecurringEntryEditAction.CategoryChanged -> {
                 updateFormState { currentState ->
                     currentState.copy(category = action.value)
                 }
             }
 
-            is RecurringEntryCreateAction.NameChanged -> {
+            is RecurringEntryEditAction.NameChanged -> {
                 updateFormState { currentState ->
                     currentState.copy(name = action.value)
                 }
             }
 
-            is RecurringEntryCreateAction.NextPaymentDateChanged -> {
+            is RecurringEntryEditAction.NextPaymentDateChanged -> {
                 updateFormState { currentState ->
                     currentState.copy(nextPaymentDate = action.value)
                 }
             }
 
-            is RecurringEntryCreateAction.NotesChanged -> {
+            is RecurringEntryEditAction.NotesChanged -> {
                 updateFormState { currentState ->
                     currentState.copy(notes = action.value)
                 }
             }
 
-            RecurringEntryCreateAction.SaveClicked -> saveRecurringEntry()
+            RecurringEntryEditAction.SaveClicked -> saveRecurringEntry()
 
-            is RecurringEntryCreateAction.TypeChanged -> {
+            is RecurringEntryEditAction.TypeChanged -> {
                 _state.update { currentState ->
                     currentState.copy(
                         form = currentState.form.copy(type = action.value)
@@ -96,6 +102,37 @@ class RecurringEntryCreateViewModel(
         }
     }
 
+    private fun loadRecurringEntry() {
+        viewModelScope.launch {
+            _state.update { currentState ->
+                currentState.copy(
+                    isLoading = true,
+                    hasSaveError = false,
+                    isMissingEntry = false
+                )
+            }
+
+            val entry = runCatching {
+                recurringEntryRepository.getRecurringEntry(entryId)
+            }.getOrNull()
+
+            _state.update { currentState ->
+                if (entry == null) {
+                    currentState.copy(
+                        isLoading = false,
+                        isMissingEntry = true
+                    )
+                } else {
+                    currentState.copy(
+                        form = entry.toFormState(),
+                        isLoading = false,
+                        isMissingEntry = false
+                    )
+                }
+            }
+        }
+    }
+
     private fun saveRecurringEntry() {
         val currentState = _state.value.copy(showValidationErrors = true, hasSaveError = false)
         _state.value = currentState
@@ -110,12 +147,14 @@ class RecurringEntryCreateViewModel(
             }
 
             runCatching {
-                recurringEntryRepository.upsertRecurringEntry(currentState.form.toRecurringEntry())
+                recurringEntryRepository.upsertRecurringEntry(
+                    currentState.form.toRecurringEntry(id = entryId)
+                )
             }.onSuccess {
                 _state.update { state ->
                     state.copy(isSaving = false)
                 }
-                _effects.emit(RecurringEntryCreateEffect.NavigateBack)
+                _effects.emit(RecurringEntryEditEffect.NavigateBack)
             }.onFailure {
                 _state.update { state ->
                     state.copy(
@@ -129,12 +168,14 @@ class RecurringEntryCreateViewModel(
 
     companion object {
         fun factory(
+            entryId: Long,
             recurringEntryRepository: RecurringEntryRepository
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                require(modelClass.isAssignableFrom(RecurringEntryCreateViewModel::class.java))
-                return RecurringEntryCreateViewModel(
+                require(modelClass.isAssignableFrom(RecurringEntryEditViewModel::class.java))
+                return RecurringEntryEditViewModel(
+                    entryId = entryId,
                     recurringEntryRepository = recurringEntryRepository
                 ) as T
             }

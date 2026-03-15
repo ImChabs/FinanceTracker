@@ -35,6 +35,12 @@ class DashboardViewModel(
                     _effects.emit(DashboardEffect.NavigateToRecurringEntryCreate)
                 }
             }
+
+            is DashboardAction.RecurringEntryClicked -> {
+                viewModelScope.launch {
+                    _effects.emit(DashboardEffect.NavigateToRecurringEntryEdit(action.entryId))
+                }
+            }
         }
     }
 

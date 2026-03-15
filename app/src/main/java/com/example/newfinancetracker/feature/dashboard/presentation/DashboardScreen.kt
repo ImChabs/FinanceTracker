@@ -1,6 +1,7 @@
 package com.example.newfinancetracker.feature.dashboard.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,7 @@ import java.text.NumberFormat
 @Composable
 fun DashboardScreenRoot(
     onAddRecurringEntryClick: () -> Unit,
+    onRecurringEntryClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -52,6 +54,7 @@ fun DashboardScreenRoot(
         viewModel.effects.collect { effect ->
             when (effect) {
                 DashboardEffect.NavigateToRecurringEntryCreate -> onAddRecurringEntryClick()
+                is DashboardEffect.NavigateToRecurringEntryEdit -> onRecurringEntryClick(effect.entryId)
             }
         }
     }
@@ -129,7 +132,12 @@ fun DashboardScreen(
                     )
 
                     state.recurringEntries.forEach { entry ->
-                        RecurringEntryCard(entry = entry)
+                        RecurringEntryCard(
+                            entry = entry,
+                            onClick = {
+                                onAction(DashboardAction.RecurringEntryClicked(entry.id))
+                            }
+                        )
                     }
                 }
             }
@@ -205,11 +213,14 @@ private fun EmptyStateCard() {
 
 @Composable
 private fun RecurringEntryCard(
-    entry: DashboardRecurringEntryItem
+    entry: DashboardRecurringEntryItem,
+    onClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
