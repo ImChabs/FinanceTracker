@@ -10,6 +10,8 @@
     <string name="dashboard_due_tomorrow">Due tomorrow</string>
     <string name="dashboard_upcoming_accessibility_overdue">Overdue payment</string>
     <string name="dashboard_upcoming_accessibility_due_today">Payment due today</string>
+    <string name="dashboard_upcoming_accessibility_summary">%1$s, %2$s, %3$s, %4$s, %5$s</string>
+    <string name="dashboard_upcoming_accessibility_summary_with_due_context">%1$s, %2$s, %3$s, %4$s, %5$s, %6$s</string>
     <string name="dashboard_add_recurring_entry">Add recurring entry</string>
     <string name="dashboard_loading">Loading recurring overview...</string>
     <string name="dashboard_summary_active_entries">Across %1$d active entries</string>

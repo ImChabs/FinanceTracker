@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -228,11 +229,13 @@ private fun UpcomingPaymentRow(
     val urgency = payment.relativeDueContext.toUpcomingPaymentUrgency()
     val urgencyStyle = rememberUpcomingPaymentUrgencyStyle(urgency = urgency)
     val urgencyAccessibilityDescription = urgency.toAccessibilityDescription()
+    val accessibilitySummary = payment.toAccessibilitySummary(urgency = urgency)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .semantics {
+            .semantics(mergeDescendants = true) {
+                contentDescription = accessibilitySummary
                 upcomingPaymentUrgency = urgency.name
                 urgencyAccessibilityDescription?.let { description ->
                     stateDescription = description
@@ -609,6 +612,43 @@ private fun DashboardUpcomingPaymentUrgency.toAccessibilityDescription(): String
         }
         DashboardUpcomingPaymentUrgency.STANDARD -> null
     }
+
+@Composable
+private fun DashboardUpcomingPaymentItem.toAccessibilitySummary(
+    urgency: DashboardUpcomingPaymentUrgency
+): String {
+    val formattedAmount = formatAmountForSavedCurrency(
+        amount = amount,
+        currencyCode = currencyCode
+    )
+    val formattedDate = nextPaymentDate.toDashboardDisplayDate()
+    val relativeDueText = if (urgency == DashboardUpcomingPaymentUrgency.STANDARD) {
+        relativeDueContext?.toDisplayText()
+    } else {
+        null
+    }
+
+    return if (relativeDueText == null) {
+        stringResource(
+            R.string.dashboard_upcoming_accessibility_summary,
+            name,
+            formattedAmount,
+            formattedDate,
+            category,
+            currencyCode
+        )
+    } else {
+        stringResource(
+            R.string.dashboard_upcoming_accessibility_summary_with_due_context,
+            name,
+            formattedAmount,
+            formattedDate,
+            category,
+            currencyCode,
+            relativeDueText
+        )
+    }
+}
 
 internal val UpcomingPaymentUrgencySemanticsKey =
     SemanticsPropertyKey<String>("UpcomingPaymentUrgency")

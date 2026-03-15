@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -323,116 +324,217 @@ class DashboardScreenTest {
 
     @Test
     fun dashboardScreen_marksOverdueAndDueTodayPaymentsAsUrgent() {
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(
-                        isLoading = false,
-                        monthlyRecurringTotal = 40.0,
-                        activeEntryCount = 3,
-                        savedEntryCount = 3,
-                        recurringEntries = listOf(
-                            savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
-                            savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
-                            savedEntry(id = 3L, name = "Music", nextPaymentDate = "2026-03-17")
-                        ),
-                        upcomingPayments = listOf(
-                            DashboardUpcomingPaymentItem(
-                                id = 1L,
-                                name = "Rent",
-                                amount = 20.0,
-                                currencyCode = "USD",
-                                nextPaymentDate = "2026-03-14",
-                                category = "Housing",
-                                relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
-                            ),
-                            DashboardUpcomingPaymentItem(
-                                id = 2L,
-                                name = "Water",
-                                amount = 10.0,
-                                currencyCode = "USD",
-                                nextPaymentDate = "2026-03-15",
-                                category = "Utilities",
-                                relativeDueContext = DashboardRelativeDueContext.DueToday
-                            ),
-                            DashboardUpcomingPaymentItem(
-                                id = 3L,
-                                name = "Music",
-                                amount = 10.0,
-                                currencyCode = "USD",
-                                nextPaymentDate = "2026-03-17",
-                                category = "Streaming",
-                                relativeDueContext = DashboardRelativeDueContext.DueInDays(daysUntilDue = 2)
-                            )
-                        )
-                    ),
-                    onAction = {},
-                    snackbarHostState = remember { SnackbarHostState() }
-                )
-            }
-        }
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
 
-        composeRule.onNodeWithText("Rent").assert(hasUpcomingPaymentUrgency("OVERDUE"))
-        composeRule.onNodeWithText("Water").assert(hasUpcomingPaymentUrgency("DUE_TODAY"))
-        composeRule.onNodeWithText("Music").assert(hasUpcomingPaymentUrgency("STANDARD"))
+        try {
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 40.0,
+                            activeEntryCount = 3,
+                            savedEntryCount = 3,
+                            recurringEntries = listOf(
+                                savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
+                                savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
+                                savedEntry(id = 3L, name = "Music", nextPaymentDate = "2026-03-17")
+                            ),
+                            upcomingPayments = listOf(
+                                DashboardUpcomingPaymentItem(
+                                    id = 1L,
+                                    name = "Rent",
+                                    amount = 20.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-14",
+                                    category = "Housing",
+                                    relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                                ),
+                                DashboardUpcomingPaymentItem(
+                                    id = 2L,
+                                    name = "Water",
+                                    amount = 10.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-15",
+                                    category = "Utilities",
+                                    relativeDueContext = DashboardRelativeDueContext.DueToday
+                                ),
+                                DashboardUpcomingPaymentItem(
+                                    id = 3L,
+                                    name = "Music",
+                                    amount = 10.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-17",
+                                    category = "Streaming",
+                                    relativeDueContext = DashboardRelativeDueContext.DueInDays(daysUntilDue = 2)
+                                )
+                            )
+                        ),
+                        onAction = {},
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
+            }
+
+            composeRule.onAllNodes(
+                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
+            ).assertCountEquals(1)
+            composeRule.onNodeWithText("Rent").assert(hasUpcomingPaymentUrgency("OVERDUE"))
+            composeRule.onAllNodes(
+                hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
+            ).assertCountEquals(1)
+            composeRule.onNodeWithText("Water").assert(hasUpcomingPaymentUrgency("DUE_TODAY"))
+            composeRule.onAllNodes(
+                hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
+            ).assertCountEquals(1)
+            composeRule.onNodeWithText("Music").assert(hasUpcomingPaymentUrgency("STANDARD"))
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
     }
 
     @Test
     fun dashboardScreen_exposesUrgencyAccessibilityDescriptionsOnlyForUrgentUpcomingPayments() {
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(
-                        isLoading = false,
-                        monthlyRecurringTotal = 40.0,
-                        activeEntryCount = 3,
-                        savedEntryCount = 3,
-                        recurringEntries = listOf(
-                            savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
-                            savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
-                            savedEntry(id = 3L, name = "Music", nextPaymentDate = "2026-03-17")
-                        ),
-                        upcomingPayments = listOf(
-                            DashboardUpcomingPaymentItem(
-                                id = 1L,
-                                name = "Rent",
-                                amount = 20.0,
-                                currencyCode = "USD",
-                                nextPaymentDate = "2026-03-14",
-                                category = "Housing",
-                                relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
-                            ),
-                            DashboardUpcomingPaymentItem(
-                                id = 2L,
-                                name = "Water",
-                                amount = 10.0,
-                                currencyCode = "USD",
-                                nextPaymentDate = "2026-03-15",
-                                category = "Utilities",
-                                relativeDueContext = DashboardRelativeDueContext.DueToday
-                            ),
-                            DashboardUpcomingPaymentItem(
-                                id = 3L,
-                                name = "Music",
-                                amount = 10.0,
-                                currencyCode = "USD",
-                                nextPaymentDate = "2026-03-17",
-                                category = "Streaming",
-                                relativeDueContext = DashboardRelativeDueContext.DueInDays(daysUntilDue = 2)
-                            )
-                        )
-                    ),
-                    onAction = {},
-                    snackbarHostState = remember { SnackbarHostState() }
-                )
-            }
-        }
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
 
-        composeRule.onNodeWithText("Rent").assert(hasStateDescription("Overdue payment"))
-        composeRule.onNodeWithText("Water").assert(hasStateDescription("Payment due today"))
-        composeRule.onNodeWithText("Music").assert(
-            SemanticsMatcher.keyNotDefined(androidx.compose.ui.semantics.SemanticsProperties.StateDescription)
-        )
+        try {
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 40.0,
+                            activeEntryCount = 3,
+                            savedEntryCount = 3,
+                            recurringEntries = listOf(
+                                savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
+                                savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
+                                savedEntry(id = 3L, name = "Music", nextPaymentDate = "2026-03-17")
+                            ),
+                            upcomingPayments = listOf(
+                                DashboardUpcomingPaymentItem(
+                                    id = 1L,
+                                    name = "Rent",
+                                    amount = 20.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-14",
+                                    category = "Housing",
+                                    relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                                ),
+                                DashboardUpcomingPaymentItem(
+                                    id = 2L,
+                                    name = "Water",
+                                    amount = 10.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-15",
+                                    category = "Utilities",
+                                    relativeDueContext = DashboardRelativeDueContext.DueToday
+                                ),
+                                DashboardUpcomingPaymentItem(
+                                    id = 3L,
+                                    name = "Music",
+                                    amount = 10.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-17",
+                                    category = "Streaming",
+                                    relativeDueContext = DashboardRelativeDueContext.DueInDays(daysUntilDue = 2)
+                                )
+                            )
+                        ),
+                        onAction = {},
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
+            }
+
+            composeRule.onNodeWithText("Rent").assert(hasStateDescription("Overdue payment"))
+            composeRule.onAllNodes(
+                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
+            ).assertCountEquals(1)
+            composeRule.onNodeWithText("Water").assert(hasStateDescription("Payment due today"))
+            composeRule.onAllNodes(
+                hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
+            ).assertCountEquals(1)
+            composeRule.onNodeWithText("Music").assert(
+                SemanticsMatcher.keyNotDefined(androidx.compose.ui.semantics.SemanticsProperties.StateDescription)
+            )
+            composeRule.onAllNodes(
+                hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
+            ).assertCountEquals(1)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
+
+    @Test
+    fun dashboardScreen_exposesUpcomingPaymentAccessibilitySummariesWithoutDuplicatingUrgentDueText() {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
+        try {
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 45.0,
+                            activeEntryCount = 3,
+                            savedEntryCount = 3,
+                            recurringEntries = listOf(
+                                savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
+                                savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
+                                savedEntry(id = 3L, name = "Legacy import", nextPaymentDate = "17/03/2026")
+                            ),
+                            upcomingPayments = listOf(
+                                DashboardUpcomingPaymentItem(
+                                    id = 1L,
+                                    name = "Rent",
+                                    amount = 20.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-14",
+                                    category = "Housing",
+                                    relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                                ),
+                                DashboardUpcomingPaymentItem(
+                                    id = 2L,
+                                    name = "Water",
+                                    amount = 10.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-15",
+                                    category = "Utilities",
+                                    relativeDueContext = DashboardRelativeDueContext.DueToday
+                                ),
+                                DashboardUpcomingPaymentItem(
+                                    id = 3L,
+                                    name = "Legacy import",
+                                    amount = 15.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "17/03/2026",
+                                    category = "Other",
+                                    relativeDueContext = DashboardRelativeDueContext.DueTomorrow
+                                )
+                            )
+                        ),
+                        onAction = {},
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
+            }
+
+            composeRule.onAllNodes(
+                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
+            ).assertCountEquals(1)
+            composeRule.onAllNodes(
+                hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
+            ).assertCountEquals(1)
+            composeRule.onAllNodes(
+                hasContentDescription("Legacy import, \$15.00, 17/03/2026, Other, USD, Due tomorrow")
+            ).assertCountEquals(1)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
     }
 
     private fun savedEntry(
