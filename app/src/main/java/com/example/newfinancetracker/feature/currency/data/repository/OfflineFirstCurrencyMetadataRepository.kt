@@ -6,10 +6,11 @@ import com.example.newfinancetracker.feature.currency.data.local.toEntity
 import com.example.newfinancetracker.feature.currency.data.remote.CurrencyMetadataRemoteDataSource
 import com.example.newfinancetracker.feature.currency.domain.model.CurrencyMetadata
 import com.example.newfinancetracker.feature.currency.domain.repository.CurrencyMetadataRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class OfflineFirstCurrencyMetadataRepository(
+class OfflineFirstCurrencyMetadataRepository @Inject constructor(
     private val currencyMetadataDao: CurrencyMetadataDao,
     private val currencyMetadataRemoteDataSource: CurrencyMetadataRemoteDataSource
 ) : CurrencyMetadataRepository {

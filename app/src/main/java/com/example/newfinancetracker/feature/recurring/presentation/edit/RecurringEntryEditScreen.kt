@@ -20,13 +20,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.newfinancetracker.R
-import com.example.newfinancetracker.core.app.FinanceTrackerApplication
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryDeleteButton
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryFormScreen
@@ -34,19 +32,10 @@ import com.example.newfinancetracker.feature.recurring.presentation.form.Recurri
 
 @Composable
 fun RecurringEntryEditScreenRoot(
-    entryId: Long,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val application = context.applicationContext as FinanceTrackerApplication
-    val viewModel: RecurringEntryEditViewModel = viewModel(
-        factory = RecurringEntryEditViewModel.factory(
-            entryId = entryId,
-            recurringEntryRepository = application.recurringEntryRepository,
-            currencyMetadataRepository = application.currencyMetadataRepository
-        )
-    )
+    val viewModel: RecurringEntryEditViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel) {

@@ -1,6 +1,8 @@
 package com.example.newfinancetracker.feature.currency.data.remote
 
-class CurrencyMetadataRemoteDataSource(
+import javax.inject.Inject
+
+class CurrencyMetadataRemoteDataSource @Inject constructor(
     private val currencyMetadataService: CurrencyMetadataService
 ) {
     suspend fun fetchCurrencyMetadata(): List<CurrencyMetadataDto> =

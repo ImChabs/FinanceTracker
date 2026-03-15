@@ -38,9 +38,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.newfinancetracker.R
-import com.example.newfinancetracker.core.app.FinanceTrackerApplication
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
@@ -52,14 +51,8 @@ fun DashboardScreenRoot(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val application = context.applicationContext as FinanceTrackerApplication
     val snackbarHostState = remember { SnackbarHostState() }
-    val viewModel: DashboardViewModel = viewModel(
-        factory = DashboardViewModel.factory(
-            recurringEntryRepository = application.recurringEntryRepository,
-            currencyMetadataRepository = application.currencyMetadataRepository
-        )
-    )
+    val viewModel: DashboardViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel) {

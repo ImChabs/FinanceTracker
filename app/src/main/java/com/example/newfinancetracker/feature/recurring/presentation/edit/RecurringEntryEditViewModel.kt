@@ -1,8 +1,9 @@
 package com.example.newfinancetracker.feature.recurring.presentation.edit
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.newfinancetracker.core.navigation.FinanceTrackerDestination
 import com.example.newfinancetracker.feature.currency.domain.model.CurrencyMetadata
 import com.example.newfinancetracker.feature.currency.domain.repository.CurrencyMetadataRepository
 import com.example.newfinancetracker.feature.recurring.domain.repository.RecurringEntryRepository
@@ -10,6 +11,8 @@ import com.example.newfinancetracker.feature.recurring.presentation.form.Recurri
 import com.example.newfinancetracker.feature.recurring.presentation.form.resolveRecurringEntryCurrencySelection
 import com.example.newfinancetracker.feature.recurring.presentation.form.toFormState
 import com.example.newfinancetracker.feature.recurring.presentation.form.toRecurringEntry
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,11 +23,18 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class RecurringEntryEditViewModel(
-    private val entryId: Long,
+@HiltViewModel
+class RecurringEntryEditViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val recurringEntryRepository: RecurringEntryRepository,
     private val currencyMetadataRepository: CurrencyMetadataRepository
 ) : ViewModel() {
+
+    private val entryId: Long = checkNotNull(
+        savedStateHandle.get<Long>(FinanceTrackerDestination.RecurringEntryEdit.entryIdArg)
+    ) {
+        "Missing recurring entry id."
+    }
 
     private var latestCurrencyMetadata: List<CurrencyMetadata> = emptyList()
 
@@ -266,21 +276,15 @@ class RecurringEntryEditViewModel(
         }
     }
 
-    companion object {
-        fun factory(
-            entryId: Long,
-            recurringEntryRepository: RecurringEntryRepository,
-            currencyMetadataRepository: CurrencyMetadataRepository
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                require(modelClass.isAssignableFrom(RecurringEntryEditViewModel::class.java))
-                return RecurringEntryEditViewModel(
-                    entryId = entryId,
-                    recurringEntryRepository = recurringEntryRepository,
-                    currencyMetadataRepository = currencyMetadataRepository
-                ) as T
-            }
-        }
-    }
+    constructor(
+        entryId: Long,
+        recurringEntryRepository: RecurringEntryRepository,
+        currencyMetadataRepository: CurrencyMetadataRepository
+    ) : this(
+        savedStateHandle = SavedStateHandle(
+            mapOf(FinanceTrackerDestination.RecurringEntryEdit.entryIdArg to entryId)
+        ),
+        recurringEntryRepository = recurringEntryRepository,
+        currencyMetadataRepository = currencyMetadataRepository
+    )
 }

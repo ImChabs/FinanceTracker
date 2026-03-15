@@ -1,13 +1,14 @@
 package com.example.newfinancetracker.feature.recurring.presentation.create
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.newfinancetracker.feature.currency.domain.repository.CurrencyMetadataRepository
 import com.example.newfinancetracker.feature.recurring.domain.repository.RecurringEntryRepository
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryFormState
 import com.example.newfinancetracker.feature.recurring.presentation.form.resolveRecurringEntryCurrencySelection
 import com.example.newfinancetracker.feature.recurring.presentation.form.toRecurringEntry
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,7 +19,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class RecurringEntryCreateViewModel(
+@HiltViewModel
+class RecurringEntryCreateViewModel @Inject constructor(
     private val recurringEntryRepository: RecurringEntryRepository,
     private val currencyMetadataRepository: CurrencyMetadataRepository
 ) : ViewModel() {
@@ -156,22 +158,6 @@ class RecurringEntryCreateViewModel(
                         hasSaveError = true
                     )
                 }
-            }
-        }
-    }
-
-    companion object {
-        fun factory(
-            recurringEntryRepository: RecurringEntryRepository,
-            currencyMetadataRepository: CurrencyMetadataRepository
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                require(modelClass.isAssignableFrom(RecurringEntryCreateViewModel::class.java))
-                return RecurringEntryCreateViewModel(
-                    recurringEntryRepository = recurringEntryRepository,
-                    currencyMetadataRepository = currencyMetadataRepository
-                ) as T
             }
         }
     }

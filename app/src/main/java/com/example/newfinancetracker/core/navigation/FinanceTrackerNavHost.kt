@@ -46,13 +46,8 @@ fun FinanceTrackerNavHost(
                     type = NavType.LongType
                 }
             )
-        ) { backStackEntry ->
-            val entryId = backStackEntry.arguments?.getLong(
-                FinanceTrackerDestination.RecurringEntryEdit.entryIdArg
-            ) ?: return@composable
-
+        ) {
             RecurringEntryEditScreenRoot(
-                entryId = entryId,
                 onNavigateBack = navController::popBackStack
             )
         }

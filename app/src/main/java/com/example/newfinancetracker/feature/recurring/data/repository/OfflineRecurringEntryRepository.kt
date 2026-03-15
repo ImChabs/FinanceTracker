@@ -5,10 +5,11 @@ import com.example.newfinancetracker.feature.recurring.data.local.toDomain
 import com.example.newfinancetracker.feature.recurring.data.local.toEntity
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntry
 import com.example.newfinancetracker.feature.recurring.domain.repository.RecurringEntryRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class OfflineRecurringEntryRepository(
+class OfflineRecurringEntryRepository @Inject constructor(
     private val recurringEntryDao: RecurringEntryDao
 ) : RecurringEntryRepository {
 

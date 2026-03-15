@@ -1,10 +1,11 @@
 package com.example.newfinancetracker.feature.dashboard.presentation
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.newfinancetracker.feature.currency.domain.repository.CurrencyMetadataRepository
 import com.example.newfinancetracker.feature.recurring.domain.repository.RecurringEntryRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -15,7 +16,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class DashboardViewModel(
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
     private val recurringEntryRepository: RecurringEntryRepository,
     private val currencyMetadataRepository: CurrencyMetadataRepository
 ) : ViewModel() {
@@ -98,22 +100,6 @@ class DashboardViewModel(
                         DashboardEffect.CurrencyMetadataRetryFailed
                     }
                 )
-            }
-        }
-    }
-
-    companion object {
-        fun factory(
-            recurringEntryRepository: RecurringEntryRepository,
-            currencyMetadataRepository: CurrencyMetadataRepository
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                require(modelClass.isAssignableFrom(DashboardViewModel::class.java))
-                return DashboardViewModel(
-                    recurringEntryRepository = recurringEntryRepository,
-                    currencyMetadataRepository = currencyMetadataRepository
-                ) as T
             }
         }
     }
