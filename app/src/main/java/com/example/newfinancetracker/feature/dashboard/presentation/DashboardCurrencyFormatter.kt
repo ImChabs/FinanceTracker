@@ -28,6 +28,20 @@ internal fun formatAmountForSavedCurrency(
     }.format(amount)
 }
 
+internal fun formatSummaryAmount(
+    amount: Double,
+    hasMixedCurrencies: Boolean,
+    locale: Locale = Locale.getDefault()
+): String =
+    if (hasMixedCurrencies) {
+        NumberFormat.getNumberInstance(locale).apply {
+            minimumFractionDigits = 2
+            maximumFractionDigits = 2
+        }.format(amount)
+    } else {
+        NumberFormat.getCurrencyInstance(locale).format(amount)
+    }
+
 private fun String.toCurrencyOrNull(): Currency? =
     runCatching {
         Currency.getInstance(this)

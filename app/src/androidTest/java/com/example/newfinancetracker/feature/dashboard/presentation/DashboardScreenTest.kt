@@ -161,84 +161,94 @@ class DashboardScreenTest {
 
     @Test
     fun dashboardScreen_showsMixedCurrencySummaryMessageOnlyWhenActiveCurrenciesDiffer() {
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(
-                        isLoading = false,
-                        monthlyRecurringTotal = 29.98,
-                        activeEntryCount = 2,
-                        activeCurrencyCodes = setOf("EUR", "JPY"),
-                        savedEntryCount = 2,
-                        recurringEntries = listOf(
-                            DashboardRecurringEntryItem(
-                                id = 1L,
-                                name = "Design tool",
-                                amount = 19.99,
-                                currencyCode = "EUR",
-                                billingFrequency = BillingFrequency.MONTHLY,
-                                nextPaymentDate = "2026-03-25",
-                                category = "Software",
-                                type = RecurringEntryType.SUBSCRIPTION,
-                                isActive = true,
-                                notes = null
-                            ),
-                            DashboardRecurringEntryItem(
-                                id = 2L,
-                                name = "Phone plan",
-                                amount = 9.99,
-                                currencyCode = "JPY",
-                                billingFrequency = BillingFrequency.MONTHLY,
-                                nextPaymentDate = "2026-03-18",
-                                category = "Utilities",
-                                type = RecurringEntryType.RECURRING_EXPENSE,
-                                isActive = true,
-                                notes = null
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
+        try {
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 29.98,
+                            activeEntryCount = 2,
+                            activeCurrencyCodes = setOf("EUR", "JPY"),
+                            savedEntryCount = 2,
+                            recurringEntries = listOf(
+                                DashboardRecurringEntryItem(
+                                    id = 1L,
+                                    name = "Design tool",
+                                    amount = 19.99,
+                                    currencyCode = "EUR",
+                                    billingFrequency = BillingFrequency.MONTHLY,
+                                    nextPaymentDate = "2026-03-25",
+                                    category = "Software",
+                                    type = RecurringEntryType.SUBSCRIPTION,
+                                    isActive = true,
+                                    notes = null
+                                ),
+                                DashboardRecurringEntryItem(
+                                    id = 2L,
+                                    name = "Phone plan",
+                                    amount = 9.99,
+                                    currencyCode = "JPY",
+                                    billingFrequency = BillingFrequency.MONTHLY,
+                                    nextPaymentDate = "2026-03-18",
+                                    category = "Utilities",
+                                    type = RecurringEntryType.RECURRING_EXPENSE,
+                                    isActive = true,
+                                    notes = null
+                                )
                             )
-                        )
-                    ),
-                    onAction = {},
-                    snackbarHostState = remember { SnackbarHostState() }
-                )
+                        ),
+                        onAction = {},
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
             }
-        }
 
-        composeRule.onAllNodesWithText(
-            "Includes 2 active currencies. Total is an unconverted aggregate."
-        ).assertCountEquals(1)
+            composeRule.onAllNodesWithText("29.98").assertCountEquals(1)
+            composeRule.onAllNodesWithText("\$29.98").assertCountEquals(0)
+            composeRule.onAllNodesWithText(
+                "Includes 2 active currencies. Total is an unconverted aggregate."
+            ).assertCountEquals(1)
 
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(
-                        isLoading = false,
-                        monthlyRecurringTotal = 19.99,
-                        activeEntryCount = 1,
-                        activeCurrencyCodes = setOf("EUR"),
-                        savedEntryCount = 1,
-                        recurringEntries = listOf(
-                            DashboardRecurringEntryItem(
-                                id = 1L,
-                                name = "Design tool",
-                                amount = 19.99,
-                                currencyCode = "EUR",
-                                billingFrequency = BillingFrequency.MONTHLY,
-                                nextPaymentDate = "2026-03-25",
-                                category = "Software",
-                                type = RecurringEntryType.SUBSCRIPTION,
-                                isActive = true,
-                                notes = null
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 19.99,
+                            activeEntryCount = 1,
+                            activeCurrencyCodes = setOf("EUR"),
+                            savedEntryCount = 1,
+                            recurringEntries = listOf(
+                                DashboardRecurringEntryItem(
+                                    id = 1L,
+                                    name = "Design tool",
+                                    amount = 19.99,
+                                    currencyCode = "EUR",
+                                    billingFrequency = BillingFrequency.MONTHLY,
+                                    nextPaymentDate = "2026-03-25",
+                                    category = "Software",
+                                    type = RecurringEntryType.SUBSCRIPTION,
+                                    isActive = true,
+                                    notes = null
+                                )
                             )
-                        )
-                    ),
-                    onAction = {},
-                    snackbarHostState = remember { SnackbarHostState() }
-                )
+                        ),
+                        onAction = {},
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
             }
-        }
 
-        composeRule.onAllNodesWithText(
-            "Includes 2 active currencies. Total is an unconverted aggregate."
-        ).assertCountEquals(0)
+            composeRule.onAllNodesWithText("\$19.99").assertCountEquals(1)
+            composeRule.onAllNodesWithText(
+                "Includes 2 active currencies. Total is an unconverted aggregate."
+            ).assertCountEquals(0)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
     }
 }
