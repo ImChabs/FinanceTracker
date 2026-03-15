@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
+import com.example.newfinancetracker.feature.recurring.domain.model.DEFAULT_CURRENCY_CODE
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
 
 @Entity(tableName = "recurring_entries")
@@ -12,6 +13,8 @@ data class RecurringEntryEntity(
     val id: Long = 0L,
     val name: String,
     val amount: Double,
+    @ColumnInfo(name = "currency_code")
+    val currencyCode: String = DEFAULT_CURRENCY_CODE,
     @ColumnInfo(name = "billing_frequency")
     val billingFrequency: BillingFrequency,
     @ColumnInfo(name = "next_payment_date")

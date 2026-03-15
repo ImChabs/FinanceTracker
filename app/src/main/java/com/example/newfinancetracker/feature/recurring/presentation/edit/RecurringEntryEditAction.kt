@@ -6,6 +6,7 @@ import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEnt
 sealed interface RecurringEntryEditAction {
     data class NameChanged(val value: String) : RecurringEntryEditAction
     data class AmountChanged(val value: String) : RecurringEntryEditAction
+    data class CurrencyCodeChanged(val value: String) : RecurringEntryEditAction
     data class CategoryChanged(val value: String) : RecurringEntryEditAction
     data class NextPaymentDateChanged(val value: String) : RecurringEntryEditAction
     data class NotesChanged(val value: String) : RecurringEntryEditAction

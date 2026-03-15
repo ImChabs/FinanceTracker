@@ -43,7 +43,8 @@ fun RecurringEntryEditScreenRoot(
     val viewModel: RecurringEntryEditViewModel = viewModel(
         factory = RecurringEntryEditViewModel.factory(
             entryId = entryId,
-            recurringEntryRepository = application.recurringEntryRepository
+            recurringEntryRepository = application.recurringEntryRepository,
+            currencyMetadataRepository = application.currencyMetadataRepository
         )
     )
     val state by viewModel.state.collectAsState()
@@ -121,12 +122,14 @@ fun RecurringEntryEditScreen(
                 navigationLabel = stringResource(R.string.recurring_edit_back),
                 saveLabel = stringResource(R.string.recurring_edit_save),
                 formState = state.form,
+                currencyOptions = state.currencyOptions,
                 showValidationErrors = state.showValidationErrors,
                 hasSaveError = state.hasSaveError,
                 isSaving = state.isSaving || state.isDeleting,
                 onNavigateBack = onNavigateBack,
                 onNameChanged = { onAction(RecurringEntryEditAction.NameChanged(it)) },
                 onAmountChanged = { onAction(RecurringEntryEditAction.AmountChanged(it)) },
+                onCurrencyCodeChanged = { onAction(RecurringEntryEditAction.CurrencyCodeChanged(it)) },
                 onCategoryChanged = { onAction(RecurringEntryEditAction.CategoryChanged(it)) },
                 onNextPaymentDateChanged = {
                     onAction(RecurringEntryEditAction.NextPaymentDateChanged(it))
@@ -258,6 +261,7 @@ private fun RecurringEntryEditScreenPreview() {
                 form = RecurringEntryFormState(
                     name = "Rent",
                     amount = "1450.00",
+                    currencyCode = "USD",
                     category = "Housing",
                     nextPaymentDate = "2026-04-01",
                     notes = "Due on the first"

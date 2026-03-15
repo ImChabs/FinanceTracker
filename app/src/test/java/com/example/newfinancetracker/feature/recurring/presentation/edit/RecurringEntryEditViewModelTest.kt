@@ -1,5 +1,7 @@
 package com.example.newfinancetracker.feature.recurring.presentation.edit
 
+import com.example.newfinancetracker.feature.currency.domain.model.CurrencyMetadata
+import com.example.newfinancetracker.feature.currency.domain.repository.CurrencyMetadataRepository
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntry
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
@@ -42,7 +44,8 @@ class RecurringEntryEditViewModelTest {
         val repository = FakeRecurringEntryRepository()
         val viewModel = RecurringEntryEditViewModel(
             entryId = EXISTING_ENTRY.id,
-            recurringEntryRepository = repository
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
         )
 
         advanceUntilIdle()
@@ -57,7 +60,8 @@ class RecurringEntryEditViewModelTest {
         val repository = FakeRecurringEntryRepository()
         val viewModel = RecurringEntryEditViewModel(
             entryId = EXISTING_ENTRY.id,
-            recurringEntryRepository = repository
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
         )
 
         advanceUntilIdle()
@@ -79,7 +83,8 @@ class RecurringEntryEditViewModelTest {
         val repository = FakeRecurringEntryRepository(shouldFailDelete = true)
         val viewModel = RecurringEntryEditViewModel(
             entryId = EXISTING_ENTRY.id,
-            recurringEntryRepository = repository
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
         )
 
         advanceUntilIdle()
@@ -90,6 +95,26 @@ class RecurringEntryEditViewModelTest {
         assertTrue(viewModel.state.value.hasDeleteError)
         assertFalse(viewModel.state.value.isDeleteConfirmationVisible)
         assertFalse(viewModel.state.value.isDeleting)
+    }
+
+    @Test
+    fun `saved currency stays available when cached metadata does not contain it`() = runTest(testDispatcher) {
+        val repository = FakeRecurringEntryRepository()
+        val viewModel = RecurringEntryEditViewModel(
+            entryId = EXISTING_ENTRY.id,
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository(
+                initialMetadata = listOf(
+                    CurrencyMetadata(code = "EUR", displayName = "Euro")
+                )
+            )
+        )
+
+        advanceUntilIdle()
+
+        assertEquals("JPY", viewModel.state.value.form.currencyCode)
+        assertEquals("JPY", viewModel.state.value.currencyOptions.first().code)
+        assertEquals("EUR", viewModel.state.value.currencyOptions.last().code)
     }
 
     private class FakeRecurringEntryRepository(
@@ -116,11 +141,22 @@ class RecurringEntryEditViewModelTest {
         }
     }
 
+    private class FakeCurrencyMetadataRepository(
+        initialMetadata: List<CurrencyMetadata> = emptyList()
+    ) : CurrencyMetadataRepository {
+        private val metadata = MutableStateFlow(initialMetadata)
+
+        override fun observeCurrencyMetadata(): Flow<List<CurrencyMetadata>> = metadata
+
+        override suspend fun syncCurrencyMetadata(): Result<Unit> = Result.success(Unit)
+    }
+
     private companion object {
         val EXISTING_ENTRY = RecurringEntry(
             id = 7L,
             name = "Rent",
             amount = 1450.0,
+            currencyCode = "JPY",
             billingFrequency = BillingFrequency.MONTHLY,
             nextPaymentDate = "2026-04-01",
             category = "Housing",

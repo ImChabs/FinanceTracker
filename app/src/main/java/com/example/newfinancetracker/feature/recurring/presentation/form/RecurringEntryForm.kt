@@ -1,6 +1,7 @@
 package com.example.newfinancetracker.feature.recurring.presentation.form
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,8 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -38,12 +46,14 @@ fun RecurringEntryFormScreen(
     navigationLabel: String,
     saveLabel: String,
     formState: RecurringEntryFormState,
+    currencyOptions: List<RecurringEntryCurrencyOption>,
     showValidationErrors: Boolean,
     hasSaveError: Boolean,
     isSaving: Boolean,
     onNavigateBack: () -> Unit,
     onNameChanged: (String) -> Unit,
     onAmountChanged: (String) -> Unit,
+    onCurrencyCodeChanged: (String) -> Unit,
     onCategoryChanged: (String) -> Unit,
     onNextPaymentDateChanged: (String) -> Unit,
     onTypeChanged: (RecurringEntryType) -> Unit,
@@ -106,6 +116,12 @@ fun RecurringEntryFormScreen(
                 },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
+            )
+
+            CurrencySelectionField(
+                selectedCurrencyCode = formState.currencyCode,
+                currencyOptions = currencyOptions,
+                onCurrencySelected = onCurrencyCodeChanged
             )
 
             OutlinedTextField(
@@ -244,6 +260,49 @@ fun RecurringEntryDeleteButton(
         modifier = modifier.fillMaxWidth()
     ) {
         Text(text = label)
+    }
+}
+
+@Composable
+private fun CurrencySelectionField(
+    selectedCurrencyCode: String,
+    currencyOptions: List<RecurringEntryCurrencyOption>,
+    onCurrencySelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val selectedOption = currencyOptions.firstOrNull { it.code == selectedCurrencyCode }
+        ?: RecurringEntryCurrencyOption(code = selectedCurrencyCode)
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = formatRecurringEntryCurrencyOption(selectedOption),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(text = stringResource(R.string.recurring_create_currency_label)) },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable { isExpanded = true }
+        )
+
+        DropdownMenu(
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false }
+        ) {
+            currencyOptions.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(text = formatRecurringEntryCurrencyOption(option)) },
+                    onClick = {
+                        onCurrencySelected(option.code)
+                        isExpanded = false
+                    }
+                )
+            }
+        }
     }
 }
 

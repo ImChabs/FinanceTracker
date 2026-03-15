@@ -32,6 +32,7 @@
     <string name="recurring_create_name_placeholder">Netflix, rent, gym membership...</string>
     <string name="recurring_create_amount_label">Amount</string>
     <string name="recurring_create_amount_placeholder">0.00</string>
+    <string name="recurring_create_currency_label">Currency</string>
     <string name="recurring_create_category_label">Category</string>
     <string name="recurring_create_category_placeholder">Streaming, housing, utilities...</string>
     <string name="recurring_create_next_payment_label">Next payment date</string>

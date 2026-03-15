@@ -1,9 +1,12 @@
 package com.example.newfinancetracker.feature.recurring.domain.model
 
+const val DEFAULT_CURRENCY_CODE: String = "USD"
+
 data class RecurringEntry(
     val id: Long = 0L,
     val name: String,
     val amount: Double,
+    val currencyCode: String = DEFAULT_CURRENCY_CODE,
     val billingFrequency: BillingFrequency,
     val nextPaymentDate: String,
     val category: String,

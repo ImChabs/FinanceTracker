@@ -1,6 +1,7 @@
 package com.example.newfinancetracker.feature.recurring.presentation.form
 
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
+import com.example.newfinancetracker.feature.recurring.domain.model.DEFAULT_CURRENCY_CODE
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntry
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
 import java.text.ParseException
@@ -10,6 +11,7 @@ import java.util.Locale
 data class RecurringEntryFormState(
     val name: String = "",
     val amount: String = "",
+    val currencyCode: String = DEFAULT_CURRENCY_CODE,
     val category: String = "",
     val nextPaymentDate: String = "",
     val notes: String = "",
@@ -20,6 +22,7 @@ data class RecurringEntryFormState(
     val canSubmit: Boolean
         get() = name.isNotBlank() &&
             parseAmount(amount) != null &&
+            currencyCode.isNotBlank() &&
             category.isNotBlank() &&
             isValidIsoDate(nextPaymentDate)
 }
@@ -28,6 +31,7 @@ internal fun RecurringEntry.toFormState(): RecurringEntryFormState =
     RecurringEntryFormState(
         name = name,
         amount = amount.toString(),
+        currencyCode = currencyCode,
         category = category,
         nextPaymentDate = nextPaymentDate,
         notes = notes.orEmpty(),
@@ -41,6 +45,7 @@ internal fun RecurringEntryFormState.toRecurringEntry(id: Long = 0L): RecurringE
         id = id,
         name = name.trim(),
         amount = requireNotNull(parseAmount(amount)),
+        currencyCode = currencyCode.trim().uppercase(Locale.US).ifBlank { DEFAULT_CURRENCY_CODE },
         billingFrequency = billingFrequency,
         nextPaymentDate = nextPaymentDate.trim(),
         category = category.trim(),

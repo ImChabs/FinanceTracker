@@ -16,6 +16,7 @@ class FinanceTrackerApplication : Application() {
     val database: FinanceTrackerDatabase by lazy {
         Room.databaseBuilder(this, FinanceTrackerDatabase::class.java, FinanceTrackerDatabase.DATABASE_NAME)
             .addMigrations(FinanceTrackerDatabase.MIGRATION_1_2)
+            .addMigrations(FinanceTrackerDatabase.MIGRATION_2_3)
             .build()
     }
 

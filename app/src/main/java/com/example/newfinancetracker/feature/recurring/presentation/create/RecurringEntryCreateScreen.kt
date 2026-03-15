@@ -24,7 +24,8 @@ fun RecurringEntryCreateScreenRoot(
     val application = context.applicationContext as FinanceTrackerApplication
     val viewModel: RecurringEntryCreateViewModel = viewModel(
         factory = RecurringEntryCreateViewModel.factory(
-            recurringEntryRepository = application.recurringEntryRepository
+            recurringEntryRepository = application.recurringEntryRepository,
+            currencyMetadataRepository = application.currencyMetadataRepository
         )
     )
     val state by viewModel.state.collectAsState()
@@ -57,12 +58,14 @@ fun RecurringEntryCreateScreen(
         navigationLabel = stringResource(R.string.recurring_create_cancel),
         saveLabel = stringResource(R.string.recurring_create_save),
         formState = state.form,
+        currencyOptions = state.currencyOptions,
         showValidationErrors = state.showValidationErrors,
         hasSaveError = state.hasSaveError,
         isSaving = state.isSaving,
         onNavigateBack = onNavigateBack,
         onNameChanged = { onAction(RecurringEntryCreateAction.NameChanged(it)) },
         onAmountChanged = { onAction(RecurringEntryCreateAction.AmountChanged(it)) },
+        onCurrencyCodeChanged = { onAction(RecurringEntryCreateAction.CurrencyCodeChanged(it)) },
         onCategoryChanged = { onAction(RecurringEntryCreateAction.CategoryChanged(it)) },
         onNextPaymentDateChanged = {
             onAction(RecurringEntryCreateAction.NextPaymentDateChanged(it))
@@ -87,6 +90,7 @@ private fun RecurringEntryCreateScreenPreview() {
                 form = RecurringEntryFormState(
                     name = "Netflix",
                     amount = "15.99",
+                    currencyCode = "USD",
                     category = "Streaming",
                     nextPaymentDate = "2026-03-31",
                     notes = "Standard plan"

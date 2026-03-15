@@ -1,10 +1,15 @@
 package com.example.newfinancetracker.feature.recurring.presentation.edit
 
+import com.example.newfinancetracker.feature.recurring.domain.model.DEFAULT_CURRENCY_CODE
+import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryCurrencyOption
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryFormState
 
 data class RecurringEntryEditState(
     val entryId: Long,
     val form: RecurringEntryFormState = RecurringEntryFormState(),
+    val currencyOptions: List<RecurringEntryCurrencyOption> = listOf(
+        RecurringEntryCurrencyOption(code = DEFAULT_CURRENCY_CODE)
+    ),
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
     val isDeleting: Boolean = false,

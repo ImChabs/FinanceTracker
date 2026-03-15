@@ -3,8 +3,11 @@ package com.example.newfinancetracker.feature.recurring.presentation.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.newfinancetracker.feature.currency.domain.model.CurrencyMetadata
+import com.example.newfinancetracker.feature.currency.domain.repository.CurrencyMetadataRepository
 import com.example.newfinancetracker.feature.recurring.domain.repository.RecurringEntryRepository
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryFormState
+import com.example.newfinancetracker.feature.recurring.presentation.form.resolveRecurringEntryCurrencySelection
 import com.example.newfinancetracker.feature.recurring.presentation.form.toFormState
 import com.example.newfinancetracker.feature.recurring.presentation.form.toRecurringEntry
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -13,13 +16,17 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RecurringEntryEditViewModel(
     private val entryId: Long,
-    private val recurringEntryRepository: RecurringEntryRepository
+    private val recurringEntryRepository: RecurringEntryRepository,
+    private val currencyMetadataRepository: CurrencyMetadataRepository
 ) : ViewModel() {
+
+    private var latestCurrencyMetadata: List<CurrencyMetadata> = emptyList()
 
     private val _state = MutableStateFlow(RecurringEntryEditState(entryId = entryId))
     val state: StateFlow<RecurringEntryEditState> = _state.asStateFlow()
@@ -28,6 +35,7 @@ class RecurringEntryEditViewModel(
     val effects: SharedFlow<RecurringEntryEditEffect> = _effects.asSharedFlow()
 
     init {
+        observeCurrencyMetadata()
         loadRecurringEntry()
     }
 
@@ -38,6 +46,12 @@ class RecurringEntryEditViewModel(
                     currentState.copy(
                         form = currentState.form.copy(isActive = action.value)
                     )
+                }
+            }
+
+            is RecurringEntryEditAction.CurrencyCodeChanged -> {
+                updateFormState { currentState ->
+                    currentState.copy(currencyCode = action.value)
                 }
             }
 
@@ -112,6 +126,26 @@ class RecurringEntryEditViewModel(
         }
     }
 
+    private fun observeCurrencyMetadata() {
+        viewModelScope.launch {
+            currencyMetadataRepository.observeCurrencyMetadata().collect { metadata ->
+                latestCurrencyMetadata = metadata
+                _state.update { currentState ->
+                    val currencySelection = resolveRecurringEntryCurrencySelection(
+                        cachedMetadata = metadata,
+                        currentCode = currentState.form.currencyCode,
+                        preferFirstCachedOverDefault = false
+                    )
+
+                    currentState.copy(
+                        form = currentState.form.copy(currencyCode = currencySelection.selectedCode),
+                        currencyOptions = currencySelection.options
+                    )
+                }
+            }
+        }
+    }
+
     private fun updateFormState(
         transform: (RecurringEntryFormState) -> RecurringEntryFormState
     ) {
@@ -147,8 +181,16 @@ class RecurringEntryEditViewModel(
                         isMissingEntry = true
                     )
                 } else {
+                    val loadedForm = entry.toFormState()
+                    val currencySelection = resolveRecurringEntryCurrencySelection(
+                        cachedMetadata = latestCurrencyMetadata,
+                        currentCode = loadedForm.currencyCode,
+                        preferFirstCachedOverDefault = false
+                    )
+
                     currentState.copy(
-                        form = entry.toFormState(),
+                        form = loadedForm.copy(currencyCode = currencySelection.selectedCode),
+                        currencyOptions = currencySelection.options,
                         isLoading = false,
                         isMissingEntry = false,
                         isDeleteConfirmationVisible = false
@@ -227,14 +269,16 @@ class RecurringEntryEditViewModel(
     companion object {
         fun factory(
             entryId: Long,
-            recurringEntryRepository: RecurringEntryRepository
+            recurringEntryRepository: RecurringEntryRepository,
+            currencyMetadataRepository: CurrencyMetadataRepository
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 require(modelClass.isAssignableFrom(RecurringEntryEditViewModel::class.java))
                 return RecurringEntryEditViewModel(
                     entryId = entryId,
-                    recurringEntryRepository = recurringEntryRepository
+                    recurringEntryRepository = recurringEntryRepository,
+                    currencyMetadataRepository = currencyMetadataRepository
                 ) as T
             }
         }
