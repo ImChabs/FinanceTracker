@@ -46,7 +46,8 @@ fun DashboardScreenRoot(
     val application = context.applicationContext as FinanceTrackerApplication
     val viewModel: DashboardViewModel = viewModel(
         factory = DashboardViewModel.factory(
-            recurringEntryRepository = application.recurringEntryRepository
+            recurringEntryRepository = application.recurringEntryRepository,
+            currencyMetadataRepository = application.currencyMetadataRepository
         )
     )
     val state by viewModel.state.collectAsState()
@@ -268,8 +269,39 @@ private fun SummaryCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
             )
+            CurrencyMetadataStatus(state = state)
         }
     }
+}
+
+@Composable
+private fun CurrencyMetadataStatus(
+    state: DashboardState
+) {
+    val statusText = when {
+        state.currencyMetadataCount > 0 && state.hasCurrencySyncFailure -> {
+            stringResource(
+                R.string.dashboard_currency_status_refresh_failed,
+                state.currencyMetadataCount
+            )
+        }
+
+        state.currencyMetadataCount > 0 -> {
+            stringResource(
+                R.string.dashboard_currency_status_ready,
+                state.currencyMetadataCount
+            )
+        }
+
+        state.hasCurrencySyncFailure -> stringResource(R.string.dashboard_currency_status_unavailable)
+        else -> null
+    } ?: return
+
+    Text(
+        text = statusText,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
+    )
 }
 
 @Composable
