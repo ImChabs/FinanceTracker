@@ -656,6 +656,79 @@ class DashboardScreenTest {
         }
     }
 
+    @Test
+    fun dashboardScreen_summaryCardExposesMergedAccessibilitySummary() {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
+        try {
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 29.98,
+                            activeEntryCount = 2,
+                            activeCurrencyCodes = setOf("EUR", "JPY"),
+                            savedEntryCount = 2,
+                            currencyMetadataCount = 2
+                        ),
+                        onAction = {},
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
+            }
+
+            composeRule.onAllNodes(
+                hasContentDescription(
+                    "Monthly recurring total. 29.98. Across 2 active entries. Includes 2 active currencies. Total is an unconverted aggregate. Currency metadata cache size: 2"
+                )
+            ).assertCountEquals(1)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
+
+    @Test
+    fun dashboardScreen_summaryCardKeepsRetryActionAvailableWhenCurrencyMetadataFails() {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
+        try {
+            val actions = mutableListOf<DashboardAction>()
+
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 15.99,
+                            activeEntryCount = 1,
+                            activeCurrencyCodes = setOf("USD"),
+                            savedEntryCount = 1,
+                            hasCurrencySyncFailure = true
+                        ),
+                        onAction = actions::add,
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
+            }
+
+            composeRule.onAllNodes(
+                hasContentDescription(
+                    "Monthly recurring total. \$15.99. Across 1 active entries. Currency metadata unavailable right now."
+                )
+            ).assertCountEquals(1)
+            composeRule.onNodeWithText("Retry currency sync")
+                .assert(hasClickAction())
+                .performClick()
+
+            assertEquals(listOf(DashboardAction.RetryCurrencyMetadataClicked), actions)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
+
     private fun savedEntry(
         id: Long,
         name: String,
