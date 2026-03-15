@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -226,12 +227,16 @@ private fun UpcomingPaymentRow(
 ) {
     val urgency = payment.relativeDueContext.toUpcomingPaymentUrgency()
     val urgencyStyle = rememberUpcomingPaymentUrgencyStyle(urgency = urgency)
+    val urgencyAccessibilityDescription = urgency.toAccessibilityDescription()
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .semantics {
                 upcomingPaymentUrgency = urgency.name
+                urgencyAccessibilityDescription?.let { description ->
+                    stateDescription = description
+                }
             }
             .background(
                 color = urgencyStyle.containerColor,
@@ -592,6 +597,18 @@ private data class DashboardUpcomingPaymentUrgencyStyle(
     val secondaryTextColor: androidx.compose.ui.graphics.Color,
     val dueContextColor: androidx.compose.ui.graphics.Color
 )
+
+@Composable
+private fun DashboardUpcomingPaymentUrgency.toAccessibilityDescription(): String? =
+    when (this) {
+        DashboardUpcomingPaymentUrgency.OVERDUE -> {
+            stringResource(R.string.dashboard_upcoming_accessibility_overdue)
+        }
+        DashboardUpcomingPaymentUrgency.DUE_TODAY -> {
+            stringResource(R.string.dashboard_upcoming_accessibility_due_today)
+        }
+        DashboardUpcomingPaymentUrgency.STANDARD -> null
+    }
 
 internal val UpcomingPaymentUrgencySemanticsKey =
     SemanticsPropertyKey<String>("UpcomingPaymentUrgency")
