@@ -255,7 +255,10 @@ private fun UpcomingPaymentRow(
             )
         }
         Text(
-            text = formatCurrency(payment.amount),
+            text = formatAmountForSavedCurrency(
+                amount = payment.amount,
+                currencyCode = payment.currencyCode
+            ),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
@@ -432,7 +435,10 @@ private fun RecurringEntryCard(
                     )
                 }
                 Text(
-                    text = formatCurrency(entry.amount),
+                    text = formatAmountForSavedCurrency(
+                        amount = entry.amount,
+                        currencyCode = entry.currencyCode
+                    ),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
