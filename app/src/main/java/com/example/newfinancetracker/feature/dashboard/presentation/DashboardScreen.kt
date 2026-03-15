@@ -245,6 +245,14 @@ private fun UpcomingPaymentRow(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Text(
+                text = stringResource(
+                    R.string.dashboard_currency_code,
+                    payment.currencyCode
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
         Text(
             text = formatCurrency(payment.amount),
@@ -414,6 +422,14 @@ private fun RecurringEntryCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Text(
+                        text = stringResource(
+                            R.string.dashboard_currency_code,
+                            entry.currencyCode
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 Text(
                     text = formatCurrency(entry.amount),
@@ -498,6 +514,7 @@ private fun DashboardScreenPreview() {
                         id = 1L,
                         name = "Netflix",
                         amount = 15.99,
+                        currencyCode = "USD",
                         nextPaymentDate = "2026-03-31",
                         category = "Streaming"
                     ),
@@ -505,6 +522,7 @@ private fun DashboardScreenPreview() {
                         id = 2L,
                         name = "Rent",
                         amount = 190.0,
+                        currencyCode = "EUR",
                         nextPaymentDate = "2026-04-01",
                         category = "Housing"
                     )
@@ -514,6 +532,7 @@ private fun DashboardScreenPreview() {
                         id = 1L,
                         name = "Netflix",
                         amount = 15.99,
+                        currencyCode = "USD",
                         billingFrequency = BillingFrequency.MONTHLY,
                         nextPaymentDate = "2026-03-31",
                         category = "Streaming",
@@ -525,6 +544,7 @@ private fun DashboardScreenPreview() {
                         id = 2L,
                         name = "Rent",
                         amount = 190.0,
+                        currencyCode = "EUR",
                         billingFrequency = BillingFrequency.MONTHLY,
                         nextPaymentDate = "2026-04-01",
                         category = "Housing",
@@ -536,6 +556,7 @@ private fun DashboardScreenPreview() {
                         id = 3L,
                         name = "Gym Membership",
                         amount = 29.99,
+                        currencyCode = "JPY",
                         billingFrequency = BillingFrequency.MONTHLY,
                         nextPaymentDate = "2026-04-05",
                         category = "Health",

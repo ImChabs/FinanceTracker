@@ -26,6 +26,7 @@ data class DashboardRecurringEntryItem(
     val id: Long,
     val name: String,
     val amount: Double,
+    val currencyCode: String,
     val billingFrequency: BillingFrequency,
     val nextPaymentDate: String,
     val category: String,
@@ -38,6 +39,7 @@ data class DashboardUpcomingPaymentItem(
     val id: Long,
     val name: String,
     val amount: Double,
+    val currencyCode: String,
     val nextPaymentDate: String,
     val category: String
 )
@@ -48,6 +50,7 @@ internal fun List<RecurringEntry>.toDashboardState(): DashboardState {
             id = entry.id,
             name = entry.name,
             amount = entry.amount,
+            currencyCode = entry.currencyCode,
             billingFrequency = entry.billingFrequency,
             nextPaymentDate = entry.nextPaymentDate,
             category = entry.category,
@@ -64,6 +67,7 @@ internal fun List<RecurringEntry>.toDashboardState(): DashboardState {
                     id = entry.id,
                     name = entry.name,
                     amount = entry.amount,
+                    currencyCode = entry.currencyCode,
                     nextPaymentDate = entry.nextPaymentDate,
                     category = entry.category
                 )

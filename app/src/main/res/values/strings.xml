@@ -22,6 +22,7 @@
     <string name="dashboard_empty_body">Add your first subscription or recurring expense to start seeing your monthly total and saved items here.</string>
     <string name="dashboard_entries_title">Saved recurring entries</string>
     <string name="dashboard_entries_count">%1$d saved entries</string>
+    <string name="dashboard_currency_code">Currency: %1$s</string>
     <string name="dashboard_next_payment">Next payment %1$s</string>
     <string name="dashboard_notes">Notes: %1$s</string>
     <string name="dashboard_status_active">Active</string>

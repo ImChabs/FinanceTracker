@@ -16,6 +16,7 @@ class DashboardStateTest {
                 id = 1L,
                 name = "Streaming",
                 amount = 20.0,
+                currencyCode = "USD",
                 billingFrequency = BillingFrequency.MONTHLY,
                 nextPaymentDate = "2026-03-31",
                 category = "Entertainment",
@@ -27,6 +28,7 @@ class DashboardStateTest {
                 id = 2L,
                 name = "Weekly commute",
                 amount = 30.0,
+                currencyCode = "EUR",
                 billingFrequency = BillingFrequency.WEEKLY,
                 nextPaymentDate = "2026-03-18",
                 category = "Transport",
@@ -38,6 +40,7 @@ class DashboardStateTest {
                 id = 3L,
                 name = "Insurance",
                 amount = 90.0,
+                currencyCode = "JPY",
                 billingFrequency = BillingFrequency.QUARTERLY,
                 nextPaymentDate = "2026-04-01",
                 category = "Insurance",
@@ -49,6 +52,7 @@ class DashboardStateTest {
                 id = 4L,
                 name = "Domain renewal",
                 amount = 120.0,
+                currencyCode = "GBP",
                 billingFrequency = BillingFrequency.YEARLY,
                 nextPaymentDate = "2026-08-12",
                 category = "Software",
@@ -60,6 +64,7 @@ class DashboardStateTest {
                 id = 5L,
                 name = "Archived membership",
                 amount = 999.0,
+                currencyCode = "CAD",
                 billingFrequency = BillingFrequency.MONTHLY,
                 nextPaymentDate = "2026-03-20",
                 category = "Health",
@@ -75,6 +80,14 @@ class DashboardStateTest {
         assertEquals(
             listOf("2026-03-18", "2026-03-31", "2026-04-01", "2026-08-12"),
             state.upcomingPayments.map { it.nextPaymentDate }
+        )
+        assertEquals(
+            listOf("USD", "EUR", "JPY", "GBP", "CAD"),
+            state.recurringEntries.map { it.currencyCode }
+        )
+        assertEquals(
+            listOf("EUR", "USD", "JPY", "GBP"),
+            state.upcomingPayments.map { it.currencyCode }
         )
         assertEquals(null, state.recurringEntries[3].notes)
     }
@@ -97,6 +110,7 @@ class DashboardStateTest {
                 id = 1L,
                 name = "Water",
                 amount = 45.0,
+                currencyCode = "AUD",
                 billingFrequency = BillingFrequency.MONTHLY,
                 nextPaymentDate = "2026-03-19",
                 category = "Utilities",
@@ -108,6 +122,7 @@ class DashboardStateTest {
                 id = 2L,
                 name = "Legacy entry",
                 amount = 12.0,
+                currencyCode = "USD",
                 billingFrequency = BillingFrequency.MONTHLY,
                 nextPaymentDate = "2026-13-01",
                 category = "Other",
@@ -119,6 +134,7 @@ class DashboardStateTest {
                 id = 3L,
                 name = "Paused service",
                 amount = 8.0,
+                currencyCode = "CHF",
                 billingFrequency = BillingFrequency.MONTHLY,
                 nextPaymentDate = "2026-03-16",
                 category = "Software",
@@ -130,5 +146,6 @@ class DashboardStateTest {
 
         assertEquals(1, state.upcomingPayments.size)
         assertEquals("Water", state.upcomingPayments.single().name)
+        assertEquals("AUD", state.upcomingPayments.single().currencyCode)
     }
 }
