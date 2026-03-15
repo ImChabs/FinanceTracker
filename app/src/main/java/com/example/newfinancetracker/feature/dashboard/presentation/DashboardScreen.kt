@@ -38,7 +38,6 @@ import com.example.newfinancetracker.core.app.FinanceTrackerApplication
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
-import java.text.NumberFormat
 
 @Composable
 fun DashboardScreenRoot(
@@ -287,7 +286,10 @@ private fun SummaryCard(
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.72f)
             )
             Text(
-                text = formatCurrency(state.monthlyRecurringTotal),
+                text = formatSummaryAmount(
+                    amount = state.monthlyRecurringTotal,
+                    hasMixedCurrencies = state.hasMixedActiveCurrencies
+                ),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -510,9 +512,6 @@ private fun billingFrequencyLabel(frequency: BillingFrequency): String =
         BillingFrequency.QUARTERLY -> stringResource(R.string.recurring_create_frequency_quarterly)
         BillingFrequency.YEARLY -> stringResource(R.string.recurring_create_frequency_yearly)
     }
-
-private fun formatCurrency(amount: Double): String =
-    NumberFormat.getCurrencyInstance().format(amount)
 
 @Preview(showBackground = true)
 @Composable
