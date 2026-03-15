@@ -6,4 +6,8 @@ sealed interface FinanceTrackerDestination {
     data object Dashboard : FinanceTrackerDestination {
         override val route: String = "dashboard"
     }
+
+    data object RecurringEntryCreate : FinanceTrackerDestination {
+        override val route: String = "recurring-entry/create"
+    }
 }

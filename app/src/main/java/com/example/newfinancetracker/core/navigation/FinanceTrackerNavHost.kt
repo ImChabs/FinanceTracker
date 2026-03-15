@@ -5,7 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.newfinancetracker.feature.dashboard.presentation.DashboardScreen
+import com.example.newfinancetracker.feature.dashboard.presentation.DashboardScreenRoot
+import com.example.newfinancetracker.feature.recurring.presentation.create.RecurringEntryCreateScreenRoot
 
 @Composable
 fun FinanceTrackerNavHost(
@@ -19,7 +20,17 @@ fun FinanceTrackerNavHost(
         modifier = modifier
     ) {
         composable(FinanceTrackerDestination.Dashboard.route) {
-            DashboardScreen()
+            DashboardScreenRoot(
+                onAddRecurringEntryClick = {
+                    navController.navigate(FinanceTrackerDestination.RecurringEntryCreate.route)
+                }
+            )
+        }
+
+        composable(FinanceTrackerDestination.RecurringEntryCreate.route) {
+            RecurringEntryCreateScreenRoot(
+                onNavigateBack = navController::popBackStack
+            )
         }
     }
 }
