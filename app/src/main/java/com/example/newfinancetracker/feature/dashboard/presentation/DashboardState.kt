@@ -11,6 +11,7 @@ data class DashboardState(
     val isLoading: Boolean = true,
     val monthlyRecurringTotal: Double = 0.0,
     val activeEntryCount: Int = 0,
+    val activeCurrencyCodes: Set<String> = emptySet(),
     val savedEntryCount: Int = 0,
     val recurringEntries: List<DashboardRecurringEntryItem> = emptyList(),
     val upcomingPayments: List<DashboardUpcomingPaymentItem> = emptyList(),
@@ -20,6 +21,9 @@ data class DashboardState(
 ) {
     val isEmpty: Boolean
         get() = !isLoading && recurringEntries.isEmpty()
+
+    val hasMixedActiveCurrencies: Boolean
+        get() = activeCurrencyCodes.size > 1
 }
 
 data class DashboardRecurringEntryItem(
@@ -81,6 +85,7 @@ internal fun List<RecurringEntry>.toDashboardState(): DashboardState {
             entry.amount.toMonthlyAmount(entry.billingFrequency)
         },
         activeEntryCount = activeEntries.size,
+        activeCurrencyCodes = activeEntries.map { it.currencyCode }.toSet(),
         savedEntryCount = recurringEntryItems.size,
         recurringEntries = recurringEntryItems,
         upcomingPayments = upcomingPayments

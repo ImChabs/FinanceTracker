@@ -10,6 +10,7 @@
     <string name="dashboard_loading">Loading recurring overview...</string>
     <string name="dashboard_summary_active_entries">Across %1$d active entries</string>
     <string name="dashboard_summary_no_active_entries">No active entries are included yet</string>
+    <string name="dashboard_summary_mixed_currencies">Includes %1$d active currencies. Total is an unconverted aggregate.</string>
     <string name="dashboard_currency_status_ready">Currency metadata cache size: %1$d</string>
     <string name="dashboard_currency_status_refresh_failed">Currency refresh unavailable. Cached metadata count: %1$d</string>
     <string name="dashboard_currency_status_unavailable">Currency metadata unavailable right now.</string>

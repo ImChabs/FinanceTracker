@@ -76,6 +76,8 @@ class DashboardStateTest {
 
         assertEquals(190.0, state.monthlyRecurringTotal, 0.0001)
         assertEquals(4, state.activeEntryCount)
+        assertEquals(setOf("USD", "EUR", "JPY", "GBP"), state.activeCurrencyCodes)
+        assertTrue(state.hasMixedActiveCurrencies)
         assertEquals(5, state.savedEntryCount)
         assertEquals(
             listOf("2026-03-18", "2026-03-31", "2026-04-01", "2026-08-12"),
@@ -99,6 +101,7 @@ class DashboardStateTest {
         assertTrue(state.isEmpty)
         assertEquals(0.0, state.monthlyRecurringTotal, 0.0)
         assertEquals(0, state.activeEntryCount)
+        assertTrue(state.activeCurrencyCodes.isEmpty())
         assertEquals(0, state.savedEntryCount)
         assertTrue(state.upcomingPayments.isEmpty())
     }
@@ -147,5 +150,7 @@ class DashboardStateTest {
         assertEquals(1, state.upcomingPayments.size)
         assertEquals("Water", state.upcomingPayments.single().name)
         assertEquals("AUD", state.upcomingPayments.single().currencyCode)
+        assertEquals(setOf("AUD", "USD"), state.activeCurrencyCodes)
+        assertTrue(state.hasMixedActiveCurrencies)
     }
 }

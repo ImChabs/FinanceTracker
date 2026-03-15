@@ -304,6 +304,16 @@ private fun SummaryCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
             )
+            if (state.hasMixedActiveCurrencies) {
+                Text(
+                    text = stringResource(
+                        R.string.dashboard_summary_mixed_currencies,
+                        state.activeCurrencyCodes.size
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
+                )
+            }
             CurrencyMetadataStatus(
                 state = state,
                 onAction = onAction
@@ -513,6 +523,7 @@ private fun DashboardScreenPreview() {
                 isLoading = false,
                 monthlyRecurringTotal = 205.99,
                 activeEntryCount = 2,
+                activeCurrencyCodes = setOf("USD", "EUR"),
                 savedEntryCount = 3,
                 currencyMetadataCount = 2,
                 upcomingPayments = listOf(
