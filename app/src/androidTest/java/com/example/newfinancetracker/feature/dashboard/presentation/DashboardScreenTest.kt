@@ -168,7 +168,7 @@ class DashboardScreenTest {
     }
 
     @Test
-    fun dashboardScreen_showsMixedCurrencySummaryMessageOnlyWhenActiveCurrenciesDiffer() {
+    fun dashboardScreen_showsMixedCurrencySummaryMessageWhenActiveCurrenciesDiffer() {
         val previousLocale = Locale.getDefault()
         Locale.setDefault(Locale.US)
 
@@ -220,7 +220,17 @@ class DashboardScreenTest {
             composeRule.onAllNodesWithText(
                 "Includes 2 active currencies. Total is an unconverted aggregate."
             ).assertCountEquals(1)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
 
+    @Test
+    fun dashboardScreen_hidesMixedCurrencySummaryMessageWhenActiveCurrencyIsSingular() {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
+        try {
             composeRule.setContent {
                 FinanceTrackerTheme {
                     DashboardScreen(
@@ -383,15 +393,21 @@ class DashboardScreenTest {
             composeRule.onAllNodes(
                 hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
             ).assertCountEquals(1)
-            composeRule.onNodeWithText("Rent").assert(hasUpcomingPaymentUrgency("OVERDUE"))
+            composeRule.onNode(
+                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
+            ).assert(hasUpcomingPaymentUrgency("OVERDUE"))
             composeRule.onAllNodes(
                 hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
             ).assertCountEquals(1)
-            composeRule.onNodeWithText("Water").assert(hasUpcomingPaymentUrgency("DUE_TODAY"))
+            composeRule.onNode(
+                hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
+            ).assert(hasUpcomingPaymentUrgency("DUE_TODAY"))
             composeRule.onAllNodes(
                 hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
             ).assertCountEquals(1)
-            composeRule.onNodeWithText("Music").assert(hasUpcomingPaymentUrgency("STANDARD"))
+            composeRule.onNode(
+                hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
+            ).assert(hasUpcomingPaymentUrgency("STANDARD"))
         } finally {
             Locale.setDefault(previousLocale)
         }
@@ -452,20 +468,17 @@ class DashboardScreenTest {
                 }
             }
 
-            composeRule.onNodeWithText("Rent").assert(hasStateDescription("Overdue payment"))
-            composeRule.onAllNodes(
+            composeRule.onNode(
                 hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
-            ).assertCountEquals(1)
-            composeRule.onNodeWithText("Water").assert(hasStateDescription("Payment due today"))
-            composeRule.onAllNodes(
+            ).assert(hasStateDescription("Overdue payment"))
+            composeRule.onNode(
                 hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
-            ).assertCountEquals(1)
-            composeRule.onNodeWithText("Music").assert(
+            ).assert(hasStateDescription("Payment due today"))
+            composeRule.onNode(
+                hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
+            ).assert(
                 SemanticsMatcher.keyNotDefined(androidx.compose.ui.semantics.SemanticsProperties.StateDescription)
             )
-            composeRule.onAllNodes(
-                hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
-            ).assertCountEquals(1)
         } finally {
             Locale.setDefault(previousLocale)
         }
@@ -585,6 +598,56 @@ class DashboardScreenTest {
                 .performClick()
 
             assertEquals(listOf(DashboardAction.RecurringEntryClicked(7L)), actions)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
+
+    @Test
+    fun dashboardScreen_savedRecurringEntryCardExposesMergedAccessibilitySummaryAndClickAction() {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
+        try {
+            val actions = mutableListOf<DashboardAction>()
+
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 15.99,
+                            activeEntryCount = 1,
+                            savedEntryCount = 1,
+                            recurringEntries = listOf(
+                                DashboardRecurringEntryItem(
+                                    id = 5L,
+                                    name = "Netflix",
+                                    amount = 15.99,
+                                    currencyCode = "USD",
+                                    billingFrequency = BillingFrequency.MONTHLY,
+                                    nextPaymentDate = "2026-03-31",
+                                    category = "Streaming",
+                                    type = RecurringEntryType.SUBSCRIPTION,
+                                    isActive = true,
+                                    notes = "Family plan"
+                                )
+                            )
+                        ),
+                        onAction = actions::add,
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
+            }
+
+            composeRule.onNode(
+                hasContentDescription(
+                    "Netflix, \$15.99, Subscription, Monthly, Mar 31, 2026, Streaming, USD, Active, Notes: Family plan"
+                )
+            ).assert(hasClickAction())
+                .performClick()
+
+            assertEquals(listOf(DashboardAction.RecurringEntryClicked(5L)), actions)
         } finally {
             Locale.setDefault(previousLocale)
         }

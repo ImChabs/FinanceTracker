@@ -484,11 +484,16 @@ private fun RecurringEntryCard(
     entry: DashboardRecurringEntryItem,
     onClick: () -> Unit
 ) {
+    val accessibilitySummary = entry.toAccessibilitySummary()
+
     Card(
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
+            .semantics(mergeDescendants = true) {
+                contentDescription = accessibilitySummary
+            }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -657,6 +662,49 @@ private fun DashboardUpcomingPaymentItem.toAccessibilitySummary(
             category,
             currencyCode,
             relativeDueText
+        )
+    }
+}
+
+@Composable
+private fun DashboardRecurringEntryItem.toAccessibilitySummary(): String {
+    val formattedAmount = formatAmountForSavedCurrency(
+        amount = amount,
+        currencyCode = currencyCode
+    )
+    val typeLabel = recurringEntryTypeLabel(type)
+    val frequencyLabel = billingFrequencyLabel(billingFrequency)
+    val formattedDate = nextPaymentDate.toDashboardDisplayDate()
+    val statusLabel = if (isActive) {
+        stringResource(R.string.dashboard_status_active)
+    } else {
+        stringResource(R.string.dashboard_status_inactive)
+    }
+
+    return if (notes.isNullOrBlank()) {
+        stringResource(
+            R.string.dashboard_saved_entry_accessibility_summary,
+            name,
+            formattedAmount,
+            typeLabel,
+            frequencyLabel,
+            formattedDate,
+            category,
+            currencyCode,
+            statusLabel
+        )
+    } else {
+        stringResource(
+            R.string.dashboard_saved_entry_accessibility_summary_with_notes,
+            name,
+            formattedAmount,
+            typeLabel,
+            frequencyLabel,
+            formattedDate,
+            category,
+            currencyCode,
+            statusLabel,
+            notes
         )
     }
 }
