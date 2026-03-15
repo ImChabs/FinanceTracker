@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -96,6 +97,7 @@ fun DashboardScreen(
             )
 
             SummaryCard(state = state)
+            UpcomingPaymentsSection(state = state)
 
             Button(
                 onClick = { onAction(DashboardAction.AddRecurringEntryClicked) }
@@ -142,6 +144,89 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun UpcomingPaymentsSection(
+    state: DashboardState
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.dashboard_upcoming_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        if (state.upcomingPayments.isEmpty()) {
+            Card(
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.dashboard_upcoming_empty),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(20.dp)
+                )
+            }
+        } else {
+            Card(
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                ) {
+                    state.upcomingPayments.forEachIndexed { index, payment ->
+                        UpcomingPaymentRow(payment = payment)
+                        if (index < state.upcomingPayments.lastIndex) {
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.outlineVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UpcomingPaymentRow(
+    payment: DashboardUpcomingPaymentItem
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = payment.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = stringResource(
+                    R.string.dashboard_upcoming_date_and_category,
+                    payment.nextPaymentDate,
+                    payment.category
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Text(
+            text = formatCurrency(payment.amount),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
@@ -322,6 +407,22 @@ private fun DashboardScreenPreview() {
                 monthlyRecurringTotal = 205.99,
                 activeEntryCount = 2,
                 savedEntryCount = 3,
+                upcomingPayments = listOf(
+                    DashboardUpcomingPaymentItem(
+                        id = 1L,
+                        name = "Netflix",
+                        amount = 15.99,
+                        nextPaymentDate = "2026-03-31",
+                        category = "Streaming"
+                    ),
+                    DashboardUpcomingPaymentItem(
+                        id = 2L,
+                        name = "Rent",
+                        amount = 190.0,
+                        nextPaymentDate = "2026-04-01",
+                        category = "Housing"
+                    )
+                ),
                 recurringEntries = listOf(
                     DashboardRecurringEntryItem(
                         id = 1L,

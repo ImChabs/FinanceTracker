@@ -72,6 +72,10 @@ class DashboardStateTest {
         assertEquals(190.0, state.monthlyRecurringTotal, 0.0001)
         assertEquals(4, state.activeEntryCount)
         assertEquals(5, state.savedEntryCount)
+        assertEquals(
+            listOf("2026-03-18", "2026-03-31", "2026-04-01", "2026-08-12"),
+            state.upcomingPayments.map { it.nextPaymentDate }
+        )
         assertEquals(null, state.recurringEntries[3].notes)
     }
 
@@ -83,5 +87,48 @@ class DashboardStateTest {
         assertEquals(0.0, state.monthlyRecurringTotal, 0.0)
         assertEquals(0, state.activeEntryCount)
         assertEquals(0, state.savedEntryCount)
+        assertTrue(state.upcomingPayments.isEmpty())
+    }
+
+    @Test
+    fun `dashboard upcoming payments only include active entries with valid dates`() {
+        val state = listOf(
+            RecurringEntry(
+                id = 1L,
+                name = "Water",
+                amount = 45.0,
+                billingFrequency = BillingFrequency.MONTHLY,
+                nextPaymentDate = "2026-03-19",
+                category = "Utilities",
+                type = RecurringEntryType.RECURRING_EXPENSE,
+                isActive = true,
+                notes = null
+            ),
+            RecurringEntry(
+                id = 2L,
+                name = "Legacy entry",
+                amount = 12.0,
+                billingFrequency = BillingFrequency.MONTHLY,
+                nextPaymentDate = "2026-13-01",
+                category = "Other",
+                type = RecurringEntryType.SUBSCRIPTION,
+                isActive = true,
+                notes = null
+            ),
+            RecurringEntry(
+                id = 3L,
+                name = "Paused service",
+                amount = 8.0,
+                billingFrequency = BillingFrequency.MONTHLY,
+                nextPaymentDate = "2026-03-16",
+                category = "Software",
+                type = RecurringEntryType.SUBSCRIPTION,
+                isActive = false,
+                notes = null
+            )
+        ).toDashboardState()
+
+        assertEquals(1, state.upcomingPayments.size)
+        assertEquals("Water", state.upcomingPayments.single().name)
     }
 }

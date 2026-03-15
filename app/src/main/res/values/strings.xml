@@ -3,6 +3,9 @@
     <string name="dashboard_title">Dashboard</string>
     <string name="dashboard_headline">Track recurring expenses with confidence</string>
     <string name="dashboard_summary_label">Monthly recurring total</string>
+    <string name="dashboard_upcoming_title">Upcoming payments</string>
+    <string name="dashboard_upcoming_empty">No active upcoming payments yet. Active entries with a valid next payment date will appear here.</string>
+    <string name="dashboard_upcoming_date_and_category">%1$s - %2$s</string>
     <string name="dashboard_add_recurring_entry">Add recurring entry</string>
     <string name="dashboard_loading">Loading recurring overview...</string>
     <string name="dashboard_summary_active_entries">Across %1$d active entries</string>
