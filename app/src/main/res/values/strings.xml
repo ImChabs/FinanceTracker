@@ -6,6 +6,8 @@
     <string name="dashboard_upcoming_title">Upcoming payments</string>
     <string name="dashboard_upcoming_empty">No active upcoming payments yet. Active entries with a valid next payment date will appear here.</string>
     <string name="dashboard_upcoming_date_and_category">%1$s - %2$s</string>
+    <string name="dashboard_due_today">Due today</string>
+    <string name="dashboard_due_tomorrow">Due tomorrow</string>
     <string name="dashboard_add_recurring_entry">Add recurring entry</string>
     <string name="dashboard_loading">Loading recurring overview...</string>
     <string name="dashboard_summary_active_entries">Across %1$d active entries</string>
@@ -70,4 +72,12 @@
     <string name="recurring_edit_missing_title">This recurring entry is no longer available</string>
     <string name="recurring_edit_missing_body">The saved entry could not be found. It may have been removed or changed elsewhere.</string>
     <string name="recurring_edit_back_to_dashboard">Back to dashboard</string>
+    <plurals name="dashboard_due_in_days">
+        <item quantity="one">Due in %d day</item>
+        <item quantity="other">Due in %d days</item>
+    </plurals>
+    <plurals name="dashboard_due_overdue">
+        <item quantity="one">Overdue by %d day</item>
+        <item quantity="other">Overdue by %d days</item>
+    </plurals>
 </resources>

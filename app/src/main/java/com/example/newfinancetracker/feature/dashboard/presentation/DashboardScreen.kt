@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -244,6 +245,14 @@ private fun UpcomingPaymentRow(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            payment.relativeDueContext?.let { relativeDueContext ->
+                Text(
+                    text = relativeDueContext.toDisplayText(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
             Text(
                 text = stringResource(
                     R.string.dashboard_currency_code,
@@ -513,6 +522,23 @@ private fun billingFrequencyLabel(frequency: BillingFrequency): String =
         BillingFrequency.YEARLY -> stringResource(R.string.recurring_create_frequency_yearly)
     }
 
+@Composable
+private fun DashboardRelativeDueContext.toDisplayText(): String =
+    when (this) {
+        is DashboardRelativeDueContext.Overdue -> pluralStringResource(
+            R.plurals.dashboard_due_overdue,
+            daysOverdue,
+            daysOverdue
+        )
+        DashboardRelativeDueContext.DueToday -> stringResource(R.string.dashboard_due_today)
+        DashboardRelativeDueContext.DueTomorrow -> stringResource(R.string.dashboard_due_tomorrow)
+        is DashboardRelativeDueContext.DueInDays -> pluralStringResource(
+            R.plurals.dashboard_due_in_days,
+            daysUntilDue,
+            daysUntilDue
+        )
+    }
+
 @Preview(showBackground = true)
 @Composable
 private fun DashboardScreenPreview() {
@@ -532,7 +558,8 @@ private fun DashboardScreenPreview() {
                         amount = 15.99,
                         currencyCode = "USD",
                         nextPaymentDate = "2026-03-31",
-                        category = "Streaming"
+                        category = "Streaming",
+                        relativeDueContext = DashboardRelativeDueContext.DueTomorrow
                     ),
                     DashboardUpcomingPaymentItem(
                         id = 2L,
@@ -540,7 +567,8 @@ private fun DashboardScreenPreview() {
                         amount = 190.0,
                         currencyCode = "EUR",
                         nextPaymentDate = "2026-04-01",
-                        category = "Housing"
+                        category = "Housing",
+                        relativeDueContext = DashboardRelativeDueContext.DueInDays(2)
                     )
                 ),
                 recurringEntries = listOf(

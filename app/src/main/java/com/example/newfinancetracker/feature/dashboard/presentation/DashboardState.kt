@@ -7,6 +7,8 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+import kotlin.math.absoluteValue
 
 data class DashboardState(
     val isLoading: Boolean = true,
@@ -46,10 +48,20 @@ data class DashboardUpcomingPaymentItem(
     val amount: Double,
     val currencyCode: String,
     val nextPaymentDate: String,
-    val category: String
+    val category: String,
+    val relativeDueContext: DashboardRelativeDueContext? = null
 )
 
-internal fun List<RecurringEntry>.toDashboardState(): DashboardState {
+sealed interface DashboardRelativeDueContext {
+    data class Overdue(val daysOverdue: Int) : DashboardRelativeDueContext
+    data object DueToday : DashboardRelativeDueContext
+    data object DueTomorrow : DashboardRelativeDueContext
+    data class DueInDays(val daysUntilDue: Int) : DashboardRelativeDueContext
+}
+
+internal fun List<RecurringEntry>.toDashboardState(
+    referenceDate: Date = Date()
+): DashboardState {
     val recurringEntryItems = map { entry ->
         DashboardRecurringEntryItem(
             id = entry.id,
@@ -74,7 +86,8 @@ internal fun List<RecurringEntry>.toDashboardState(): DashboardState {
                     amount = entry.amount,
                     currencyCode = entry.currencyCode,
                     nextPaymentDate = entry.nextPaymentDate,
-                    category = entry.category
+                    category = entry.category,
+                    relativeDueContext = entry.nextPaymentDate.toDashboardRelativeDueContext(referenceDate)
                 )
             }
         }
@@ -110,17 +123,48 @@ internal fun String.toDashboardDisplayDate(
     locale: Locale = Locale.getDefault()
 ): String {
     val parsedDate = toIsoDate() ?: return this
-    return SimpleDateFormat(DASHBOARD_DISPLAY_DATE_PATTERN, locale).format(parsedDate)
+    return SimpleDateFormat(DASHBOARD_DISPLAY_DATE_PATTERN, locale).apply {
+        timeZone = TimeZone.getTimeZone(UTC_TIME_ZONE_ID)
+    }.format(parsedDate)
+}
+
+internal fun String.toDashboardRelativeDueContext(
+    referenceDate: Date = Date()
+): DashboardRelativeDueContext? {
+    val dueDate = toIsoDate() ?: return null
+    val dayDelta = ((dueDate.time - referenceDate.toUtcStartOfDayMillis()) / MILLIS_PER_DAY).toInt()
+
+    return when {
+        dayDelta < 0 -> DashboardRelativeDueContext.Overdue(daysOverdue = dayDelta.absoluteValue)
+        dayDelta == 0 -> DashboardRelativeDueContext.DueToday
+        dayDelta == 1 -> DashboardRelativeDueContext.DueTomorrow
+        else -> DashboardRelativeDueContext.DueInDays(daysUntilDue = dayDelta)
+    }
 }
 
 private fun String.toIsoDate(): Date? =
     try {
         SimpleDateFormat(ISO_DATE_PATTERN, Locale.US).apply {
             isLenient = false
+            timeZone = TimeZone.getTimeZone(UTC_TIME_ZONE_ID)
         }.parse(trim())
     } catch (_: ParseException) {
         null
     }
 
+private fun Date.toUtcStartOfDayMillis(): Long {
+    val dateOnly = SimpleDateFormat(ISO_DATE_PATTERN, Locale.US).apply {
+        timeZone = TimeZone.getTimeZone(UTC_TIME_ZONE_ID)
+    }.format(this)
+    return checkNotNull(
+        SimpleDateFormat(ISO_DATE_PATTERN, Locale.US).apply {
+            isLenient = false
+            timeZone = TimeZone.getTimeZone(UTC_TIME_ZONE_ID)
+        }.parse(dateOnly)
+    ).time
+}
+
 private const val ISO_DATE_PATTERN: String = "yyyy-MM-dd"
 private const val DASHBOARD_DISPLAY_DATE_PATTERN: String = "MMM d, yyyy"
+private const val UTC_TIME_ZONE_ID: String = "UTC"
+private const val MILLIS_PER_DAY: Long = 24L * 60L * 60L * 1000L

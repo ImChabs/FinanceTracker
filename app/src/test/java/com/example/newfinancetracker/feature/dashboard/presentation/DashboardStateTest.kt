@@ -4,9 +4,13 @@ import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequ
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntry
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 class DashboardStateTest {
 
@@ -156,6 +160,32 @@ class DashboardStateTest {
     }
 
     @Test
+    fun `dashboard upcoming payment relative due context is computed deterministically`() {
+        val state = listOf(
+            recurringEntryWithDate(id = 1L, name = "Past due", nextPaymentDate = "2026-03-13"),
+            recurringEntryWithDate(id = 2L, name = "Today", nextPaymentDate = "2026-03-15"),
+            recurringEntryWithDate(id = 3L, name = "Tomorrow", nextPaymentDate = "2026-03-16"),
+            recurringEntryWithDate(id = 4L, name = "Soon", nextPaymentDate = "2026-03-20")
+        ).toDashboardState(referenceDate = isoDate("2026-03-15"))
+
+        assertEquals(
+            listOf(
+                DashboardRelativeDueContext.Overdue(daysOverdue = 2),
+                DashboardRelativeDueContext.DueToday,
+                DashboardRelativeDueContext.DueTomorrow,
+                DashboardRelativeDueContext.DueInDays(daysUntilDue = 5)
+            ),
+            state.upcomingPayments.map { it.relativeDueContext }
+        )
+    }
+
+    @Test
+    fun `dashboard relative due context falls back to null for invalid or legacy strings`() {
+        assertNull("31/03/2026".toDashboardRelativeDueContext(referenceDate = isoDate("2026-03-15")))
+        assertNull("2026-13-01".toDashboardRelativeDueContext(referenceDate = isoDate("2026-03-15")))
+    }
+
+    @Test
     fun `dashboard display date formats valid iso date strings`() {
         assertEquals(
             "Mar 31, 2026",
@@ -174,4 +204,29 @@ class DashboardStateTest {
             " 2026-13-01 ".toDashboardDisplayDate(Locale.US)
         )
     }
+
+    private fun recurringEntryWithDate(
+        id: Long,
+        name: String,
+        nextPaymentDate: String
+    ): RecurringEntry = RecurringEntry(
+        id = id,
+        name = name,
+        amount = 10.0,
+        currencyCode = "USD",
+        billingFrequency = BillingFrequency.MONTHLY,
+        nextPaymentDate = nextPaymentDate,
+        category = "Utilities",
+        type = RecurringEntryType.RECURRING_EXPENSE,
+        isActive = true,
+        notes = null
+    )
+
+    private fun isoDate(value: String): Date =
+        checkNotNull(
+            SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+                isLenient = false
+                timeZone = TimeZone.getTimeZone("UTC")
+            }.parse(value)
+        )
 }
