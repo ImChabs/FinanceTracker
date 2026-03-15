@@ -29,7 +29,7 @@ class DashboardViewModel(
     init {
         observeCurrencyMetadata()
         observeRecurringEntries()
-        syncCurrencyMetadata()
+        syncCurrencyMetadata(isRetry = false)
     }
 
     fun onAction(action: DashboardAction) {
@@ -38,6 +38,10 @@ class DashboardViewModel(
                 viewModelScope.launch {
                     _effects.emit(DashboardEffect.NavigateToRecurringEntryCreate)
                 }
+            }
+
+            DashboardAction.RetryCurrencyMetadataClicked -> {
+                syncCurrencyMetadata(isRetry = true)
             }
 
             is DashboardAction.RecurringEntryClicked -> {
@@ -55,7 +59,8 @@ class DashboardViewModel(
                 _state.update {
                     dashboardState.copy(
                         currencyMetadataCount = it.currencyMetadataCount,
-                        hasCurrencySyncFailure = it.hasCurrencySyncFailure
+                        hasCurrencySyncFailure = it.hasCurrencySyncFailure,
+                        isCurrencySyncInProgress = it.isCurrencySyncInProgress
                     )
                 }
             }
@@ -72,11 +77,27 @@ class DashboardViewModel(
         }
     }
 
-    private fun syncCurrencyMetadata() {
+    private fun syncCurrencyMetadata(isRetry: Boolean) {
+        if (_state.value.isCurrencySyncInProgress) return
+
+        _state.update { it.copy(isCurrencySyncInProgress = true) }
         viewModelScope.launch {
             val syncResult = currencyMetadataRepository.syncCurrencyMetadata()
             _state.update {
-                it.copy(hasCurrencySyncFailure = syncResult.isFailure)
+                it.copy(
+                    hasCurrencySyncFailure = syncResult.isFailure,
+                    isCurrencySyncInProgress = false
+                )
+            }
+
+            if (isRetry) {
+                _effects.emit(
+                    if (syncResult.isSuccess) {
+                        DashboardEffect.CurrencyMetadataRetrySucceeded
+                    } else {
+                        DashboardEffect.CurrencyMetadataRetryFailed
+                    }
+                )
             }
         }
     }

@@ -13,6 +13,11 @@
     <string name="dashboard_currency_status_ready">Currency metadata cache size: %1$d</string>
     <string name="dashboard_currency_status_refresh_failed">Currency refresh unavailable. Cached metadata count: %1$d</string>
     <string name="dashboard_currency_status_unavailable">Currency metadata unavailable right now.</string>
+    <string name="dashboard_currency_status_refreshing">Refreshing currency metadata...</string>
+    <string name="dashboard_currency_status_refreshing_cached">Refreshing currency metadata. Cached metadata count: %1$d</string>
+    <string name="dashboard_currency_retry">Retry currency sync</string>
+    <string name="dashboard_currency_retry_success">Currency metadata refreshed.</string>
+    <string name="dashboard_currency_retry_failure">Currency metadata refresh failed. Please try again.</string>
     <string name="dashboard_empty_title">No recurring entries yet</string>
     <string name="dashboard_empty_body">Add your first subscription or recurring expense to start seeing your monthly total and saved items here.</string>
     <string name="dashboard_entries_title">Saved recurring entries</string>

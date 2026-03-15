@@ -15,7 +15,8 @@ data class DashboardState(
     val recurringEntries: List<DashboardRecurringEntryItem> = emptyList(),
     val upcomingPayments: List<DashboardUpcomingPaymentItem> = emptyList(),
     val currencyMetadataCount: Int = 0,
-    val hasCurrencySyncFailure: Boolean = false
+    val hasCurrencySyncFailure: Boolean = false,
+    val isCurrencySyncInProgress: Boolean = false
 ) {
     val isEmpty: Boolean
         get() = !isLoading && recurringEntries.isEmpty()

@@ -17,11 +17,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -44,6 +48,7 @@ fun DashboardScreenRoot(
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as FinanceTrackerApplication
+    val snackbarHostState = remember { SnackbarHostState() }
     val viewModel: DashboardViewModel = viewModel(
         factory = DashboardViewModel.factory(
             recurringEntryRepository = application.recurringEntryRepository,
@@ -57,6 +62,16 @@ fun DashboardScreenRoot(
             when (effect) {
                 DashboardEffect.NavigateToRecurringEntryCreate -> onAddRecurringEntryClick()
                 is DashboardEffect.NavigateToRecurringEntryEdit -> onRecurringEntryClick(effect.entryId)
+                DashboardEffect.CurrencyMetadataRetrySucceeded -> {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.dashboard_currency_retry_success)
+                    )
+                }
+                DashboardEffect.CurrencyMetadataRetryFailed -> {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.dashboard_currency_retry_failure)
+                    )
+                }
             }
         }
     }
@@ -64,6 +79,7 @@ fun DashboardScreenRoot(
     DashboardScreen(
         state = state,
         onAction = viewModel::onAction,
+        snackbarHostState = snackbarHostState,
         modifier = modifier
     )
 }
@@ -72,10 +88,14 @@ fun DashboardScreenRoot(
 fun DashboardScreen(
     state: DashboardState,
     onAction: (DashboardAction) -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
-        modifier = modifier
+        modifier = modifier,
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
     ) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(18.dp),
@@ -97,7 +117,10 @@ fun DashboardScreen(
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.86f)
             )
 
-            SummaryCard(state = state)
+            SummaryCard(
+                state = state,
+                onAction = onAction
+            )
             UpcomingPaymentsSection(state = state)
 
             Button(
@@ -233,7 +256,8 @@ private fun UpcomingPaymentRow(
 
 @Composable
 private fun SummaryCard(
-    state: DashboardState
+    state: DashboardState,
+    onAction: (DashboardAction) -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(28.dp),
@@ -269,16 +293,31 @@ private fun SummaryCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
             )
-            CurrencyMetadataStatus(state = state)
+            CurrencyMetadataStatus(
+                state = state,
+                onAction = onAction
+            )
         }
     }
 }
 
 @Composable
 private fun CurrencyMetadataStatus(
-    state: DashboardState
+    state: DashboardState,
+    onAction: (DashboardAction) -> Unit
 ) {
     val statusText = when {
+        state.isCurrencySyncInProgress && state.currencyMetadataCount > 0 -> {
+            stringResource(
+                R.string.dashboard_currency_status_refreshing_cached,
+                state.currencyMetadataCount
+            )
+        }
+
+        state.isCurrencySyncInProgress -> {
+            stringResource(R.string.dashboard_currency_status_refreshing)
+        }
+
         state.currencyMetadataCount > 0 && state.hasCurrencySyncFailure -> {
             stringResource(
                 R.string.dashboard_currency_status_refresh_failed,
@@ -297,11 +336,25 @@ private fun CurrencyMetadataStatus(
         else -> null
     } ?: return
 
-    Text(
-        text = statusText,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
-    )
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = statusText,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
+        )
+
+        if ((state.hasCurrencySyncFailure || state.currencyMetadataCount == 0) &&
+            !state.isCurrencySyncInProgress
+        ) {
+            TextButton(
+                onClick = { onAction(DashboardAction.RetryCurrencyMetadataClicked) }
+            ) {
+                Text(text = stringResource(R.string.dashboard_currency_retry))
+            }
+        }
+    }
 }
 
 @Composable
@@ -439,6 +492,7 @@ private fun DashboardScreenPreview() {
                 monthlyRecurringTotal = 205.99,
                 activeEntryCount = 2,
                 savedEntryCount = 3,
+                currencyMetadataCount = 2,
                 upcomingPayments = listOf(
                     DashboardUpcomingPaymentItem(
                         id = 1L,
@@ -491,7 +545,8 @@ private fun DashboardScreenPreview() {
                     )
                 )
             ),
-            onAction = {}
+            onAction = {},
+            snackbarHostState = remember { SnackbarHostState() }
         )
     }
 }

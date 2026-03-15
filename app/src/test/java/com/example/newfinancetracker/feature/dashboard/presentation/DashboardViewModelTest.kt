@@ -8,8 +8,12 @@ import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEnt
 import com.example.newfinancetracker.feature.recurring.domain.repository.RecurringEntryRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -90,6 +94,139 @@ class DashboardViewModelTest {
         assertTrue(viewModel.state.value.hasCurrencySyncFailure)
     }
 
+    @Test
+    fun `retry currency sync emits success effect and refreshes cached metadata`() = runTest(testDispatcher) {
+        val recurringRepository = FakeRecurringEntryRepository(
+            entries = listOf(ACTIVE_ENTRY)
+        )
+        val currencyRepository = FakeCurrencyMetadataRepository(
+            initialMetadata = listOf(
+                CurrencyMetadata(code = "JPY", displayName = "Japanese Yen")
+            ),
+            syncAttempts = ArrayDeque(
+                listOf(
+                    SyncAttempt(failure = IOException("Offline")),
+                    SyncAttempt(
+                        updatedMetadata = listOf(
+                            CurrencyMetadata(code = "EUR", displayName = "Euro"),
+                            CurrencyMetadata(code = "USD", displayName = "United States Dollar")
+                        )
+                    )
+                )
+            )
+        )
+        val viewModel = DashboardViewModel(
+            recurringEntryRepository = recurringRepository,
+            currencyMetadataRepository = currencyRepository
+        )
+
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.hasCurrencySyncFailure)
+        assertEquals(1, viewModel.state.value.currencyMetadataCount)
+
+        val retryEffect = async {
+            viewModel.effects.first { effect ->
+                effect == DashboardEffect.CurrencyMetadataRetrySucceeded
+            }
+        }
+        viewModel.onAction(DashboardAction.RetryCurrencyMetadataClicked)
+        advanceUntilIdle()
+
+        assertEquals(2, currencyRepository.syncCallCount)
+        assertFalse(viewModel.state.value.hasCurrencySyncFailure)
+        assertEquals(2, viewModel.state.value.currencyMetadataCount)
+        assertEquals(DashboardEffect.CurrencyMetadataRetrySucceeded, retryEffect.await())
+    }
+
+    @Test
+    fun `retry currency sync exposes progress and ignores duplicate retry clicks`() = runTest(testDispatcher) {
+        val recurringRepository = FakeRecurringEntryRepository(
+            entries = listOf(ACTIVE_ENTRY)
+        )
+        val retryCompletion = CompletableDeferred<Unit>()
+        val currencyRepository = FakeCurrencyMetadataRepository(
+            syncAttempts = ArrayDeque(
+                listOf(
+                    SyncAttempt(failure = IOException("Offline")),
+                    SyncAttempt(
+                        updatedMetadata = listOf(
+                            CurrencyMetadata(code = "USD", displayName = "United States Dollar")
+                        ),
+                        completionSignal = retryCompletion
+                    )
+                )
+            )
+        )
+        val viewModel = DashboardViewModel(
+            recurringEntryRepository = recurringRepository,
+            currencyMetadataRepository = currencyRepository
+        )
+
+        advanceUntilIdle()
+
+        val retryEffect = async {
+            viewModel.effects.first { effect ->
+                effect == DashboardEffect.CurrencyMetadataRetrySucceeded
+            }
+        }
+        viewModel.onAction(DashboardAction.RetryCurrencyMetadataClicked)
+        runCurrent()
+
+        assertTrue(viewModel.state.value.isCurrencySyncInProgress)
+        assertEquals(2, currencyRepository.syncCallCount)
+
+        viewModel.onAction(DashboardAction.RetryCurrencyMetadataClicked)
+        runCurrent()
+
+        assertEquals(2, currencyRepository.syncCallCount)
+
+        retryCompletion.complete(Unit)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.isCurrencySyncInProgress)
+        assertEquals(DashboardEffect.CurrencyMetadataRetrySucceeded, retryEffect.await())
+    }
+
+    @Test
+    fun `retry currency sync emits failure effect while keeping recurring content available`() = runTest(testDispatcher) {
+        val recurringRepository = FakeRecurringEntryRepository(
+            entries = listOf(ACTIVE_ENTRY)
+        )
+        val currencyRepository = FakeCurrencyMetadataRepository(
+            initialMetadata = listOf(
+                CurrencyMetadata(code = "JPY", displayName = "Japanese Yen")
+            ),
+            syncAttempts = ArrayDeque(
+                listOf(
+                    SyncAttempt(failure = IOException("Offline")),
+                    SyncAttempt(failure = IOException("Still offline"))
+                )
+            )
+        )
+        val viewModel = DashboardViewModel(
+            recurringEntryRepository = recurringRepository,
+            currencyMetadataRepository = currencyRepository
+        )
+
+        advanceUntilIdle()
+
+        val retryEffect = async {
+            viewModel.effects.first { effect ->
+                effect == DashboardEffect.CurrencyMetadataRetryFailed
+            }
+        }
+        viewModel.onAction(DashboardAction.RetryCurrencyMetadataClicked)
+        advanceUntilIdle()
+
+        assertEquals(2, currencyRepository.syncCallCount)
+        assertFalse(viewModel.state.value.isLoading)
+        assertEquals(1, viewModel.state.value.savedEntryCount)
+        assertEquals(1, viewModel.state.value.currencyMetadataCount)
+        assertTrue(viewModel.state.value.hasCurrencySyncFailure)
+        assertEquals(DashboardEffect.CurrencyMetadataRetryFailed, retryEffect.await())
+    }
+
     private class FakeRecurringEntryRepository(
         entries: List<RecurringEntry>
     ) : RecurringEntryRepository {
@@ -111,7 +248,8 @@ class DashboardViewModelTest {
     private class FakeCurrencyMetadataRepository(
         initialMetadata: List<CurrencyMetadata> = emptyList(),
         private val syncedMetadata: List<CurrencyMetadata> = initialMetadata,
-        private val syncFailure: Throwable? = null
+        private val syncFailure: Throwable? = null,
+        private val syncAttempts: ArrayDeque<SyncAttempt> = ArrayDeque()
     ) : CurrencyMetadataRepository {
 
         private val metadata = MutableStateFlow(initialMetadata)
@@ -123,12 +261,21 @@ class DashboardViewModelTest {
 
         override suspend fun syncCurrencyMetadata(): Result<Unit> {
             syncCallCount += 1
+            val syncAttempt = syncAttempts.removeFirstOrNull()
+            syncAttempt?.completionSignal?.await()
+            syncAttempt?.failure?.let { return Result.failure(it) }
             syncFailure?.let { return Result.failure(it) }
 
-            metadata.value = syncedMetadata
+            metadata.value = syncAttempt?.updatedMetadata ?: syncedMetadata
             return Result.success(Unit)
         }
     }
+
+    private data class SyncAttempt(
+        val updatedMetadata: List<CurrencyMetadata>? = null,
+        val failure: Throwable? = null,
+        val completionSignal: CompletableDeferred<Unit>? = null
+    )
 
     private companion object {
         val ACTIVE_ENTRY = RecurringEntry(
