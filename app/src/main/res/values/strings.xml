@@ -14,6 +14,7 @@
     <string name="dashboard_upcoming_accessibility_summary_with_due_context">%1$s, %2$s, %3$s, %4$s, %5$s, %6$s</string>
     <string name="dashboard_saved_entry_accessibility_summary">%1$s, %2$s, %3$s, %4$s, %5$s, %6$s, %7$s, %8$s</string>
     <string name="dashboard_saved_entry_accessibility_summary_with_notes">%1$s, %2$s, %3$s, %4$s, %5$s, %6$s, %7$s, %8$s, Notes: %9$s</string>
+    <string name="dashboard_saved_entry_edit_action_label">Edit saved recurring entry</string>
     <string name="dashboard_add_recurring_entry">Add recurring entry</string>
     <string name="dashboard_loading">Loading recurring overview...</string>
     <string name="dashboard_summary_active_entries">Across %1$d active entries</string>

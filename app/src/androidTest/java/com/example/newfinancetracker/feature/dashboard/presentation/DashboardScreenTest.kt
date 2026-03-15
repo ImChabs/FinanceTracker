@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.semantics.SemanticsActions
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
@@ -645,6 +646,8 @@ class DashboardScreenTest {
                     "Netflix, \$15.99, Subscription, Monthly, Mar 31, 2026, Streaming, USD, Active, Notes: Family plan"
                 )
             ).assert(hasClickAction())
+                .assert(hasStateDescription("Active"))
+                .assert(hasClickLabel("Edit saved recurring entry"))
                 .performClick()
 
             assertEquals(listOf(DashboardAction.RecurringEntryClicked(5L)), actions)
@@ -672,4 +675,14 @@ class DashboardScreenTest {
 
     private fun hasUpcomingPaymentUrgency(value: String): SemanticsMatcher =
         SemanticsMatcher.expectValue(UpcomingPaymentUrgencySemanticsKey, value)
+
+    private fun hasClickLabel(label: String): SemanticsMatcher =
+        SemanticsMatcher("has click label $label") { semanticsNode ->
+            val config = semanticsNode.config
+            if (SemanticsActions.OnClick !in config) {
+                false
+            } else {
+                config[SemanticsActions.OnClick].label == label
+            }
+        }
 }

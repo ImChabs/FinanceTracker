@@ -485,14 +485,20 @@ private fun RecurringEntryCard(
     onClick: () -> Unit
 ) {
     val accessibilitySummary = entry.toAccessibilitySummary()
+    val accessibilityStateDescription = entry.accessibilityStatusLabel()
+    val editActionLabel = stringResource(R.string.dashboard_saved_entry_edit_action_label)
 
     Card(
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(
+                onClickLabel = editActionLabel,
+                onClick = onClick
+            )
             .semantics(mergeDescendants = true) {
                 contentDescription = accessibilitySummary
+                stateDescription = accessibilityStateDescription
             }
     ) {
         Column(
@@ -675,11 +681,7 @@ private fun DashboardRecurringEntryItem.toAccessibilitySummary(): String {
     val typeLabel = recurringEntryTypeLabel(type)
     val frequencyLabel = billingFrequencyLabel(billingFrequency)
     val formattedDate = nextPaymentDate.toDashboardDisplayDate()
-    val statusLabel = if (isActive) {
-        stringResource(R.string.dashboard_status_active)
-    } else {
-        stringResource(R.string.dashboard_status_inactive)
-    }
+    val statusLabel = accessibilityStatusLabel()
 
     return if (notes.isNullOrBlank()) {
         stringResource(
@@ -708,6 +710,14 @@ private fun DashboardRecurringEntryItem.toAccessibilitySummary(): String {
         )
     }
 }
+
+@Composable
+private fun DashboardRecurringEntryItem.accessibilityStatusLabel(): String =
+    if (isActive) {
+        stringResource(R.string.dashboard_status_active)
+    } else {
+        stringResource(R.string.dashboard_status_inactive)
+    }
 
 internal val UpcomingPaymentUrgencySemanticsKey =
     SemanticsPropertyKey<String>("UpcomingPaymentUrgency")
