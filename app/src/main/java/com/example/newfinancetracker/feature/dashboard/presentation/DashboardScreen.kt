@@ -238,7 +238,7 @@ private fun UpcomingPaymentRow(
             Text(
                 text = stringResource(
                     R.string.dashboard_upcoming_date_and_category,
-                    payment.nextPaymentDate,
+                    payment.nextPaymentDate.toDashboardDisplayDate(),
                     payment.category
                 ),
                 style = MaterialTheme.typography.bodyMedium,
@@ -468,7 +468,7 @@ private fun RecurringEntryCard(
             Text(
                 text = stringResource(
                     R.string.dashboard_next_payment,
-                    entry.nextPaymentDate
+                    entry.nextPaymentDate.toDashboardDisplayDate()
                 ),
                 style = MaterialTheme.typography.bodyMedium
             )

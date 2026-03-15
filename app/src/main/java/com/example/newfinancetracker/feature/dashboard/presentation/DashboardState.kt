@@ -5,6 +5,7 @@ import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEnt
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 data class DashboardState(
@@ -103,12 +104,23 @@ private fun Double.toMonthlyAmount(
     }
 
 private fun String.toIsoSortKey(): Long? =
+    toIsoDate()?.time
+
+internal fun String.toDashboardDisplayDate(
+    locale: Locale = Locale.getDefault()
+): String {
+    val parsedDate = toIsoDate() ?: return this
+    return SimpleDateFormat(DASHBOARD_DISPLAY_DATE_PATTERN, locale).format(parsedDate)
+}
+
+private fun String.toIsoDate(): Date? =
     try {
         SimpleDateFormat(ISO_DATE_PATTERN, Locale.US).apply {
             isLenient = false
-        }.parse(trim())?.time
+        }.parse(trim())
     } catch (_: ParseException) {
         null
     }
 
 private const val ISO_DATE_PATTERN: String = "yyyy-MM-dd"
+private const val DASHBOARD_DISPLAY_DATE_PATTERN: String = "MMM d, yyyy"

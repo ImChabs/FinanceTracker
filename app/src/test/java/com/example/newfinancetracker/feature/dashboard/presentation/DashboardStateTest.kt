@@ -6,6 +6,7 @@ import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEnt
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.Locale
 
 class DashboardStateTest {
 
@@ -152,5 +153,25 @@ class DashboardStateTest {
         assertEquals("AUD", state.upcomingPayments.single().currencyCode)
         assertEquals(setOf("AUD", "USD"), state.activeCurrencyCodes)
         assertTrue(state.hasMixedActiveCurrencies)
+    }
+
+    @Test
+    fun `dashboard display date formats valid iso date strings`() {
+        assertEquals(
+            "Mar 31, 2026",
+            "2026-03-31".toDashboardDisplayDate(Locale.US)
+        )
+    }
+
+    @Test
+    fun `dashboard display date falls back to raw value for invalid or legacy strings`() {
+        assertEquals(
+            "31/03/2026",
+            "31/03/2026".toDashboardDisplayDate(Locale.US)
+        )
+        assertEquals(
+            " 2026-13-01 ",
+            " 2026-13-01 ".toDashboardDisplayDate(Locale.US)
+        )
     }
 }

@@ -251,4 +251,69 @@ class DashboardScreenTest {
             Locale.setDefault(previousLocale)
         }
     }
+
+    @Test
+    fun dashboardScreen_formatsDisplayedDatesAndFallsBackForLegacyValues() {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
+        try {
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 35.98,
+                            activeEntryCount = 2,
+                            savedEntryCount = 2,
+                            recurringEntries = listOf(
+                                DashboardRecurringEntryItem(
+                                    id = 1L,
+                                    name = "Music",
+                                    amount = 15.99,
+                                    currencyCode = "USD",
+                                    billingFrequency = BillingFrequency.MONTHLY,
+                                    nextPaymentDate = "2026-03-31",
+                                    category = "Streaming",
+                                    type = RecurringEntryType.SUBSCRIPTION,
+                                    isActive = true,
+                                    notes = null
+                                ),
+                                DashboardRecurringEntryItem(
+                                    id = 2L,
+                                    name = "Legacy import",
+                                    amount = 20.0,
+                                    currencyCode = "USD",
+                                    billingFrequency = BillingFrequency.MONTHLY,
+                                    nextPaymentDate = "31/03/2026",
+                                    category = "Other",
+                                    type = RecurringEntryType.RECURRING_EXPENSE,
+                                    isActive = true,
+                                    notes = null
+                                )
+                            ),
+                            upcomingPayments = listOf(
+                                DashboardUpcomingPaymentItem(
+                                    id = 1L,
+                                    name = "Music",
+                                    amount = 15.99,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-31",
+                                    category = "Streaming"
+                                )
+                            )
+                        ),
+                        onAction = {},
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
+            }
+
+            composeRule.onAllNodesWithText("Mar 31, 2026 - Streaming").assertCountEquals(1)
+            composeRule.onAllNodesWithText("Next payment Mar 31, 2026").assertCountEquals(1)
+            composeRule.onAllNodesWithText("Next payment 31/03/2026").assertCountEquals(1)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
 }
