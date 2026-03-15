@@ -2,8 +2,11 @@ package com.example.newfinancetracker.feature.dashboard.presentation
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
@@ -316,4 +319,80 @@ class DashboardScreenTest {
             Locale.setDefault(previousLocale)
         }
     }
+
+    @Test
+    fun dashboardScreen_marksOverdueAndDueTodayPaymentsAsUrgent() {
+        composeRule.setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = DashboardState(
+                        isLoading = false,
+                        monthlyRecurringTotal = 40.0,
+                        activeEntryCount = 3,
+                        savedEntryCount = 3,
+                        recurringEntries = listOf(
+                            savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
+                            savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
+                            savedEntry(id = 3L, name = "Music", nextPaymentDate = "2026-03-17")
+                        ),
+                        upcomingPayments = listOf(
+                            DashboardUpcomingPaymentItem(
+                                id = 1L,
+                                name = "Rent",
+                                amount = 20.0,
+                                currencyCode = "USD",
+                                nextPaymentDate = "2026-03-14",
+                                category = "Housing",
+                                relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                            ),
+                            DashboardUpcomingPaymentItem(
+                                id = 2L,
+                                name = "Water",
+                                amount = 10.0,
+                                currencyCode = "USD",
+                                nextPaymentDate = "2026-03-15",
+                                category = "Utilities",
+                                relativeDueContext = DashboardRelativeDueContext.DueToday
+                            ),
+                            DashboardUpcomingPaymentItem(
+                                id = 3L,
+                                name = "Music",
+                                amount = 10.0,
+                                currencyCode = "USD",
+                                nextPaymentDate = "2026-03-17",
+                                category = "Streaming",
+                                relativeDueContext = DashboardRelativeDueContext.DueInDays(daysUntilDue = 2)
+                            )
+                        )
+                    ),
+                    onAction = {},
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Rent").assert(hasUpcomingPaymentUrgency("OVERDUE"))
+        composeRule.onNodeWithText("Water").assert(hasUpcomingPaymentUrgency("DUE_TODAY"))
+        composeRule.onNodeWithText("Music").assert(hasUpcomingPaymentUrgency("STANDARD"))
+    }
+
+    private fun savedEntry(
+        id: Long,
+        name: String,
+        nextPaymentDate: String
+    ): DashboardRecurringEntryItem = DashboardRecurringEntryItem(
+        id = id,
+        name = name,
+        amount = 10.0,
+        currencyCode = "USD",
+        billingFrequency = BillingFrequency.MONTHLY,
+        nextPaymentDate = nextPaymentDate,
+        category = "Utilities",
+        type = RecurringEntryType.RECURRING_EXPENSE,
+        isActive = true,
+        notes = null
+    )
+
+    private fun hasUpcomingPaymentUrgency(value: String): SemanticsMatcher =
+        SemanticsMatcher.expectValue(UpcomingPaymentUrgencySemanticsKey, value)
 }

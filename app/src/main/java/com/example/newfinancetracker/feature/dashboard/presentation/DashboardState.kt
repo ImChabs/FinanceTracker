@@ -59,6 +59,19 @@ sealed interface DashboardRelativeDueContext {
     data class DueInDays(val daysUntilDue: Int) : DashboardRelativeDueContext
 }
 
+internal enum class DashboardUpcomingPaymentUrgency {
+    STANDARD,
+    DUE_TODAY,
+    OVERDUE
+}
+
+internal fun DashboardRelativeDueContext?.toUpcomingPaymentUrgency(): DashboardUpcomingPaymentUrgency =
+    when (this) {
+        is DashboardRelativeDueContext.Overdue -> DashboardUpcomingPaymentUrgency.OVERDUE
+        DashboardRelativeDueContext.DueToday -> DashboardUpcomingPaymentUrgency.DUE_TODAY
+        else -> DashboardUpcomingPaymentUrgency.STANDARD
+    }
+
 internal fun List<RecurringEntry>.toDashboardState(
     referenceDate: Date = Date()
 ): DashboardState {

@@ -3,6 +3,7 @@ package com.example.newfinancetracker.feature.dashboard.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -221,54 +224,98 @@ private fun UpcomingPaymentsSection(
 private fun UpcomingPaymentRow(
     payment: DashboardUpcomingPaymentItem
 ) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
+    val urgency = payment.relativeDueContext.toUpcomingPaymentUrgency()
+    val urgencyStyle = rememberUpcomingPaymentUrgencyStyle(urgency = urgency)
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+            .semantics {
+                upcomingPaymentUrgency = urgency.name
+            }
+            .background(
+                color = urgencyStyle.containerColor,
+                shape = RoundedCornerShape(20.dp)
+            )
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.weight(1f)
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            Text(
-                text = payment.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = stringResource(
-                    R.string.dashboard_upcoming_date_and_category,
-                    payment.nextPaymentDate.toDashboardDisplayDate(),
-                    payment.category
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            payment.relativeDueContext?.let { relativeDueContext ->
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    text = relativeDueContext.toDisplayText(),
+                    text = payment.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = urgencyStyle.primaryTextColor
+                )
+                Text(
+                    text = stringResource(
+                        R.string.dashboard_upcoming_date_and_category,
+                        payment.nextPaymentDate.toDashboardDisplayDate(),
+                        payment.category
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = urgencyStyle.secondaryTextColor
+                )
+                payment.relativeDueContext?.let { relativeDueContext ->
+                    Text(
+                        text = relativeDueContext.toDisplayText(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = urgencyStyle.dueContextColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                Text(
+                    text = stringResource(
+                        R.string.dashboard_currency_code,
+                        payment.currencyCode
+                    ),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium
+                    color = urgencyStyle.secondaryTextColor
                 )
             }
             Text(
-                text = stringResource(
-                    R.string.dashboard_currency_code,
-                    payment.currencyCode
+                text = formatAmountForSavedCurrency(
+                    amount = payment.amount,
+                    currencyCode = payment.currencyCode
                 ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = urgencyStyle.primaryTextColor
             )
         }
-        Text(
-            text = formatAmountForSavedCurrency(
-                amount = payment.amount,
-                currencyCode = payment.currencyCode
-            ),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+    }
+}
+
+@Composable
+private fun rememberUpcomingPaymentUrgencyStyle(
+    urgency: DashboardUpcomingPaymentUrgency
+): DashboardUpcomingPaymentUrgencyStyle {
+    val colorScheme = MaterialTheme.colorScheme
+    return when (urgency) {
+        DashboardUpcomingPaymentUrgency.OVERDUE -> DashboardUpcomingPaymentUrgencyStyle(
+            containerColor = colorScheme.errorContainer.copy(alpha = 0.42f),
+            primaryTextColor = colorScheme.onSurface,
+            secondaryTextColor = colorScheme.onSurfaceVariant,
+            dueContextColor = colorScheme.error
+        )
+        DashboardUpcomingPaymentUrgency.DUE_TODAY -> DashboardUpcomingPaymentUrgencyStyle(
+            containerColor = colorScheme.primaryContainer.copy(alpha = 0.55f),
+            primaryTextColor = colorScheme.onSurface,
+            secondaryTextColor = colorScheme.onSurfaceVariant,
+            dueContextColor = colorScheme.primary
+        )
+        DashboardUpcomingPaymentUrgency.STANDARD -> DashboardUpcomingPaymentUrgencyStyle(
+            containerColor = colorScheme.surface,
+            primaryTextColor = colorScheme.onSurface,
+            secondaryTextColor = colorScheme.onSurfaceVariant,
+            dueContextColor = colorScheme.primary
         )
     }
 }
@@ -539,6 +586,19 @@ private fun DashboardRelativeDueContext.toDisplayText(): String =
         )
     }
 
+private data class DashboardUpcomingPaymentUrgencyStyle(
+    val containerColor: androidx.compose.ui.graphics.Color,
+    val primaryTextColor: androidx.compose.ui.graphics.Color,
+    val secondaryTextColor: androidx.compose.ui.graphics.Color,
+    val dueContextColor: androidx.compose.ui.graphics.Color
+)
+
+internal val UpcomingPaymentUrgencySemanticsKey =
+    SemanticsPropertyKey<String>("UpcomingPaymentUrgency")
+
+internal var androidx.compose.ui.semantics.SemanticsPropertyReceiver.upcomingPaymentUrgency
+    by UpcomingPaymentUrgencySemanticsKey
+
 @Preview(showBackground = true)
 @Composable
 private fun DashboardScreenPreview() {
@@ -559,7 +619,7 @@ private fun DashboardScreenPreview() {
                         currencyCode = "USD",
                         nextPaymentDate = "2026-03-31",
                         category = "Streaming",
-                        relativeDueContext = DashboardRelativeDueContext.DueTomorrow
+                        relativeDueContext = DashboardRelativeDueContext.DueToday
                     ),
                     DashboardUpcomingPaymentItem(
                         id = 2L,
@@ -568,7 +628,7 @@ private fun DashboardScreenPreview() {
                         currencyCode = "EUR",
                         nextPaymentDate = "2026-04-01",
                         category = "Housing",
-                        relativeDueContext = DashboardRelativeDueContext.DueInDays(2)
+                        relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
                     )
                 ),
                 recurringEntries = listOf(

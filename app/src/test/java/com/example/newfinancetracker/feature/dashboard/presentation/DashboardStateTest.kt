@@ -186,6 +186,30 @@ class DashboardStateTest {
     }
 
     @Test
+    fun `dashboard upcoming payment urgency emphasizes overdue and due today only`() {
+        assertEquals(
+            DashboardUpcomingPaymentUrgency.OVERDUE,
+            DashboardRelativeDueContext.Overdue(daysOverdue = 3).toUpcomingPaymentUrgency()
+        )
+        assertEquals(
+            DashboardUpcomingPaymentUrgency.DUE_TODAY,
+            DashboardRelativeDueContext.DueToday.toUpcomingPaymentUrgency()
+        )
+        assertEquals(
+            DashboardUpcomingPaymentUrgency.STANDARD,
+            DashboardRelativeDueContext.DueTomorrow.toUpcomingPaymentUrgency()
+        )
+        assertEquals(
+            DashboardUpcomingPaymentUrgency.STANDARD,
+            DashboardRelativeDueContext.DueInDays(daysUntilDue = 4).toUpcomingPaymentUrgency()
+        )
+        assertEquals(
+            DashboardUpcomingPaymentUrgency.STANDARD,
+            null.toUpcomingPaymentUrgency()
+        )
+    }
+
+    @Test
     fun `dashboard display date formats valid iso date strings`() {
         assertEquals(
             "Mar 31, 2026",
