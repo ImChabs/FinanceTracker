@@ -126,7 +126,10 @@ fun DashboardScreen(
                 state = state,
                 onAction = onAction
             )
-            UpcomingPaymentsSection(state = state)
+            UpcomingPaymentsSection(
+                state = state,
+                onAction = onAction
+            )
 
             Button(
                 onClick = { onAction(DashboardAction.AddRecurringEntryClicked) }
@@ -178,7 +181,8 @@ fun DashboardScreen(
 
 @Composable
 private fun UpcomingPaymentsSection(
-    state: DashboardState
+    state: DashboardState,
+    onAction: (DashboardAction) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -209,7 +213,12 @@ private fun UpcomingPaymentsSection(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                 ) {
                     state.upcomingPayments.forEachIndexed { index, payment ->
-                        UpcomingPaymentRow(payment = payment)
+                        UpcomingPaymentRow(
+                            payment = payment,
+                            onClick = {
+                                onAction(DashboardAction.RecurringEntryClicked(payment.id))
+                            }
+                        )
                         if (index < state.upcomingPayments.lastIndex) {
                             HorizontalDivider(
                                 color = MaterialTheme.colorScheme.outlineVariant
@@ -224,7 +233,8 @@ private fun UpcomingPaymentsSection(
 
 @Composable
 private fun UpcomingPaymentRow(
-    payment: DashboardUpcomingPaymentItem
+    payment: DashboardUpcomingPaymentItem,
+    onClick: () -> Unit
 ) {
     val urgency = payment.relativeDueContext.toUpcomingPaymentUrgency()
     val urgencyStyle = rememberUpcomingPaymentUrgencyStyle(urgency = urgency)
@@ -234,6 +244,7 @@ private fun UpcomingPaymentRow(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .semantics(mergeDescendants = true) {
                 contentDescription = accessibilitySummary
                 upcomingPaymentUrgency = urgency.name

@@ -6,13 +6,16 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
@@ -532,6 +535,56 @@ class DashboardScreenTest {
             composeRule.onAllNodes(
                 hasContentDescription("Legacy import, \$15.00, 17/03/2026, Other, USD, Due tomorrow")
             ).assertCountEquals(1)
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
+
+    @Test
+    fun dashboardScreen_upcomingPaymentRowClickDispatchesRecurringEntryActionAndKeepsUrgentSemantics() {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
+        try {
+            val actions = mutableListOf<DashboardAction>()
+
+            composeRule.setContent {
+                FinanceTrackerTheme {
+                    DashboardScreen(
+                        state = DashboardState(
+                            isLoading = false,
+                            monthlyRecurringTotal = 20.0,
+                            activeEntryCount = 1,
+                            savedEntryCount = 1,
+                            recurringEntries = listOf(
+                                savedEntry(id = 7L, name = "Rent", nextPaymentDate = "2026-03-14")
+                            ),
+                            upcomingPayments = listOf(
+                                DashboardUpcomingPaymentItem(
+                                    id = 7L,
+                                    name = "Rent",
+                                    amount = 20.0,
+                                    currencyCode = "USD",
+                                    nextPaymentDate = "2026-03-14",
+                                    category = "Housing",
+                                    relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                                )
+                            )
+                        ),
+                        onAction = actions::add,
+                        snackbarHostState = remember { SnackbarHostState() }
+                    )
+                }
+            }
+
+            composeRule.onNode(
+                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
+            ).assert(hasClickAction())
+                .assert(hasStateDescription("Overdue payment"))
+                .assert(hasUpcomingPaymentUrgency("OVERDUE"))
+                .performClick()
+
+            assertEquals(listOf(DashboardAction.RecurringEntryClicked(7L)), actions)
         } finally {
             Locale.setDefault(previousLocale)
         }
