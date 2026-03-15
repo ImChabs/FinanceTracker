@@ -337,12 +337,18 @@ private fun SummaryCard(
     state: DashboardState,
     onAction: (DashboardAction) -> Unit
 ) {
+    val accessibilitySummary = summaryCardAccessibilitySummary(state = state)
+
     Card(
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = accessibilitySummary
+            }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -393,11 +399,70 @@ private fun SummaryCard(
 }
 
 @Composable
+private fun summaryCardAccessibilitySummary(
+    state: DashboardState
+): String = buildList {
+    add(stringResource(R.string.dashboard_summary_label))
+    add(
+        formatSummaryAmount(
+            amount = state.monthlyRecurringTotal,
+            hasMixedCurrencies = state.hasMixedActiveCurrencies
+        )
+    )
+    add(
+        if (state.activeEntryCount > 0) {
+            stringResource(
+                R.string.dashboard_summary_active_entries,
+                state.activeEntryCount
+            )
+        } else {
+            stringResource(R.string.dashboard_summary_no_active_entries)
+        }
+    )
+    if (state.hasMixedActiveCurrencies) {
+        add(
+            stringResource(
+                R.string.dashboard_summary_mixed_currencies,
+                state.activeCurrencyCodes.size
+            )
+        )
+    }
+    currencyMetadataStatusText(state = state)?.let(::add)
+}.joinToAccessibilitySummary()
+
+@Composable
 private fun CurrencyMetadataStatus(
     state: DashboardState,
     onAction: (DashboardAction) -> Unit
 ) {
-    val statusText = when {
+    val statusText = currencyMetadataStatusText(state = state) ?: return
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = statusText,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
+        )
+
+        if ((state.hasCurrencySyncFailure || state.currencyMetadataCount == 0) &&
+            !state.isCurrencySyncInProgress
+        ) {
+            TextButton(
+                onClick = { onAction(DashboardAction.RetryCurrencyMetadataClicked) }
+            ) {
+                Text(text = stringResource(R.string.dashboard_currency_retry))
+            }
+        }
+    }
+}
+
+@Composable
+private fun currencyMetadataStatusText(
+    state: DashboardState
+): String? =
+    when {
         state.isCurrencySyncInProgress && state.currencyMetadataCount > 0 -> {
             stringResource(
                 R.string.dashboard_currency_status_refreshing_cached,
@@ -425,25 +490,16 @@ private fun CurrencyMetadataStatus(
 
         state.hasCurrencySyncFailure -> stringResource(R.string.dashboard_currency_status_unavailable)
         else -> null
-    } ?: return
+    }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = statusText,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
-        )
-
-        if ((state.hasCurrencySyncFailure || state.currencyMetadataCount == 0) &&
-            !state.isCurrencySyncInProgress
-        ) {
-            TextButton(
-                onClick = { onAction(DashboardAction.RetryCurrencyMetadataClicked) }
-            ) {
-                Text(text = stringResource(R.string.dashboard_currency_retry))
-            }
+private fun List<String>.joinToAccessibilitySummary(): String = buildString {
+    this@joinToAccessibilitySummary.forEachIndexed { index, segment ->
+        append(segment)
+        if (index == this@joinToAccessibilitySummary.lastIndex) return@forEachIndexed
+        if (segment.endsWith(".") || segment.endsWith("!") || segment.endsWith("?")) {
+            append(' ')
+        } else {
+            append(". ")
         }
     }
 }
