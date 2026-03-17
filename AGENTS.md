@@ -13,10 +13,18 @@
 - Room
 - Retrofit 3
 
+## Instruction Ownership
+- `AGENTS.md` defines durable repository rules: architecture, structure, naming, state handling, dependency/design constraints, and verification expectations.
+- `docs/blueprint.md` defines product goals, scope, roadmap context, and out-of-scope boundaries.
+- `handoff/next-block.md` defines the immediate next implementation block.
+- `handoff-history/` is archival only and should not be treated as the live source of truth unless historical lookup is explicitly needed.
+- `docs/official-docs.md` is a selective reference index for official framework and library guidance when behavior is uncertain.
+
 ## Planning Inputs
 - For product goals, feature scope, roadmap context, and overall application direction, consult `docs/blueprint.md` if present.
 - For the immediate next implementation step, consult `handoff/next-block.md` if present.
 - When framework or library behavior is uncertain, prefer official documentation and consult `docs/official-docs.md` if present.
+- Read only the files needed for the current task and avoid loading archival history or broad documentation unless it is relevant to the work.
 
 ## Project Structure
 - Organize code primarily by feature.
@@ -75,6 +83,9 @@
 - Always try to verify changes before considering the task complete.
 - Use the smallest meaningful verification for the affected scope.
 - Prefer focused module-level or target-level verification over full project builds.
+- For targeted compile verification in this single-module app, prefer `.\\gradlew.bat :app:compileDebugKotlin`.
+- Use `.\\gradlew.bat :app:testDebugUnitTest` when domain/data logic changes or when adding/updating unit tests.
+- Use targeted instrumentation or Compose UI tests only when UI behavior changes warrant them.
 - Avoid `clean` and full rebuilds unless truly necessary.
 - Do not leave compile errors caused by the change.
 - If verification could not be completed, state it explicitly.
