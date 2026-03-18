@@ -506,9 +506,18 @@ private fun List<String>.joinToAccessibilitySummary(): String = buildString {
 
 @Composable
 private fun EmptyStateCard() {
+    val accessibilitySummary = listOf(
+        stringResource(R.string.dashboard_empty_title),
+        stringResource(R.string.dashboard_empty_body)
+    ).joinToAccessibilitySummary()
+
     Card(
         shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = accessibilitySummary
+            }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),

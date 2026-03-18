@@ -729,6 +729,28 @@ class DashboardScreenTest {
         }
     }
 
+    @Test
+    fun dashboardScreen_emptyStateCardExposesMergedAccessibilitySummary() {
+        composeRule.setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = DashboardState(
+                        isLoading = false,
+                        isEmpty = true
+                    ),
+                    onAction = {},
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+
+        composeRule.onAllNodes(
+            hasContentDescription(
+                "No recurring entries yet. Add your first subscription or recurring expense to start tracking upcoming payments and monthly totals."
+            )
+        ).assertCountEquals(1)
+    }
+
     private fun savedEntry(
         id: Long,
         name: String,
