@@ -799,6 +799,28 @@ class DashboardScreenTest {
         ).assertCountEquals(1)
     }
 
+    @Test
+    fun dashboardScreen_addRecurringEntryButtonExposesAccessibilityActionLabelAndDispatchesAction() {
+        val actions = mutableListOf<DashboardAction>()
+
+        composeRule.setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = DashboardState(isLoading = false),
+                    onAction = actions::add,
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Add recurring entry")
+            .assert(hasClickAction())
+            .assert(hasClickLabel("Add a new recurring entry"))
+            .performClick()
+
+        assertEquals(listOf(DashboardAction.AddRecurringEntryClicked), actions)
+    }
+
     private fun savedEntry(
         id: Long,
         name: String,

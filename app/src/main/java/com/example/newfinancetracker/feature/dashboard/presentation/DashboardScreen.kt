@@ -90,6 +90,9 @@ fun DashboardScreen(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
+    val addRecurringEntryActionLabel =
+        stringResource(R.string.dashboard_add_recurring_entry_action_label)
+
     Scaffold(
         modifier = modifier,
         snackbarHost = {
@@ -126,7 +129,10 @@ fun DashboardScreen(
             )
 
             Button(
-                onClick = { onAction(DashboardAction.AddRecurringEntryClicked) }
+                onClick = { onAction(DashboardAction.AddRecurringEntryClicked) },
+                modifier = Modifier.semantics {
+                    onClick(label = addRecurringEntryActionLabel, action = null)
+                }
             ) {
                 Text(text = stringResource(R.string.dashboard_add_recurring_entry))
             }
