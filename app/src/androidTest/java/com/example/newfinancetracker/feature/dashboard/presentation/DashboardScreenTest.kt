@@ -610,6 +610,7 @@ class DashboardScreenTest {
             composeRule.onNode(
                 hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
             ).assert(hasClickAction())
+                .assert(hasClickLabel("Open recurring entry details"))
                 .assert(hasStateDescription("Overdue payment"))
                 .assert(hasUpcomingPaymentUrgency("OVERDUE"))
                 .performClick()
@@ -797,6 +798,44 @@ class DashboardScreenTest {
                 "No upcoming payments yet. Add or update an entry with a next payment date to populate this section."
             )
         ).assertCountEquals(1)
+    }
+
+    @Test
+    fun dashboardScreen_addRecurringEntryButtonExposesAccessibilityActionLabelAndDispatchesAction() {
+        val actions = mutableListOf<DashboardAction>()
+
+        composeRule.setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = DashboardState(isLoading = false),
+                    onAction = actions::add,
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Add recurring entry")
+            .assert(hasClickAction())
+            .assert(hasClickLabel("Add a new recurring entry"))
+            .performClick()
+
+        assertEquals(listOf(DashboardAction.AddRecurringEntryClicked), actions)
+    }
+
+    @Test
+    fun dashboardScreen_loadingStateExposesAccessibilityStateDescriptionWithoutChangingVisibleCopy() {
+        composeRule.setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = DashboardState(isLoading = true),
+                    onAction = {},
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Loading recurring overview...")
+            .assert(hasStateDescription("Dashboard content is loading"))
     }
 
     private fun savedEntry(

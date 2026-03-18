@@ -90,6 +90,9 @@ fun DashboardScreen(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
+    val addRecurringEntryActionLabel =
+        stringResource(R.string.dashboard_add_recurring_entry_action_label)
+
     Scaffold(
         modifier = modifier,
         snackbarHost = {
@@ -126,17 +129,26 @@ fun DashboardScreen(
             )
 
             Button(
-                onClick = { onAction(DashboardAction.AddRecurringEntryClicked) }
+                onClick = { onAction(DashboardAction.AddRecurringEntryClicked) },
+                modifier = Modifier.semantics {
+                    onClick(label = addRecurringEntryActionLabel, action = null)
+                }
             ) {
                 Text(text = stringResource(R.string.dashboard_add_recurring_entry))
             }
 
             when {
                 state.isLoading -> {
+                    val loadingStateDescription =
+                        stringResource(R.string.dashboard_loading_accessibility_state)
+
                     Text(
                         text = stringResource(R.string.dashboard_loading),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f),
+                        modifier = Modifier.semantics {
+                            stateDescription = loadingStateDescription
+                        }
                     )
                 }
 
@@ -236,6 +248,7 @@ private fun UpcomingPaymentRow(
     payment: DashboardUpcomingPaymentItem,
     onClick: () -> Unit
 ) {
+    val openActionLabel = stringResource(R.string.dashboard_upcoming_payment_open_action_label)
     val urgency = payment.relativeDueContext.toUpcomingPaymentUrgency()
     val urgencyStyle = rememberUpcomingPaymentUrgencyStyle(urgency = urgency)
     val urgencyAccessibilityDescription = urgency.toAccessibilityDescription()
@@ -244,7 +257,10 @@ private fun UpcomingPaymentRow(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(
+                onClickLabel = openActionLabel,
+                onClick = onClick
+            )
             .semantics(mergeDescendants = true) {
                 contentDescription = accessibilitySummary
                 upcomingPaymentUrgency = urgency.name
