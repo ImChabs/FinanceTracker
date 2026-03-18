@@ -29,7 +29,9 @@ description: Implement one bounded development block in this repository, verify 
    - What adjacent fix is acceptable only if required to complete the block correctly
 4. Implement the block.
 5. Verify the smallest meaningful affected scope using the repository rules in `AGENTS.md`.
+   - If `.agents/skills/validate-fix-loop/SKILL.md` exists, follow it for the validation/fix loop and update `handoff/validation-report.md`.
 6. If verification fails because of block changes, fix issues that remain in scope or are a small required adjacent correction.
+   - Rerun the same validation target within the loop limit instead of broadening verification immediately.
 7. Summarize the result clearly.
 8. Overwrite `handoff/next-block.md` with the next-block handoff.
 9. Write a second archival copy of that same handoff into `handoff-history/` as a new file without overwriting prior history files.
@@ -38,6 +40,8 @@ description: Implement one bounded development block in this repository, verify 
 
 - Always attempt verification.
 - Follow `AGENTS.md` for verification scope and command selection.
+- When available, prefer the repo-local validation scripts through `.agents/skills/validate-fix-loop/SKILL.md`.
+- Keep the live validation artifact at `handoff/validation-report.md`.
 - Record exactly what was run and whether it passed, failed and was fixed, or could not be completed.
 
 ## Handoff Output
