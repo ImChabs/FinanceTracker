@@ -610,6 +610,7 @@ class DashboardScreenTest {
             composeRule.onNode(
                 hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
             ).assert(hasClickAction())
+                .assert(hasClickLabel("Open recurring entry details"))
                 .assert(hasStateDescription("Overdue payment"))
                 .assert(hasUpcomingPaymentUrgency("OVERDUE"))
                 .performClick()

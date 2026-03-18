@@ -17,6 +17,7 @@
     <string name="dashboard_saved_entry_edit_action_label">Edit saved recurring entry</string>
     <string name="dashboard_add_recurring_entry">Add recurring entry</string>
     <string name="dashboard_add_recurring_entry_action_label">Add a new recurring entry</string>
+    <string name="dashboard_upcoming_payment_open_action_label">Open recurring entry details</string>
     <string name="dashboard_loading">Loading recurring overview...</string>
     <string name="dashboard_loading_accessibility_state">Dashboard content is loading</string>
     <string name="dashboard_summary_active_entries">Across %1$d active entries</string>

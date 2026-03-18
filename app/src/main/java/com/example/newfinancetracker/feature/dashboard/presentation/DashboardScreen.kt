@@ -248,6 +248,7 @@ private fun UpcomingPaymentRow(
     payment: DashboardUpcomingPaymentItem,
     onClick: () -> Unit
 ) {
+    val openActionLabel = stringResource(R.string.dashboard_upcoming_payment_open_action_label)
     val urgency = payment.relativeDueContext.toUpcomingPaymentUrgency()
     val urgencyStyle = rememberUpcomingPaymentUrgencyStyle(urgency = urgency)
     val urgencyAccessibilityDescription = urgency.toAccessibilityDescription()
@@ -256,7 +257,10 @@ private fun UpcomingPaymentRow(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(
+                onClickLabel = openActionLabel,
+                onClick = onClick
+            )
             .semantics(mergeDescendants = true) {
                 contentDescription = accessibilitySummary
                 upcomingPaymentUrgency = urgency.name
