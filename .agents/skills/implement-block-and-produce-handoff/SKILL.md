@@ -5,69 +5,50 @@ description: Implement one bounded development block in this repository, verify 
 
 # Implement Block and Produce Handoff
 
-## Source of Truth
-
-- Read `AGENTS.md` first.
-- Treat `AGENTS.md` as the authoritative guide for repository conventions, architecture, structure, naming, state handling, and verification expectations.
-- Read `docs/blueprint.md` if it exists before defining block scope.
-- Use `docs/blueprint.md` as the source of truth for product goal, feature roadmap, high-level application scope, and long-term project direction.
-- Read `handoff/next-block.md` if it exists.
-- Use `handoff/next-block.md` as the source of truth for the immediate next block.
-- Treat `handoff/next-block.md` as the only live source of truth for the immediate next block unless the user explicitly says otherwise.
-- Treat `handoff-history/` as archival only and never as the source of truth unless the user explicitly requests historical lookup.
-- Resolve the current block by combining repository rules from `AGENTS.md`, product direction from `docs/blueprint.md`, and immediate scope from `handoff/next-block.md`.
-- Do not restate or override repository rules from `AGENTS.md`.
-
-## Goal
+## Purpose
 
 - Complete exactly one development block per chat/thread.
 - Implement only the requested scope, plus small adjacent fixes required to make the block correct and verifiable.
 - Leave a concise handoff for the next block at `handoff/next-block.md`.
 - Archive each completed handoff as a separate history file under `handoff-history/`.
 
+## Inputs
+
+- Read `AGENTS.md` first and follow it as the repository source of truth for durable conventions and verification expectations.
+- Read `docs/blueprint.md` if it exists when product direction or scope boundaries matter.
+- Read `handoff/next-block.md` if it exists and use it as the live source of truth for the immediate next block unless the user explicitly says otherwise.
+- Use `handoff-history/` only for archival or historical lookup when it is actually relevant.
+
 ## Workflow
 
 1. Read `AGENTS.md`.
-2. Read the current block request, `docs/blueprint.md` if it exists, and `handoff/next-block.md` if it exists.
-3. Define the exact block scope before editing by combining repository rules, product direction, and immediate next-block guidance:
+2. Read the current user request, `docs/blueprint.md` if it exists, and `handoff/next-block.md` if it exists.
+3. Define the exact block scope before editing:
    - What must change
    - What can stay untouched
    - What adjacent fix is acceptable only if required to complete the block correctly
 4. Implement the block.
-5. Verify the smallest meaningful affected scope.
-6. If verification fails because of block changes, fix issues that are in scope or are a small required adjacent correction.
+5. Verify the smallest meaningful affected scope using the repository rules in `AGENTS.md`.
+   - If `.agents/skills/validate-fix-loop/SKILL.md` exists, follow it for the validation/fix loop and update `handoff/validation-report.md`.
+6. If verification fails because of block changes, fix issues that remain in scope or are a small required adjacent correction.
+   - Rerun the same validation target within the loop limit instead of broadening verification immediately.
 7. Summarize the result clearly.
 8. Overwrite `handoff/next-block.md` with the next-block handoff.
 9. Write a second archival copy of that same handoff into `handoff-history/` as a new file without overwriting prior history files.
 
-## Scope Control
-
-- Stay inside the requested block.
-- Avoid unrelated refactors, cleanup, file moves, or architecture churn.
-- Prefer the correct solution over the superficially smallest diff.
-- Make a small adjacent change only when needed to finish the block cleanly or resolve a problem introduced by the block work.
-- Call out any limitation, deferred work, or unresolved issue explicitly.
-
 ## Verification
 
 - Always attempt verification.
-- Choose the smallest meaningful verification for the affected module, target, or task.
-- Avoid `clean`, full builds, and expensive project-wide verification unless clearly needed.
-- If verification cannot be completed, say so explicitly.
-- If verification exposes issues caused by the block changes, attempt to fix them when they remain within scope or are a small required adjacent fix.
+- Follow `AGENTS.md` for verification scope and command selection.
+- When available, prefer the repo-local validation scripts through `.agents/skills/validate-fix-loop/SKILL.md`.
+- Keep the live validation artifact at `handoff/validation-report.md`.
+- Record exactly what was run and whether it passed, failed and was fixed, or could not be completed.
 
-## Handoff Files
+## Handoff Output
 
 - Create the `handoff` directory first if it does not already exist.
 - Create the `handoff-history` directory first if it does not already exist.
 - Always create or overwrite `handoff/next-block.md`.
-- `handoff/next-block.md` remains the only live source of truth for the immediate next block.
-- Always write a second archival copy of the generated handoff into `handoff-history/`.
-- `handoff-history/` is archival only and must not be used as the source of truth unless explicitly requested.
-- Never overwrite or delete prior files in `handoff-history/`.
-- Use one file per archived handoff, not a cumulative history file.
-- Name archive files with a zero-padded numeric prefix followed by a short slug, for example `001-block-01-project-foundation-and-app-shell.md`.
-- Continue numbering from the highest existing numeric prefix already present in `handoff-history/`.
 - Keep it short, specific, and actionable.
 - Include an `Execution Recommendation` section in every generated handoff.
 - Include:
@@ -83,8 +64,15 @@ description: Implement one bounded development block in this repository, verify 
   - `- Rationale: <brief explanation>`
 - Base the next block on the current state of the codebase after your changes, not on the original request.
 
-## Execution Recommendation Guidance
+## Archive Rule
 
+- Always write a second archival copy of the generated handoff into `handoff-history/`.
+- Never overwrite or delete prior files in `handoff-history/`.
+- Use one file per archived handoff, not a cumulative history file.
+- Name each archive file as `<archive-sequence>-<block-slug>.md`.
+- `archive-sequence` is the zero-padded numeric prefix and must increase from the highest existing prefix in `handoff-history/`.
+- `block-slug` should describe the block and may include the block number if useful, but the numeric archive sequence is the uniqueness source going forward.
+- Example: `026-block-27-dashboard-filter-bar.md`.
 - Every generated handoff must include an `Execution Recommendation` section.
 - Allowed values are exactly:
   - `low`
@@ -99,23 +87,3 @@ description: Implement one bounded development block in this repository, verify 
   - `medium`: default for normal implementation blocks
   - `high`: meaningful ambiguity, multi-layer coordination, or harder verification
   - `xhigh`: hardest cases with deep coordination, difficult debugging, or major tradeoffs
-
-## Final Response Format
-
-Use this structure at the end of the block:
-
-## Block summary
-- State what was implemented and what was intentionally left out.
-
-## Files created/modified
-- List the files changed for this block using repository-relative paths.
-
-## Verification performed
-- State exactly what was run.
-- State whether it passed, failed and was fixed, or could not be completed.
-
-## Known limitations / pending items
-- List remaining risks, follow-ups, or blockers if any.
-
-## Handoff file written
-- Confirm that `handoff/next-block.md` was written or overwritten.

@@ -363,7 +363,9 @@ class DashboardScreenTest {
                                     currencyCode = "USD",
                                     nextPaymentDate = "2026-03-14",
                                     category = "Housing",
-                                    relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                                    relativeDueContext = DashboardRelativeDueContext.Overdue(
+                                        daysOverdue = 1
+                                    )
                                 ),
                                 DashboardUpcomingPaymentItem(
                                     id = 2L,
@@ -381,7 +383,9 @@ class DashboardScreenTest {
                                     currencyCode = "USD",
                                     nextPaymentDate = "2026-03-17",
                                     category = "Streaming",
-                                    relativeDueContext = DashboardRelativeDueContext.DueInDays(daysUntilDue = 2)
+                                    relativeDueContext = DashboardRelativeDueContext.DueInDays(
+                                        daysUntilDue = 2
+                                    )
                                 )
                             )
                         ),
@@ -441,7 +445,9 @@ class DashboardScreenTest {
                                     currencyCode = "USD",
                                     nextPaymentDate = "2026-03-14",
                                     category = "Housing",
-                                    relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                                    relativeDueContext = DashboardRelativeDueContext.Overdue(
+                                        daysOverdue = 1
+                                    )
                                 ),
                                 DashboardUpcomingPaymentItem(
                                     id = 2L,
@@ -459,7 +465,9 @@ class DashboardScreenTest {
                                     currencyCode = "USD",
                                     nextPaymentDate = "2026-03-17",
                                     category = "Streaming",
-                                    relativeDueContext = DashboardRelativeDueContext.DueInDays(daysUntilDue = 2)
+                                    relativeDueContext = DashboardRelativeDueContext.DueInDays(
+                                        daysUntilDue = 2
+                                    )
                                 )
                             )
                         ),
@@ -502,7 +510,11 @@ class DashboardScreenTest {
                             recurringEntries = listOf(
                                 savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
                                 savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
-                                savedEntry(id = 3L, name = "Legacy import", nextPaymentDate = "17/03/2026")
+                                savedEntry(
+                                    id = 3L,
+                                    name = "Legacy import",
+                                    nextPaymentDate = "17/03/2026"
+                                )
                             ),
                             upcomingPayments = listOf(
                                 DashboardUpcomingPaymentItem(
@@ -512,7 +524,9 @@ class DashboardScreenTest {
                                     currencyCode = "USD",
                                     nextPaymentDate = "2026-03-14",
                                     category = "Housing",
-                                    relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                                    relativeDueContext = DashboardRelativeDueContext.Overdue(
+                                        daysOverdue = 1
+                                    )
                                 ),
                                 DashboardUpcomingPaymentItem(
                                     id = 2L,
@@ -581,7 +595,9 @@ class DashboardScreenTest {
                                     currencyCode = "USD",
                                     nextPaymentDate = "2026-03-14",
                                     category = "Housing",
-                                    relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
+                                    relativeDueContext = DashboardRelativeDueContext.Overdue(
+                                        daysOverdue = 1
+                                    )
                                 )
                             )
                         ),
@@ -721,12 +737,66 @@ class DashboardScreenTest {
             ).assertCountEquals(1)
             composeRule.onNodeWithText("Retry currency sync")
                 .assert(hasClickAction())
+                .assert(hasClickLabel("Retry currency metadata sync"))
                 .performClick()
 
             assertEquals(listOf(DashboardAction.RetryCurrencyMetadataClicked), actions)
         } finally {
             Locale.setDefault(previousLocale)
         }
+    }
+
+    @Test
+    fun dashboardScreen_emptyStateCardExposesMergedAccessibilitySummary() {
+        composeRule.setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = DashboardState(
+                        isLoading = false
+                    ),
+                    onAction = {},
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+
+        composeRule.onAllNodes(
+            hasContentDescription(
+                "No recurring entries yet. Add your first subscription or recurring expense to start tracking upcoming payments and monthly totals."
+            )
+        ).assertCountEquals(1)
+    }
+
+    @Test
+    fun dashboardScreen_upcomingPaymentsEmptyStateExposesMergedAccessibilitySummary() {
+        composeRule.setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = DashboardState(
+                        isLoading = false,
+                        monthlyRecurringTotal = 15.99,
+                        activeEntryCount = 1,
+                        savedEntryCount = 1,
+                        recurringEntries = listOf(
+                            savedEntry(
+                                id = 1L,
+                                name = "Streaming",
+                                nextPaymentDate = "2026-03-31"
+                            )
+                        ),
+                        upcomingPayments = emptyList()
+                    ),
+                    onAction = {},
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+
+        composeRule.onAllNodes(
+            hasContentDescription(
+                "No upcoming payments yet. Add or update an entry with a next payment date to populate this section."
+            )
+        ).assertCountEquals(1)
     }
 
     private fun savedEntry(
