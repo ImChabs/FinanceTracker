@@ -737,6 +737,7 @@ class DashboardScreenTest {
             ).assertCountEquals(1)
             composeRule.onNodeWithText("Retry currency sync")
                 .assert(hasClickAction())
+                .assert(hasClickLabel("Retry currency metadata sync"))
                 .performClick()
 
             assertEquals(listOf(DashboardAction.RetryCurrencyMetadataClicked), actions)

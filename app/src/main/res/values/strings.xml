@@ -26,6 +26,7 @@
     <string name="dashboard_currency_status_refreshing">Refreshing currency metadata...</string>
     <string name="dashboard_currency_status_refreshing_cached">Refreshing currency metadata. Cached metadata count: %1$d</string>
     <string name="dashboard_currency_retry">Retry currency sync</string>
+    <string name="dashboard_currency_retry_action_label">Retry currency metadata sync</string>
     <string name="dashboard_currency_retry_success">Currency metadata refreshed.</string>
     <string name="dashboard_currency_retry_failure">Currency metadata refresh failed. Please try again.</string>
     <string name="dashboard_empty_title">No recurring entries yet</string>

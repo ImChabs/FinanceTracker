@@ -33,6 +33,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -442,6 +443,7 @@ private fun CurrencyMetadataStatus(
     onAction: (DashboardAction) -> Unit
 ) {
     val statusText = currencyMetadataStatusText(state = state) ?: return
+    val retryActionLabel = stringResource(R.string.dashboard_currency_retry_action_label)
 
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -456,7 +458,10 @@ private fun CurrencyMetadataStatus(
             !state.isCurrencySyncInProgress
         ) {
             TextButton(
-                onClick = { onAction(DashboardAction.RetryCurrencyMetadataClicked) }
+                onClick = { onAction(DashboardAction.RetryCurrencyMetadataClicked) },
+                modifier = Modifier.semantics {
+                    onClick(label = retryActionLabel, action = null)
+                }
             ) {
                 Text(text = stringResource(R.string.dashboard_currency_retry))
             }
