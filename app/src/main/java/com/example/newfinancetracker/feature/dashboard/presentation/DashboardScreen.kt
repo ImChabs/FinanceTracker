@@ -186,9 +186,15 @@ private fun UpcomingPaymentsSection(
             color = MaterialTheme.colorScheme.onBackground
         )
         if (state.upcomingPayments.isEmpty()) {
+            val accessibilitySummary = stringResource(R.string.dashboard_upcoming_empty)
+
             Card(
                 shape = RoundedCornerShape(24.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = accessibilitySummary
+                    }
             ) {
                 Text(
                     text = stringResource(R.string.dashboard_upcoming_empty),
