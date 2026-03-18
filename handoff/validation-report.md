@@ -1,16 +1,16 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 29 - Dashboard Add Entry Button Accessibility Action Label
-- Scope: Add a clearer accessibility action label to the dashboard add-recurring-entry button, preserve its visible text and dispatch behavior, and cover it with a focused dashboard Compose instrumentation test.
+- Name: BLOCK 30 - Dashboard Loading State Accessibility Summary
+- Scope: Add a localized loading-state accessibility description to the dashboard loading branch without changing its visible copy, and cover it with one focused dashboard Compose instrumentation test.
 
 Loop 1
-- Validation target: `connectedDebugAndroidTest` for `DashboardScreenTest.dashboardScreen_addRecurringEntryButtonExposesAccessibilityActionLabelAndDispatchesAction`
-- Underlying command: `.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.example.newfinancetracker.feature.dashboard.presentation.DashboardScreenTest#dashboardScreen_addRecurringEntryButtonExposesAccessibilityActionLabelAndDispatchesAction'`
-- Why this target: The block changes dashboard accessibility semantics and adds Compose instrumentation coverage, so one targeted Android UI test is the smallest meaningful verification.
+- Validation target: `connectedDebugAndroidTest` for `DashboardScreenTest.dashboardScreen_loadingStateExposesAccessibilityStateDescriptionWithoutChangingVisibleCopy`
+- Underlying command: `.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.example.newfinancetracker.feature.dashboard.presentation.DashboardScreenTest#dashboardScreen_loadingStateExposesAccessibilityStateDescriptionWithoutChangingVisibleCopy'`
+- Why this target: The block only changes dashboard loading-state accessibility semantics and adds matching Compose instrumentation coverage, so a single targeted Android UI test is the smallest meaningful verification.
 - Final status: passed
 - Attempts used: 1/3
-- Run 1: Passed. `.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.example.newfinancetracker.feature.dashboard.presentation.DashboardScreenTest#dashboardScreen_addRecurringEntryButtonExposesAccessibilityActionLabelAndDispatchesAction'`
+- Run 1: Passed. `.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=com.example.newfinancetracker.feature.dashboard.presentation.DashboardScreenTest#dashboardScreen_loadingStateExposesAccessibilityStateDescriptionWithoutChangingVisibleCopy'`
 - Run 2: Not used.
 - Run 3: Not used.
 - In-scope fixes applied: None recorded.

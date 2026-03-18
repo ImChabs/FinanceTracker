@@ -139,10 +139,16 @@ fun DashboardScreen(
 
             when {
                 state.isLoading -> {
+                    val loadingStateDescription =
+                        stringResource(R.string.dashboard_loading_accessibility_state)
+
                     Text(
                         text = stringResource(R.string.dashboard_loading),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f),
+                        modifier = Modifier.semantics {
+                            stateDescription = loadingStateDescription
+                        }
                     )
                 }
 

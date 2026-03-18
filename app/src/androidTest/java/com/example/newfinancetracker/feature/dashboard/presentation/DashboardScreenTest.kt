@@ -821,6 +821,22 @@ class DashboardScreenTest {
         assertEquals(listOf(DashboardAction.AddRecurringEntryClicked), actions)
     }
 
+    @Test
+    fun dashboardScreen_loadingStateExposesAccessibilityStateDescriptionWithoutChangingVisibleCopy() {
+        composeRule.setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = DashboardState(isLoading = true),
+                    onAction = {},
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Loading recurring overview...")
+            .assert(hasStateDescription("Dashboard content is loading"))
+    }
+
     private fun savedEntry(
         id: Long,
         name: String,
