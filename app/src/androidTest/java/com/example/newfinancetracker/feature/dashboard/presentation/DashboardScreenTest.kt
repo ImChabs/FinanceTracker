@@ -687,11 +687,9 @@ class DashboardScreenTest {
                 }
             }
 
-            composeRule.onAllNodes(
-                hasContentDescription(
-                    "Monthly recurring total. 29.98. Across 2 active entries. Includes 2 active currencies. Total is an unconverted aggregate. Currency metadata cache size: 2"
-                )
-            ).assertCountEquals(1)
+            composeRule.assertSingleStaticDashboardCard(
+                "Monthly recurring total. 29.98. Across 2 active entries. Includes 2 active currencies. Total is an unconverted aggregate. Currency metadata cache size: 2"
+            )
         } finally {
             Locale.setDefault(previousLocale)
         }
@@ -722,11 +720,9 @@ class DashboardScreenTest {
                 }
             }
 
-            composeRule.onAllNodes(
-                hasContentDescription(
-                    "Monthly recurring total. \$15.99. Across 1 active entries. Currency metadata unavailable right now."
-                )
-            ).assertCountEquals(1)
+            composeRule.assertSingleStaticDashboardCard(
+                "Monthly recurring total. \$15.99. Across 1 active entries. Currency metadata unavailable right now."
+            )
             composeRule.onNodeWithText("Retry currency sync")
                 .assert(hasClickAction())
                 .assert(hasClickLabel("Retry currency metadata sync"))
@@ -752,11 +748,9 @@ class DashboardScreenTest {
             }
         }
 
-        composeRule.onAllNodes(
-            hasContentDescription(
-                "No recurring entries yet. Add your first subscription or recurring expense to start tracking upcoming payments and monthly totals."
-            )
-        ).assertCountEquals(1)
+        composeRule.assertSingleStaticDashboardCard(
+            "No recurring entries yet. Add your first subscription or recurring expense to start tracking upcoming payments and monthly totals."
+        )
     }
 
     @Test
@@ -784,11 +778,9 @@ class DashboardScreenTest {
             }
         }
 
-        composeRule.onAllNodes(
-            hasContentDescription(
-                "No upcoming payments yet. Add or update an entry with a next payment date to populate this section."
-            )
-        ).assertCountEquals(1)
+        composeRule.assertSingleStaticDashboardCard(
+            "No upcoming payments yet. Add or update an entry with a next payment date to populate this section."
+        )
     }
 
     @Test
@@ -868,6 +860,17 @@ class DashboardScreenTest {
     }
 
     private fun ComposeContentTestRule.savedRecurringEntryCard(
+        contentDescription: String
+    ): SemanticsNodeInteraction = onNode(hasContentDescription(contentDescription))
+
+    private fun ComposeContentTestRule.assertSingleStaticDashboardCard(
+        contentDescription: String
+    ): SemanticsNodeInteraction {
+        onAllNodes(hasContentDescription(contentDescription)).assertCountEquals(1)
+        return staticDashboardCard(contentDescription)
+    }
+
+    private fun ComposeContentTestRule.staticDashboardCard(
         contentDescription: String
     ): SemanticsNodeInteraction = onNode(hasContentDescription(contentDescription))
 
