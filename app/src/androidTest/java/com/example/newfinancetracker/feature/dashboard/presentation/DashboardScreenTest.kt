@@ -3,8 +3,10 @@ package com.example.newfinancetracker.feature.dashboard.presentation
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasStateDescription
@@ -395,23 +397,14 @@ class DashboardScreenTest {
                 }
             }
 
-            composeRule.onAllNodes(
-                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
-            ).assertCountEquals(1)
-            composeRule.onNode(
-                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
+            composeRule.assertSingleUpcomingPaymentRow(
+                "Rent, \$20.00, Mar 14, 2026, Housing, USD"
             ).assert(hasUpcomingPaymentUrgency("OVERDUE"))
-            composeRule.onAllNodes(
-                hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
-            ).assertCountEquals(1)
-            composeRule.onNode(
-                hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
+            composeRule.assertSingleUpcomingPaymentRow(
+                "Water, \$10.00, Mar 15, 2026, Utilities, USD"
             ).assert(hasUpcomingPaymentUrgency("DUE_TODAY"))
-            composeRule.onAllNodes(
-                hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
-            ).assertCountEquals(1)
-            composeRule.onNode(
-                hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
+            composeRule.assertSingleUpcomingPaymentRow(
+                "Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days"
             ).assert(hasUpcomingPaymentUrgency("STANDARD"))
         } finally {
             Locale.setDefault(previousLocale)
@@ -477,14 +470,14 @@ class DashboardScreenTest {
                 }
             }
 
-            composeRule.onNode(
-                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
+            composeRule.upcomingPaymentRow(
+                "Rent, \$20.00, Mar 14, 2026, Housing, USD"
             ).assert(hasStateDescription("Overdue payment"))
-            composeRule.onNode(
-                hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
+            composeRule.upcomingPaymentRow(
+                "Water, \$10.00, Mar 15, 2026, Utilities, USD"
             ).assert(hasStateDescription("Payment due today"))
-            composeRule.onNode(
-                hasContentDescription("Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days")
+            composeRule.upcomingPaymentRow(
+                "Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days"
             ).assert(
                 SemanticsMatcher.keyNotDefined(androidx.compose.ui.semantics.SemanticsProperties.StateDescription)
             )
@@ -554,15 +547,15 @@ class DashboardScreenTest {
                 }
             }
 
-            composeRule.onAllNodes(
-                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
-            ).assertCountEquals(1)
-            composeRule.onAllNodes(
-                hasContentDescription("Water, \$10.00, Mar 15, 2026, Utilities, USD")
-            ).assertCountEquals(1)
-            composeRule.onAllNodes(
-                hasContentDescription("Legacy import, \$15.00, 17/03/2026, Other, USD, Due tomorrow")
-            ).assertCountEquals(1)
+            composeRule.assertSingleUpcomingPaymentRow(
+                "Rent, \$20.00, Mar 14, 2026, Housing, USD"
+            )
+            composeRule.assertSingleUpcomingPaymentRow(
+                "Water, \$10.00, Mar 15, 2026, Utilities, USD"
+            )
+            composeRule.assertSingleUpcomingPaymentRow(
+                "Legacy import, \$15.00, 17/03/2026, Other, USD, Due tomorrow"
+            )
         } finally {
             Locale.setDefault(previousLocale)
         }
@@ -607,8 +600,8 @@ class DashboardScreenTest {
                 }
             }
 
-            composeRule.onNode(
-                hasContentDescription("Rent, \$20.00, Mar 14, 2026, Housing, USD")
+            composeRule.assertSingleUpcomingPaymentRow(
+                "Rent, \$20.00, Mar 14, 2026, Housing, USD"
             ).assert(hasClickAction())
                 .assert(hasClickLabel("Open recurring entry details"))
                 .assert(hasStateDescription("Overdue payment"))
@@ -658,10 +651,8 @@ class DashboardScreenTest {
                 }
             }
 
-            composeRule.onNode(
-                hasContentDescription(
-                    "Netflix, \$15.99, Subscription, Monthly, Mar 31, 2026, Streaming, USD, Active, Notes: Family plan"
-                )
+            composeRule.assertSingleSavedRecurringEntryCard(
+                "Netflix, \$15.99, Subscription, Monthly, Mar 31, 2026, Streaming, USD, Active, Notes: Family plan"
             ).assert(hasClickAction())
                 .assert(hasStateDescription("Active"))
                 .assert(hasClickLabel("Edit saved recurring entry"))
@@ -857,6 +848,28 @@ class DashboardScreenTest {
 
     private fun hasUpcomingPaymentUrgency(value: String): SemanticsMatcher =
         SemanticsMatcher.expectValue(UpcomingPaymentUrgencySemanticsKey, value)
+
+    private fun ComposeContentTestRule.assertSingleUpcomingPaymentRow(
+        contentDescription: String
+    ): SemanticsNodeInteraction {
+        onAllNodes(hasContentDescription(contentDescription)).assertCountEquals(1)
+        return upcomingPaymentRow(contentDescription)
+    }
+
+    private fun ComposeContentTestRule.upcomingPaymentRow(
+        contentDescription: String
+    ): SemanticsNodeInteraction = onNode(hasContentDescription(contentDescription))
+
+    private fun ComposeContentTestRule.assertSingleSavedRecurringEntryCard(
+        contentDescription: String
+    ): SemanticsNodeInteraction {
+        onAllNodes(hasContentDescription(contentDescription)).assertCountEquals(1)
+        return savedRecurringEntryCard(contentDescription)
+    }
+
+    private fun ComposeContentTestRule.savedRecurringEntryCard(
+        contentDescription: String
+    ): SemanticsNodeInteraction = onNode(hasContentDescription(contentDescription))
 
     private fun hasClickLabel(label: String): SemanticsMatcher =
         SemanticsMatcher("has click label $label") { semanticsNode ->
