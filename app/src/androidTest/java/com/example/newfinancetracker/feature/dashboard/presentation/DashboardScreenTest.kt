@@ -30,56 +30,42 @@ class DashboardScreenTest {
 
     @Test
     fun dashboardScreen_showsCurrencyCodesInSavedCardsAndUpcomingPayments() {
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(
-                        isLoading = false,
-                        monthlyRecurringTotal = 29.98,
-                        activeEntryCount = 1,
-                        savedEntryCount = 2,
-                        recurringEntries = listOf(
-                            DashboardRecurringEntryItem(
-                                id = 1L,
-                                name = "Design tool",
-                                amount = 19.99,
-                                currencyCode = "EUR",
-                                billingFrequency = BillingFrequency.MONTHLY,
-                                nextPaymentDate = "2026-03-25",
-                                category = "Software",
-                                type = RecurringEntryType.SUBSCRIPTION,
-                                isActive = false,
-                                notes = null
-                            ),
-                            DashboardRecurringEntryItem(
-                                id = 2L,
-                                name = "Phone plan",
-                                amount = 9.99,
-                                currencyCode = "JPY",
-                                billingFrequency = BillingFrequency.MONTHLY,
-                                nextPaymentDate = "2026-03-18",
-                                category = "Utilities",
-                                type = RecurringEntryType.RECURRING_EXPENSE,
-                                isActive = true,
-                                notes = null
-                            )
-                        ),
-                        upcomingPayments = listOf(
-                            DashboardUpcomingPaymentItem(
-                                id = 2L,
-                                name = "Phone plan",
-                                amount = 9.99,
-                                currencyCode = "JPY",
-                                nextPaymentDate = "2026-03-18",
-                                category = "Utilities"
-                            )
-                        )
+        composeRule.setDashboardContent(
+            state = DashboardState(
+                isLoading = false,
+                monthlyRecurringTotal = 29.98,
+                activeEntryCount = 1,
+                savedEntryCount = 2,
+                recurringEntries = listOf(
+                    savedEntry(
+                        id = 1L,
+                        name = "Design tool",
+                        amount = 19.99,
+                        currencyCode = "EUR",
+                        nextPaymentDate = "2026-03-25",
+                        category = "Software",
+                        type = RecurringEntryType.SUBSCRIPTION,
+                        isActive = false
                     ),
-                    onAction = {},
-                    snackbarHostState = remember { SnackbarHostState() }
+                    savedEntry(
+                        id = 2L,
+                        name = "Phone plan",
+                        amount = 9.99,
+                        currencyCode = "JPY",
+                        nextPaymentDate = "2026-03-18"
+                    )
+                ),
+                upcomingPayments = listOf(
+                    upcomingPayment(
+                        id = 2L,
+                        name = "Phone plan",
+                        amount = 9.99,
+                        currencyCode = "JPY",
+                        nextPaymentDate = "2026-03-18"
+                    )
                 )
-            }
-        }
+            )
+        )
 
         composeRule.onAllNodesWithText("Currency: EUR").assertCountEquals(1)
         composeRule.onAllNodesWithText("Currency: JPY").assertCountEquals(2)
@@ -87,58 +73,42 @@ class DashboardScreenTest {
 
     @Test
     fun dashboardScreen_formatsSavedAndUpcomingAmountsWithEntryCurrency() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
+        withLocale(Locale.US) {
+            composeRule.setDashboardContent(
+                state = DashboardState(
                             isLoading = false,
                             monthlyRecurringTotal = 130.48,
                             activeEntryCount = 2,
                             savedEntryCount = 3,
                             recurringEntries = listOf(
-                                DashboardRecurringEntryItem(
+                                savedEntry(
                                     id = 1L,
                                     name = "Design tool",
                                     amount = 19.99,
                                     currencyCode = "EUR",
-                                    billingFrequency = BillingFrequency.MONTHLY,
                                     nextPaymentDate = "2026-03-25",
                                     category = "Software",
-                                    type = RecurringEntryType.SUBSCRIPTION,
-                                    isActive = true,
-                                    notes = null
+                                    type = RecurringEntryType.SUBSCRIPTION
                                 ),
-                                DashboardRecurringEntryItem(
+                                savedEntry(
                                     id = 2L,
                                     name = "Phone plan",
                                     amount = 1200.0,
                                     currencyCode = "JPY",
-                                    billingFrequency = BillingFrequency.MONTHLY,
-                                    nextPaymentDate = "2026-03-18",
-                                    category = "Utilities",
-                                    type = RecurringEntryType.RECURRING_EXPENSE,
-                                    isActive = true,
-                                    notes = null
+                                    nextPaymentDate = "2026-03-18"
                                 ),
-                                DashboardRecurringEntryItem(
+                                savedEntry(
                                     id = 3L,
                                     name = "Legacy import",
                                     amount = 42.5,
                                     currencyCode = "US",
-                                    billingFrequency = BillingFrequency.MONTHLY,
                                     nextPaymentDate = "2026-03-28",
                                     category = "Other",
-                                    type = RecurringEntryType.RECURRING_EXPENSE,
-                                    isActive = false,
-                                    notes = null
+                                    isActive = false
                                 )
                             ),
                             upcomingPayments = listOf(
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 1L,
                                     name = "Design tool",
                                     amount = 19.99,
@@ -146,208 +116,142 @@ class DashboardScreenTest {
                                     nextPaymentDate = "2026-03-25",
                                     category = "Software"
                                 ),
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 2L,
                                     name = "Phone plan",
                                     amount = 1200.0,
                                     currencyCode = "JPY",
-                                    nextPaymentDate = "2026-03-18",
-                                    category = "Utilities"
+                                    nextPaymentDate = "2026-03-18"
                                 )
                             )
-                        ),
-                        onAction = {},
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+                )
+            )
 
             composeRule.onAllNodesWithText("€19.99").assertCountEquals(2)
             composeRule.onAllNodesWithText("¥1,200").assertCountEquals(2)
             composeRule.onAllNodesWithText("US 42.50").assertCountEquals(1)
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_showsMixedCurrencySummaryMessageWhenActiveCurrenciesDiffer() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
+        withLocale(Locale.US) {
+            composeRule.setDashboardContent(
+                state = DashboardState(
                             isLoading = false,
                             monthlyRecurringTotal = 29.98,
                             activeEntryCount = 2,
                             activeCurrencyCodes = setOf("EUR", "JPY"),
                             savedEntryCount = 2,
                             recurringEntries = listOf(
-                                DashboardRecurringEntryItem(
+                                savedEntry(
                                     id = 1L,
                                     name = "Design tool",
                                     amount = 19.99,
                                     currencyCode = "EUR",
-                                    billingFrequency = BillingFrequency.MONTHLY,
                                     nextPaymentDate = "2026-03-25",
                                     category = "Software",
-                                    type = RecurringEntryType.SUBSCRIPTION,
-                                    isActive = true,
-                                    notes = null
+                                    type = RecurringEntryType.SUBSCRIPTION
                                 ),
-                                DashboardRecurringEntryItem(
+                                savedEntry(
                                     id = 2L,
                                     name = "Phone plan",
                                     amount = 9.99,
                                     currencyCode = "JPY",
-                                    billingFrequency = BillingFrequency.MONTHLY,
-                                    nextPaymentDate = "2026-03-18",
-                                    category = "Utilities",
-                                    type = RecurringEntryType.RECURRING_EXPENSE,
-                                    isActive = true,
-                                    notes = null
+                                    nextPaymentDate = "2026-03-18"
                                 )
                             )
-                        ),
-                        onAction = {},
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+                )
+            )
 
             composeRule.onAllNodesWithText("29.98").assertCountEquals(1)
             composeRule.onAllNodesWithText("\$29.98").assertCountEquals(0)
             composeRule.onAllNodesWithText(
                 "Includes 2 active currencies. Total is an unconverted aggregate."
             ).assertCountEquals(1)
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_hidesMixedCurrencySummaryMessageWhenActiveCurrencyIsSingular() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
+        withLocale(Locale.US) {
+            composeRule.setDashboardContent(
+                state = DashboardState(
                             isLoading = false,
                             monthlyRecurringTotal = 19.99,
                             activeEntryCount = 1,
                             activeCurrencyCodes = setOf("EUR"),
                             savedEntryCount = 1,
                             recurringEntries = listOf(
-                                DashboardRecurringEntryItem(
+                                savedEntry(
                                     id = 1L,
                                     name = "Design tool",
                                     amount = 19.99,
                                     currencyCode = "EUR",
-                                    billingFrequency = BillingFrequency.MONTHLY,
                                     nextPaymentDate = "2026-03-25",
                                     category = "Software",
-                                    type = RecurringEntryType.SUBSCRIPTION,
-                                    isActive = true,
-                                    notes = null
+                                    type = RecurringEntryType.SUBSCRIPTION
                                 )
                             )
-                        ),
-                        onAction = {},
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+                )
+            )
 
             composeRule.onAllNodesWithText("\$19.99").assertCountEquals(1)
             composeRule.onAllNodesWithText(
                 "Includes 2 active currencies. Total is an unconverted aggregate."
             ).assertCountEquals(0)
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_formatsDisplayedDatesAndFallsBackForLegacyValues() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
+        withLocale(Locale.US) {
+            composeRule.setDashboardContent(
+                state = DashboardState(
                             isLoading = false,
                             monthlyRecurringTotal = 35.98,
                             activeEntryCount = 2,
                             savedEntryCount = 2,
                             recurringEntries = listOf(
-                                DashboardRecurringEntryItem(
+                                savedEntry(
                                     id = 1L,
                                     name = "Music",
                                     amount = 15.99,
-                                    currencyCode = "USD",
-                                    billingFrequency = BillingFrequency.MONTHLY,
                                     nextPaymentDate = "2026-03-31",
                                     category = "Streaming",
-                                    type = RecurringEntryType.SUBSCRIPTION,
-                                    isActive = true,
-                                    notes = null
+                                    type = RecurringEntryType.SUBSCRIPTION
                                 ),
-                                DashboardRecurringEntryItem(
+                                savedEntry(
                                     id = 2L,
                                     name = "Legacy import",
                                     amount = 20.0,
-                                    currencyCode = "USD",
-                                    billingFrequency = BillingFrequency.MONTHLY,
                                     nextPaymentDate = "31/03/2026",
-                                    category = "Other",
-                                    type = RecurringEntryType.RECURRING_EXPENSE,
-                                    isActive = true,
-                                    notes = null
+                                    category = "Other"
                                 )
                             ),
                             upcomingPayments = listOf(
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 1L,
                                     name = "Music",
                                     amount = 15.99,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-31",
                                     category = "Streaming"
                                 )
                             )
-                        ),
-                        onAction = {},
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+                )
+            )
 
             composeRule.onAllNodesWithText("Mar 31, 2026 - Streaming").assertCountEquals(1)
             composeRule.onAllNodesWithText("Next payment Mar 31, 2026").assertCountEquals(1)
             composeRule.onAllNodesWithText("Next payment 31/03/2026").assertCountEquals(1)
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_marksOverdueAndDueTodayPaymentsAsUrgent() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
+        withLocale(Locale.US) {
+            composeRule.setDashboardContent(
+                state = DashboardState(
                             isLoading = false,
                             monthlyRecurringTotal = 40.0,
                             activeEntryCount = 3,
@@ -358,31 +262,27 @@ class DashboardScreenTest {
                                 savedEntry(id = 3L, name = "Music", nextPaymentDate = "2026-03-17")
                             ),
                             upcomingPayments = listOf(
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 1L,
                                     name = "Rent",
                                     amount = 20.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-14",
                                     category = "Housing",
                                     relativeDueContext = DashboardRelativeDueContext.Overdue(
                                         daysOverdue = 1
                                     )
                                 ),
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 2L,
                                     name = "Water",
                                     amount = 10.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-15",
-                                    category = "Utilities",
                                     relativeDueContext = DashboardRelativeDueContext.DueToday
                                 ),
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 3L,
                                     name = "Music",
                                     amount = 10.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-17",
                                     category = "Streaming",
                                     relativeDueContext = DashboardRelativeDueContext.DueInDays(
@@ -390,12 +290,8 @@ class DashboardScreenTest {
                                     )
                                 )
                             )
-                        ),
-                        onAction = {},
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+                )
+            )
 
             composeRule.assertSingleUpcomingPaymentRow(
                 "Rent, \$20.00, Mar 14, 2026, Housing, USD"
@@ -406,21 +302,14 @@ class DashboardScreenTest {
             composeRule.assertSingleUpcomingPaymentRow(
                 "Music, \$10.00, Mar 17, 2026, Streaming, USD, Due in 2 days"
             ).assert(hasUpcomingPaymentUrgency("STANDARD"))
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_exposesUrgencyAccessibilityDescriptionsOnlyForUrgentUpcomingPayments() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
+        withLocale(Locale.US) {
+            composeRule.setDashboardContent(
+                state = DashboardState(
                             isLoading = false,
                             monthlyRecurringTotal = 40.0,
                             activeEntryCount = 3,
@@ -431,31 +320,27 @@ class DashboardScreenTest {
                                 savedEntry(id = 3L, name = "Music", nextPaymentDate = "2026-03-17")
                             ),
                             upcomingPayments = listOf(
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 1L,
                                     name = "Rent",
                                     amount = 20.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-14",
                                     category = "Housing",
                                     relativeDueContext = DashboardRelativeDueContext.Overdue(
                                         daysOverdue = 1
                                     )
                                 ),
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 2L,
                                     name = "Water",
                                     amount = 10.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-15",
-                                    category = "Utilities",
                                     relativeDueContext = DashboardRelativeDueContext.DueToday
                                 ),
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 3L,
                                     name = "Music",
                                     amount = 10.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-17",
                                     category = "Streaming",
                                     relativeDueContext = DashboardRelativeDueContext.DueInDays(
@@ -463,12 +348,8 @@ class DashboardScreenTest {
                                     )
                                 )
                             )
-                        ),
-                        onAction = {},
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+                )
+            )
 
             composeRule.upcomingPaymentRow(
                 "Rent, \$20.00, Mar 14, 2026, Housing, USD"
@@ -481,21 +362,14 @@ class DashboardScreenTest {
             ).assert(
                 SemanticsMatcher.keyNotDefined(androidx.compose.ui.semantics.SemanticsProperties.StateDescription)
             )
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_exposesUpcomingPaymentAccessibilitySummariesWithoutDuplicatingUrgentDueText() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
+        withLocale(Locale.US) {
+            composeRule.setDashboardContent(
+                state = DashboardState(
                             isLoading = false,
                             monthlyRecurringTotal = 45.0,
                             activeEntryCount = 3,
@@ -510,42 +384,34 @@ class DashboardScreenTest {
                                 )
                             ),
                             upcomingPayments = listOf(
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 1L,
                                     name = "Rent",
                                     amount = 20.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-14",
                                     category = "Housing",
                                     relativeDueContext = DashboardRelativeDueContext.Overdue(
                                         daysOverdue = 1
                                     )
                                 ),
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 2L,
                                     name = "Water",
                                     amount = 10.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "2026-03-15",
-                                    category = "Utilities",
                                     relativeDueContext = DashboardRelativeDueContext.DueToday
                                 ),
-                                DashboardUpcomingPaymentItem(
+                                upcomingPayment(
                                     id = 3L,
                                     name = "Legacy import",
                                     amount = 15.0,
-                                    currencyCode = "USD",
                                     nextPaymentDate = "17/03/2026",
                                     category = "Other",
                                     relativeDueContext = DashboardRelativeDueContext.DueTomorrow
                                 )
                             )
-                        ),
-                        onAction = {},
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+                )
+            )
 
             composeRule.assertSingleUpcomingPaymentRow(
                 "Rent, \$20.00, Mar 14, 2026, Housing, USD"
@@ -556,49 +422,38 @@ class DashboardScreenTest {
             composeRule.assertSingleUpcomingPaymentRow(
                 "Legacy import, \$15.00, 17/03/2026, Other, USD, Due tomorrow"
             )
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_upcomingPaymentRowClickDispatchesRecurringEntryActionAndKeepsUrgentSemantics() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
+        withLocale(Locale.US) {
             val actions = mutableListOf<DashboardAction>()
 
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
-                            isLoading = false,
-                            monthlyRecurringTotal = 20.0,
-                            activeEntryCount = 1,
-                            savedEntryCount = 1,
-                            recurringEntries = listOf(
-                                savedEntry(id = 7L, name = "Rent", nextPaymentDate = "2026-03-14")
-                            ),
-                            upcomingPayments = listOf(
-                                DashboardUpcomingPaymentItem(
-                                    id = 7L,
-                                    name = "Rent",
-                                    amount = 20.0,
-                                    currencyCode = "USD",
-                                    nextPaymentDate = "2026-03-14",
-                                    category = "Housing",
-                                    relativeDueContext = DashboardRelativeDueContext.Overdue(
-                                        daysOverdue = 1
-                                    )
-                                )
+            composeRule.setDashboardContent(
+                state = DashboardState(
+                    isLoading = false,
+                    monthlyRecurringTotal = 20.0,
+                    activeEntryCount = 1,
+                    savedEntryCount = 1,
+                    recurringEntries = listOf(
+                        savedEntry(id = 7L, name = "Rent", nextPaymentDate = "2026-03-14")
+                    ),
+                    upcomingPayments = listOf(
+                        upcomingPayment(
+                            id = 7L,
+                            name = "Rent",
+                            amount = 20.0,
+                            nextPaymentDate = "2026-03-14",
+                            category = "Housing",
+                            relativeDueContext = DashboardRelativeDueContext.Overdue(
+                                daysOverdue = 1
                             )
-                        ),
-                        onAction = actions::add,
-                        snackbarHostState = remember { SnackbarHostState() }
+                        )
                     )
-                }
-            }
+                ),
+                onAction = actions::add
+            )
 
             composeRule.assertSingleUpcomingPaymentRow(
                 "Rent, \$20.00, Mar 14, 2026, Housing, USD"
@@ -609,47 +464,34 @@ class DashboardScreenTest {
                 .performClick()
 
             assertEquals(listOf(DashboardAction.RecurringEntryClicked(7L)), actions)
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_savedRecurringEntryCardExposesMergedAccessibilitySummaryAndClickAction() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
+        withLocale(Locale.US) {
             val actions = mutableListOf<DashboardAction>()
 
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
-                            isLoading = false,
-                            monthlyRecurringTotal = 15.99,
-                            activeEntryCount = 1,
-                            savedEntryCount = 1,
-                            recurringEntries = listOf(
-                                DashboardRecurringEntryItem(
-                                    id = 5L,
-                                    name = "Netflix",
-                                    amount = 15.99,
-                                    currencyCode = "USD",
-                                    billingFrequency = BillingFrequency.MONTHLY,
-                                    nextPaymentDate = "2026-03-31",
-                                    category = "Streaming",
-                                    type = RecurringEntryType.SUBSCRIPTION,
-                                    isActive = true,
-                                    notes = "Family plan"
-                                )
-                            )
-                        ),
-                        onAction = actions::add,
-                        snackbarHostState = remember { SnackbarHostState() }
+            composeRule.setDashboardContent(
+                state = DashboardState(
+                    isLoading = false,
+                    monthlyRecurringTotal = 15.99,
+                    activeEntryCount = 1,
+                    savedEntryCount = 1,
+                    recurringEntries = listOf(
+                        savedEntry(
+                            id = 5L,
+                            name = "Netflix",
+                            amount = 15.99,
+                            nextPaymentDate = "2026-03-31",
+                            category = "Streaming",
+                            type = RecurringEntryType.SUBSCRIPTION,
+                            notes = "Family plan"
+                        )
                     )
-                }
-            }
+                ),
+                onAction = actions::add
+            )
 
             composeRule.assertSingleSavedRecurringEntryCard(
                 "Netflix, \$15.99, Subscription, Monthly, Mar 31, 2026, Streaming, USD, Active, Notes: Family plan"
@@ -659,66 +501,45 @@ class DashboardScreenTest {
                 .performClick()
 
             assertEquals(listOf(DashboardAction.RecurringEntryClicked(5L)), actions)
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_summaryCardExposesMergedAccessibilitySummary() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
-                            isLoading = false,
-                            monthlyRecurringTotal = 29.98,
-                            activeEntryCount = 2,
-                            activeCurrencyCodes = setOf("EUR", "JPY"),
-                            savedEntryCount = 2,
-                            currencyMetadataCount = 2
-                        ),
-                        onAction = {},
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+        withLocale(Locale.US) {
+            composeRule.setDashboardContent(
+                state = DashboardState(
+                    isLoading = false,
+                    monthlyRecurringTotal = 29.98,
+                    activeEntryCount = 2,
+                    activeCurrencyCodes = setOf("EUR", "JPY"),
+                    savedEntryCount = 2,
+                    currencyMetadataCount = 2
+                )
+            )
 
             composeRule.assertSingleStaticDashboardCard(
                 "Monthly recurring total. 29.98. Across 2 active entries. Includes 2 active currencies. Total is an unconverted aggregate. Currency metadata cache size: 2"
             )
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_summaryCardKeepsRetryActionAvailableWhenCurrencyMetadataFails() {
-        val previousLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-
-        try {
+        withLocale(Locale.US) {
             val actions = mutableListOf<DashboardAction>()
 
-            composeRule.setContent {
-                FinanceTrackerTheme {
-                    DashboardScreen(
-                        state = DashboardState(
-                            isLoading = false,
-                            monthlyRecurringTotal = 15.99,
-                            activeEntryCount = 1,
-                            activeCurrencyCodes = setOf("USD"),
-                            savedEntryCount = 1,
-                            hasCurrencySyncFailure = true
-                        ),
-                        onAction = actions::add,
-                        snackbarHostState = remember { SnackbarHostState() }
-                    )
-                }
-            }
+            composeRule.setDashboardContent(
+                state = DashboardState(
+                    isLoading = false,
+                    monthlyRecurringTotal = 15.99,
+                    activeEntryCount = 1,
+                    activeCurrencyCodes = setOf("USD"),
+                    savedEntryCount = 1,
+                    hasCurrencySyncFailure = true
+                ),
+                onAction = actions::add
+            )
 
             composeRule.assertSingleStaticDashboardCard(
                 "Monthly recurring total. \$15.99. Across 1 active entries. Currency metadata unavailable right now."
@@ -729,24 +550,16 @@ class DashboardScreenTest {
                 .performClick()
 
             assertEquals(listOf(DashboardAction.RetryCurrencyMetadataClicked), actions)
-        } finally {
-            Locale.setDefault(previousLocale)
         }
     }
 
     @Test
     fun dashboardScreen_emptyStateCardExposesMergedAccessibilitySummary() {
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(
-                        isLoading = false
-                    ),
-                    onAction = {},
-                    snackbarHostState = remember { SnackbarHostState() }
-                )
-            }
-        }
+        composeRule.setDashboardContent(
+            state = DashboardState(
+                isLoading = false
+            )
+        )
 
         composeRule.assertSingleStaticDashboardCard(
             "No recurring entries yet. Add your first subscription or recurring expense to start tracking upcoming payments and monthly totals."
@@ -755,28 +568,22 @@ class DashboardScreenTest {
 
     @Test
     fun dashboardScreen_upcomingPaymentsEmptyStateExposesMergedAccessibilitySummary() {
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(
-                        isLoading = false,
-                        monthlyRecurringTotal = 15.99,
-                        activeEntryCount = 1,
-                        savedEntryCount = 1,
-                        recurringEntries = listOf(
-                            savedEntry(
-                                id = 1L,
-                                name = "Streaming",
-                                nextPaymentDate = "2026-03-31"
-                            )
-                        ),
-                        upcomingPayments = emptyList()
-                    ),
-                    onAction = {},
-                    snackbarHostState = remember { SnackbarHostState() }
-                )
-            }
-        }
+        composeRule.setDashboardContent(
+            state = DashboardState(
+                isLoading = false,
+                monthlyRecurringTotal = 15.99,
+                activeEntryCount = 1,
+                savedEntryCount = 1,
+                recurringEntries = listOf(
+                    savedEntry(
+                        id = 1L,
+                        name = "Streaming",
+                        nextPaymentDate = "2026-03-31"
+                    )
+                ),
+                upcomingPayments = emptyList()
+            )
+        )
 
         composeRule.assertSingleStaticDashboardCard(
             "No upcoming payments yet. Add or update an entry with a next payment date to populate this section."
@@ -787,15 +594,10 @@ class DashboardScreenTest {
     fun dashboardScreen_addRecurringEntryButtonExposesAccessibilityActionLabelAndDispatchesAction() {
         val actions = mutableListOf<DashboardAction>()
 
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(isLoading = false),
-                    onAction = actions::add,
-                    snackbarHostState = remember { SnackbarHostState() }
-                )
-            }
-        }
+        composeRule.setDashboardContent(
+            state = DashboardState(isLoading = false),
+            onAction = actions::add
+        )
 
         composeRule.onNodeWithText("Add recurring entry")
             .assert(hasClickAction())
@@ -807,15 +609,9 @@ class DashboardScreenTest {
 
     @Test
     fun dashboardScreen_loadingStateExposesAccessibilityStateDescriptionWithoutChangingVisibleCopy() {
-        composeRule.setContent {
-            FinanceTrackerTheme {
-                DashboardScreen(
-                    state = DashboardState(isLoading = true),
-                    onAction = {},
-                    snackbarHostState = remember { SnackbarHostState() }
-                )
-            }
-        }
+        composeRule.setDashboardContent(
+            state = DashboardState(isLoading = true)
+        )
 
         composeRule.onNodeWithText("Loading recurring overview...")
             .assert(hasStateDescription("Dashboard content is loading"))
@@ -824,19 +620,69 @@ class DashboardScreenTest {
     private fun savedEntry(
         id: Long,
         name: String,
-        nextPaymentDate: String
+        nextPaymentDate: String,
+        amount: Double = 10.0,
+        currencyCode: String = "USD",
+        category: String = "Utilities",
+        type: RecurringEntryType = RecurringEntryType.RECURRING_EXPENSE,
+        isActive: Boolean = true,
+        notes: String? = null
     ): DashboardRecurringEntryItem = DashboardRecurringEntryItem(
         id = id,
         name = name,
-        amount = 10.0,
-        currencyCode = "USD",
+        amount = amount,
+        currencyCode = currencyCode,
         billingFrequency = BillingFrequency.MONTHLY,
         nextPaymentDate = nextPaymentDate,
-        category = "Utilities",
-        type = RecurringEntryType.RECURRING_EXPENSE,
-        isActive = true,
-        notes = null
+        category = category,
+        type = type,
+        isActive = isActive,
+        notes = notes
     )
+
+    private fun upcomingPayment(
+        id: Long,
+        name: String,
+        amount: Double = 10.0,
+        currencyCode: String = "USD",
+        nextPaymentDate: String,
+        category: String = "Utilities",
+        relativeDueContext: DashboardRelativeDueContext = DashboardRelativeDueContext.None
+    ): DashboardUpcomingPaymentItem = DashboardUpcomingPaymentItem(
+        id = id,
+        name = name,
+        amount = amount,
+        currencyCode = currencyCode,
+        nextPaymentDate = nextPaymentDate,
+        category = category,
+        relativeDueContext = relativeDueContext
+    )
+
+    private fun ComposeContentTestRule.setDashboardContent(
+        state: DashboardState,
+        onAction: (DashboardAction) -> Unit = {}
+    ) {
+        setContent {
+            FinanceTrackerTheme {
+                DashboardScreen(
+                    state = state,
+                    onAction = onAction,
+                    snackbarHostState = remember { SnackbarHostState() }
+                )
+            }
+        }
+    }
+
+    private fun withLocale(locale: Locale, block: () -> Unit) {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(locale)
+
+        try {
+            block()
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
 
     private fun hasUpcomingPaymentUrgency(value: String): SemanticsMatcher =
         SemanticsMatcher.expectValue(UpcomingPaymentUrgencySemanticsKey, value)
