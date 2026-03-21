@@ -1,20 +1,20 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 47 - Visual Refresh Foundation
-- Scope: Refresh the shared Material 3 design foundation and apply it to the dashboard and recurring-entry form shells without changing product behavior.
+- Name: BLOCK 50 - Dashboard State Surface Test Coverage
+- Scope: Add targeted dashboard Compose UI tests for loading, empty, and upcoming-empty state surfaces without changing dashboard behavior.
 
 Loop 1
-- Validation target: `.\scripts\validate-compile.ps1`
-- Underlying command: `:app:compileDebugKotlin`
-- Why this target: The block only changes theme, Compose presentation, and shared UI shell styling, so targeted debug Kotlin compile coverage is the smallest meaningful verification.
-- Final status: passed_after_fix
+- Validation target: `bash scripts/validate-compile.sh :app:compileDebugAndroidTestKotlin`
+- Underlying command: `./gradlew :app:compileDebugAndroidTestKotlin`
+- Why this target: The block only changes `androidTest` Compose UI coverage, so targeted androidTest compile validation is the smallest meaningful verification.
+- Final status: not_run
 - Attempts used: 2/3
-- Run 1: Failed before Gradle started because local PowerShell execution policy blocked loading `scripts/validate-compile.ps1` (`PSSecurityException` for an unsigned script).
-- Run 2: Passed after rerunning the same repo validation script via `powershell -ExecutionPolicy Bypass -File .\scripts\validate-compile.ps1`; `:app:compileDebugKotlin` completed successfully.
+- Run 1: Could not start Gradle because the wrapper attempted to open `/home/ruyebran/.gradle/.../gradle-9.4.1-bin.zip.lck`, which is outside the writable sandbox and returned `FileNotFoundException (Permission denied)`.
+- Run 2: Could not complete after rerunning with `GRADLE_USER_HOME=/tmp/gradle-home` because the wrapper then needed to download `gradle-9.4.1-bin.zip`, and network access is blocked in this environment (`java.net.SocketException: Operation not permitted`).
 - Run 3: Not used.
-- In-scope fixes applied: No code changes were required for validation; the only adjustment was rerunning the same repo validation script with a one-time execution-policy bypass so PowerShell could start it.
-- Outstanding issues: Compile completed successfully. Existing `hiltViewModel` deprecation warnings remain in `DashboardScreen.kt` and `RecurringEntryEditScreen.kt`, but they were pre-existing and are outside this UI-only block.
+- In-scope fixes applied: Reran the same validation target with a writable local `GRADLE_USER_HOME` to separate sandbox cache access from code issues.
+- Outstanding issues: Targeted androidTest compile verification could not be completed in this sandbox because the required Gradle distribution is unavailable locally and cannot be downloaded.
 
 Loop 2
 - Validation target: <optional second validation script>

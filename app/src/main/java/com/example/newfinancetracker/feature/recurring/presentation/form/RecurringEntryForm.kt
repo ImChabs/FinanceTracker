@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -21,6 +23,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -34,8 +37,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import com.example.newfinancetracker.R
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerComponentDefaults
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerSpacing
@@ -268,7 +273,10 @@ fun RecurringEntryFormScreen(
                     Text(text = saveLabel)
                 }
 
-                destructiveAction?.invoke()
+                destructiveAction?.let {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    it()
+                }
             }
         }
     }
@@ -298,12 +306,13 @@ fun RecurringEntryDeleteButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    TextButton(
+    OutlinedButton(
         onClick = onClick,
         enabled = enabled,
-        colors = ButtonDefaults.textButtonColors(
+        colors = ButtonDefaults.outlinedButtonColors(
             contentColor = MaterialTheme.colorScheme.error
         ),
+        border = FinanceTrackerComponentDefaults.destructiveButtonBorder(),
         modifier = modifier.fillMaxWidth()
     ) {
         Text(text = label)
@@ -322,19 +331,49 @@ private fun CurrencySelectionField(
         ?: RecurringEntryCurrencyOption(code = selectedCurrencyCode)
 
     Box(modifier = modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = formatRecurringEntryCurrencyOption(selectedOption),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(text = stringResource(R.string.recurring_create_currency_label)) },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Box(
+        Card(
+            colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
+            shape = MaterialTheme.shapes.large,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .clickable { isExpanded = true }
-        )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.item),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(FinanceTrackerSpacing.cardPadding)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = stringResource(R.string.recurring_create_currency_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = selectedOption.code,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = selectedOption.displayName
+                            ?: stringResource(R.string.recurring_create_currency_supporting),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.recurring_create_currency_change),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
 
         DropdownMenu(
             expanded = isExpanded,
@@ -342,7 +381,24 @@ private fun CurrencySelectionField(
         ) {
             currencyOptions.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(text = formatRecurringEntryCurrencyOption(option)) },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = option.code,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            option.displayName?.let { displayName ->
+                                Text(
+                                    text = displayName,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    },
                     onClick = {
                         onCurrencySelected(option.code)
                         isExpanded = false
@@ -360,16 +416,21 @@ private fun <T> SelectionChipRow(
     labelFor: @Composable (T) -> String,
     onSelected: (T) -> Unit
 ) {
-    Row(
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact),
+        verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact),
         modifier = Modifier.fillMaxWidth()
     ) {
         options.forEach { option ->
             FilterChip(
                 selected = option == selectedOption,
                 onClick = { onSelected(option) },
+                colors = FinanceTrackerComponentDefaults.formSelectionChipColors(),
                 label = {
-                    Text(text = labelFor(option))
+                    Text(
+                        text = labelFor(option),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             )
         }

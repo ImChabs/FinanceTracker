@@ -4,6 +4,8 @@
 /.idea/*
 !/.idea/codeStyles/
 !/.idea/runConfigurations/
+/.idea/
+/.vscode/
 .kotlin/
 .DS_Store
 /build

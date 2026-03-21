@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,8 +27,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.SemanticsPropertyKey
@@ -37,7 +38,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.newfinancetracker.R
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerComponentDefaults
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerSpacing
@@ -51,10 +52,11 @@ fun DashboardScreenRoot(
     onRecurringEntryClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val viewModel: DashboardViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
+    val currencyRetrySuccessMessage = stringResource(R.string.dashboard_currency_retry_success)
+    val retryFailureMessage = stringResource(R.string.dashboard_currency_retry_failure)
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -63,12 +65,12 @@ fun DashboardScreenRoot(
                 is DashboardEffect.NavigateToRecurringEntryEdit -> onRecurringEntryClick(effect.entryId)
                 DashboardEffect.CurrencyMetadataRetrySucceeded -> {
                     snackbarHostState.showSnackbar(
-                        message = context.getString(R.string.dashboard_currency_retry_success)
+                        message = currencyRetrySuccessMessage
                     )
                 }
                 DashboardEffect.CurrencyMetadataRetryFailed -> {
                     snackbarHostState.showSnackbar(
-                        message = context.getString(R.string.dashboard_currency_retry_failure)
+                        message = retryFailureMessage
                     )
                 }
             }
@@ -148,17 +150,7 @@ fun DashboardScreen(
 
             when {
                 state.isLoading -> {
-                    val loadingStateDescription =
-                        stringResource(R.string.dashboard_loading_accessibility_state)
-
-                    Text(
-                        text = stringResource(R.string.dashboard_loading),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f),
-                        modifier = Modifier.semantics {
-                            stateDescription = loadingStateDescription
-                        }
-                    )
+                    LoadingStateCard()
                 }
 
                 state.isEmpty -> {
@@ -208,24 +200,9 @@ private fun UpcomingPaymentsSection(
             color = MaterialTheme.colorScheme.onBackground
         )
         if (state.upcomingPayments.isEmpty()) {
-            val accessibilitySummary = stringResource(R.string.dashboard_upcoming_empty)
-
-            Card(
-                colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
-                shape = MaterialTheme.shapes.large,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics(mergeDescendants = true) {
-                        contentDescription = accessibilitySummary
-                    }
-            ) {
-                Text(
-                    text = stringResource(R.string.dashboard_upcoming_empty),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(FinanceTrackerSpacing.cardPadding)
-                )
-            }
+            DashboardStateMessageCard(
+                body = stringResource(R.string.dashboard_upcoming_empty)
+            )
         } else {
             Card(
                 colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
@@ -549,32 +526,63 @@ private fun List<String>.joinToAccessibilitySummary(): String = buildString {
 }
 
 @Composable
+private fun LoadingStateCard() {
+    DashboardStateMessageCard(
+        body = stringResource(R.string.dashboard_loading),
+        stateDescription = stringResource(R.string.dashboard_loading_accessibility_state),
+        centered = true,
+        leadingContent = {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    )
+}
+
+@Composable
 private fun EmptyStateCard() {
-    val accessibilitySummary = listOf(
-        stringResource(R.string.dashboard_empty_title),
-        stringResource(R.string.dashboard_empty_body)
-    ).joinToAccessibilitySummary()
+    DashboardStateMessageCard(
+        title = stringResource(R.string.dashboard_empty_title),
+        body = stringResource(R.string.dashboard_empty_body)
+    )
+}
+
+@Composable
+private fun DashboardStateMessageCard(
+    body: String,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+    stateDescription: String? = null,
+    centered: Boolean = false,
+    leadingContent: (@Composable () -> Unit)? = null
+) {
+    val accessibilitySummary = listOfNotNull(title, body).joinToAccessibilitySummary()
 
     Card(
         colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
-        shape = MaterialTheme.shapes.large,
-        modifier = Modifier
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
                 contentDescription = accessibilitySummary
+                stateDescription?.let { this.stateDescription = it }
             }
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact),
-            modifier = Modifier.padding(FinanceTrackerSpacing.cardPadding)
+            horizontalAlignment = if (centered) Alignment.CenterHorizontally else Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.item),
+            modifier = Modifier.padding(FinanceTrackerSpacing.heroCardPadding)
         ) {
+            leadingContent?.invoke()
+            title?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
             Text(
-                text = stringResource(R.string.dashboard_empty_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = stringResource(R.string.dashboard_empty_body),
+                text = body,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

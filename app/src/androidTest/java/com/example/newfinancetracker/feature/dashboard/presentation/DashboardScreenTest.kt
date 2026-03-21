@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.hasContentDescription
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
@@ -258,24 +260,32 @@ class DashboardScreenTest {
     }
 
     @Test
-    fun dashboardScreen_emptyStateCardExposesMergedAccessibilitySummary() {
+    fun dashboardScreen_emptyStateCardShowsRefreshedVisibleCopyAndMergedAccessibilitySummary() {
         composeRule.setDashboardContent(
             state = emptyStateDashboardState()
         )
 
+        composeRule.onNodeWithText("No recurring entries yet").assertExists()
+        composeRule.onNodeWithText(
+            "Add your first subscription or recurring expense to start seeing your monthly total and saved items here."
+        ).assertExists()
         composeRule.assertSingleStaticDashboardCard(
-            "No recurring entries yet. Add your first subscription or recurring expense to start tracking upcoming payments and monthly totals."
+            "No recurring entries yet. Add your first subscription or recurring expense to start seeing your monthly total and saved items here."
         )
     }
 
     @Test
-    fun dashboardScreen_upcomingPaymentsEmptyStateExposesMergedAccessibilitySummary() {
+    fun dashboardScreen_upcomingPaymentsEmptyStateShowsVisibleCopyAndMergedAccessibilitySummary() {
         composeRule.setDashboardContent(
             state = upcomingPaymentsEmptyStateDashboardState()
         )
 
+        composeRule.onNodeWithText("Upcoming payments").assertExists()
+        composeRule.onNodeWithText(
+            "No active upcoming payments yet. Active entries with a valid next payment date will appear here."
+        ).assertExists()
         composeRule.assertSingleStaticDashboardCard(
-            "No upcoming payments yet. Add or update an entry with a next payment date to populate this section."
+            "No active upcoming payments yet. Active entries with a valid next payment date will appear here."
         )
     }
 
@@ -297,13 +307,17 @@ class DashboardScreenTest {
     }
 
     @Test
-    fun dashboardScreen_loadingStateExposesAccessibilityStateDescriptionWithoutChangingVisibleCopy() {
+    fun dashboardScreen_loadingStateShowsVisibleIndicatorAndAccessibilitySurface() {
         composeRule.setDashboardContent(
             state = loadingDashboardState()
         )
 
-        composeRule.onNodeWithText("Loading recurring overview...")
+        composeRule.assertSingleStaticDashboardCard("Loading recurring overview...")
             .assert(hasStateDescription("Dashboard content is loading"))
+        composeRule.onNodeWithText("Loading recurring overview...").assertExists()
+        composeRule.onAllNodes(
+            SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
+        ).assertCountEquals(1)
     }
 
     private fun savedEntry(
