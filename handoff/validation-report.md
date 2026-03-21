@@ -1,20 +1,20 @@
 # Validation Report
 
 Current block
-- Name: Gradle Kotlin source sets warning cleanup
-- Scope: Remove the experimental `android.disallowKotlinSourceSets=false` flag because the repository does not customize Android Kotlin source sets, and verify the app still compiles with the targeted Kotlin compile task.
+- Name: BLOCK 44 - Dashboard Scenario Fixture Field Consolidation
+- Scope: Consolidate the duplicated saved-entry fixture fields in `DashboardScreenTest.kt` behind one file-local composed fixture payload while preserving the existing dashboard test helper call sites.
 
 Loop 1
 - Validation target: `scripts/validate-compile.ps1`
-- Underlying command: `.\\gradlew.bat :app:compileDebugKotlin`
-- Why this target: This is the smallest meaningful verification for a Gradle property change that can affect Android Kotlin source configuration and Android compile behavior.
-- Final status: passed
-- Attempts used: 1/3
-- Run 1: Passed. `powershell -ExecutionPolicy Bypass -File scripts/validate-compile.ps1` ran `.\\gradlew.bat :app:compileDebugKotlin` successfully after removing the property.
-- Run 2: Not used.
-- Run 3: Not used.
-- In-scope fixes applied: Removed `android.disallowKotlinSourceSets=false` from `gradle.properties` after confirming there is no `kotlin.sourceSets`, `android.sourceSets`, or related Android source set customization anywhere in the repository.
-- Outstanding issues: None recorded.
+- Underlying command: `./gradlew :app:compileDebugAndroidTestKotlin`
+- Why this target: The block changes only dashboard instrumentation test Kotlin code, so Android test compile is the smallest meaningful verification.
+- Final status: failed_unresolved
+- Attempts used: 2/3
+- Run 1: Failed before Gradle started because `pwsh` is not installed in this shell, so `scripts/validate-compile.ps1` could not be executed.
+- Run 2: Failed before Gradle started when invoking `cmd.exe /c gradlew.bat :app:compileDebugAndroidTestKotlin`; this WSL environment returned `WSL ERROR: UtilBindVsockAnyPort:307: socket failed 1`.
+- Run 3: Pending
+- In-scope fixes applied: None recorded.
+- Outstanding issues: Environment limits prevented the selected Android test compile target from running, so this block could not be verified in-session.
 
 Loop 2
 - Validation target: <optional second validation script>

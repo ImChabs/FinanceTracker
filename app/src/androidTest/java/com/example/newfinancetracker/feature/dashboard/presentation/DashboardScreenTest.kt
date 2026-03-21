@@ -74,8 +74,8 @@ class DashboardScreenTest {
                     monthlyRecurringTotal = 19.99,
                     activeEntryCount = 1,
                     activeCurrencyCodes = setOf("EUR"),
-                    recurringEntries = listOf(
-                        savedEntry(
+                    recurringEntries = savedEntryScenarioItems(
+                        SavedEntryScenarioFixture(
                             id = 1L,
                             name = "Design tool",
                             amount = 19.99,
@@ -368,11 +368,135 @@ class DashboardScreenTest {
         hasCurrencySyncFailure = hasCurrencySyncFailure
     )
 
-    private fun currencyCodeDashboardState() = dashboardState(
-        monthlyRecurringTotal = 29.98,
-        activeEntryCount = 1,
-        recurringEntries = listOf(
+    private data class SavedEntryScenarioFields(
+        val id: Long,
+        val name: String,
+        val amount: Double,
+        val currencyCode: String,
+        val nextPaymentDate: String,
+        val category: String,
+        val type: RecurringEntryType,
+        val isActive: Boolean,
+        val notes: String?
+    )
+
+    private data class UpcomingPaymentScenarioFixture(
+        val savedEntry: SavedEntryScenarioFields,
+        val relativeDueContext: DashboardRelativeDueContext = DashboardRelativeDueContext.None,
+        val includeUpcomingPayment: Boolean = true
+    ) {
+        constructor(
+            id: Long,
+            name: String,
+            amount: Double = 10.0,
+            currencyCode: String = "USD",
+            nextPaymentDate: String,
+            category: String = "Utilities",
+            type: RecurringEntryType = RecurringEntryType.RECURRING_EXPENSE,
+            isActive: Boolean = true,
+            notes: String? = null,
+            relativeDueContext: DashboardRelativeDueContext = DashboardRelativeDueContext.None,
+            includeUpcomingPayment: Boolean = true
+        ) : this(
+            savedEntry = SavedEntryScenarioFields(
+                id = id,
+                name = name,
+                amount = amount,
+                currencyCode = currencyCode,
+                nextPaymentDate = nextPaymentDate,
+                category = category,
+                type = type,
+                isActive = isActive,
+                notes = notes
+            ),
+            relativeDueContext = relativeDueContext,
+            includeUpcomingPayment = includeUpcomingPayment
+        )
+    }
+
+    private data class DashboardScenarioItems(
+        val recurringEntries: List<DashboardRecurringEntryItem>,
+        val upcomingPayments: List<DashboardUpcomingPaymentItem>
+    )
+
+    private data class SavedEntryScenarioFixture(
+        val savedEntry: SavedEntryScenarioFields
+    ) {
+        constructor(
+            id: Long,
+            name: String,
+            amount: Double = 10.0,
+            currencyCode: String = "USD",
+            nextPaymentDate: String,
+            category: String = "Utilities",
+            type: RecurringEntryType = RecurringEntryType.RECURRING_EXPENSE,
+            isActive: Boolean = true,
+            notes: String? = null
+        ) : this(
+            savedEntry = SavedEntryScenarioFields(
+                id = id,
+                name = name,
+                amount = amount,
+                currencyCode = currencyCode,
+                nextPaymentDate = nextPaymentDate,
+                category = category,
+                type = type,
+                isActive = isActive,
+                notes = notes
+            )
+        )
+    }
+
+    private fun savedEntryScenarioItems(
+        vararg fixtures: SavedEntryScenarioFixture
+    ): List<DashboardRecurringEntryItem> = fixtures.map { fixture ->
+        savedEntry(
+            id = fixture.savedEntry.id,
+            name = fixture.savedEntry.name,
+            amount = fixture.savedEntry.amount,
+            currencyCode = fixture.savedEntry.currencyCode,
+            nextPaymentDate = fixture.savedEntry.nextPaymentDate,
+            category = fixture.savedEntry.category,
+            type = fixture.savedEntry.type,
+            isActive = fixture.savedEntry.isActive,
+            notes = fixture.savedEntry.notes
+        )
+    }
+
+    private fun upcomingPaymentScenarioItems(
+        vararg fixtures: UpcomingPaymentScenarioFixture
+    ): DashboardScenarioItems = DashboardScenarioItems(
+        recurringEntries = fixtures.map { fixture ->
             savedEntry(
+                id = fixture.savedEntry.id,
+                name = fixture.savedEntry.name,
+                amount = fixture.savedEntry.amount,
+                currencyCode = fixture.savedEntry.currencyCode,
+                nextPaymentDate = fixture.savedEntry.nextPaymentDate,
+                category = fixture.savedEntry.category,
+                type = fixture.savedEntry.type,
+                isActive = fixture.savedEntry.isActive,
+                notes = fixture.savedEntry.notes
+            )
+        },
+        upcomingPayments = fixtures
+            .filter(UpcomingPaymentScenarioFixture::includeUpcomingPayment)
+            .map { fixture ->
+                upcomingPayment(
+                    id = fixture.savedEntry.id,
+                    name = fixture.savedEntry.name,
+                    amount = fixture.savedEntry.amount,
+                    currencyCode = fixture.savedEntry.currencyCode,
+                    nextPaymentDate = fixture.savedEntry.nextPaymentDate,
+                    category = fixture.savedEntry.category,
+                    relativeDueContext = fixture.relativeDueContext
+                )
+            }
+    )
+
+    private fun currencyCodeDashboardState(): DashboardState {
+        val items = upcomingPaymentScenarioItems(
+            UpcomingPaymentScenarioFixture(
                 id = 1L,
                 name = "Design tool",
                 amount = 19.99,
@@ -380,18 +504,10 @@ class DashboardScreenTest {
                 nextPaymentDate = "2026-03-25",
                 category = "Software",
                 type = RecurringEntryType.SUBSCRIPTION,
-                isActive = false
+                isActive = false,
+                includeUpcomingPayment = false
             ),
-            savedEntry(
-                id = 2L,
-                name = "Phone plan",
-                amount = 9.99,
-                currencyCode = "JPY",
-                nextPaymentDate = "2026-03-18"
-            )
-        ),
-        upcomingPayments = listOf(
-            upcomingPayment(
+            UpcomingPaymentScenarioFixture(
                 id = 2L,
                 name = "Phone plan",
                 amount = 9.99,
@@ -399,13 +515,18 @@ class DashboardScreenTest {
                 nextPaymentDate = "2026-03-18"
             )
         )
-    )
 
-    private fun amountFormattingDashboardState() = dashboardState(
-        monthlyRecurringTotal = 130.48,
-        activeEntryCount = 2,
-        recurringEntries = listOf(
-            savedEntry(
+        return dashboardState(
+            monthlyRecurringTotal = 29.98,
+            activeEntryCount = 1,
+            recurringEntries = items.recurringEntries,
+            upcomingPayments = items.upcomingPayments
+        )
+    }
+
+    private fun amountFormattingDashboardState(): DashboardState {
+        val items = upcomingPaymentScenarioItems(
+            UpcomingPaymentScenarioFixture(
                 id = 1L,
                 name = "Design tool",
                 amount = 19.99,
@@ -414,48 +535,39 @@ class DashboardScreenTest {
                 category = "Software",
                 type = RecurringEntryType.SUBSCRIPTION
             ),
-            savedEntry(
+            UpcomingPaymentScenarioFixture(
                 id = 2L,
                 name = "Phone plan",
                 amount = 1200.0,
                 currencyCode = "JPY",
                 nextPaymentDate = "2026-03-18"
             ),
-            savedEntry(
+            UpcomingPaymentScenarioFixture(
                 id = 3L,
                 name = "Legacy import",
                 amount = 42.5,
                 currencyCode = "US",
                 nextPaymentDate = "2026-03-28",
                 category = "Other",
-                isActive = false
-            )
-        ),
-        upcomingPayments = listOf(
-            upcomingPayment(
-                id = 1L,
-                name = "Design tool",
-                amount = 19.99,
-                currencyCode = "EUR",
-                nextPaymentDate = "2026-03-25",
-                category = "Software"
-            ),
-            upcomingPayment(
-                id = 2L,
-                name = "Phone plan",
-                amount = 1200.0,
-                currencyCode = "JPY",
-                nextPaymentDate = "2026-03-18"
+                isActive = false,
+                includeUpcomingPayment = false
             )
         )
-    )
+
+        return dashboardState(
+            monthlyRecurringTotal = 130.48,
+            activeEntryCount = 2,
+            recurringEntries = items.recurringEntries,
+            upcomingPayments = items.upcomingPayments
+        )
+    }
 
     private fun mixedCurrencySummaryDashboardState(
         monthlyRecurringTotal: Double = 29.98,
         activeEntryCount: Int = 2,
         activeCurrencyCodes: Set<String> = setOf("EUR", "JPY"),
-        recurringEntries: List<DashboardRecurringEntryItem> = listOf(
-            savedEntry(
+        recurringEntries: List<DashboardRecurringEntryItem> = savedEntryScenarioItems(
+            SavedEntryScenarioFixture(
                 id = 1L,
                 name = "Design tool",
                 amount = 19.99,
@@ -464,7 +576,7 @@ class DashboardScreenTest {
                 category = "Software",
                 type = RecurringEntryType.SUBSCRIPTION
             ),
-            savedEntry(
+            SavedEntryScenarioFixture(
                 id = 2L,
                 name = "Phone plan",
                 amount = 9.99,
@@ -479,11 +591,9 @@ class DashboardScreenTest {
         recurringEntries = recurringEntries
     )
 
-    private fun dateFormattingDashboardState() = dashboardState(
-        monthlyRecurringTotal = 35.98,
-        activeEntryCount = 2,
-        recurringEntries = listOf(
-            savedEntry(
+    private fun dateFormattingDashboardState(): DashboardState {
+        val items = upcomingPaymentScenarioItems(
+            UpcomingPaymentScenarioFixture(
                 id = 1L,
                 name = "Music",
                 amount = 15.99,
@@ -491,35 +601,27 @@ class DashboardScreenTest {
                 category = "Streaming",
                 type = RecurringEntryType.SUBSCRIPTION
             ),
-            savedEntry(
+            UpcomingPaymentScenarioFixture(
                 id = 2L,
                 name = "Legacy import",
                 amount = 20.0,
                 nextPaymentDate = "31/03/2026",
-                category = "Other"
-            )
-        ),
-        upcomingPayments = listOf(
-            upcomingPayment(
-                id = 1L,
-                name = "Music",
-                amount = 15.99,
-                nextPaymentDate = "2026-03-31",
-                category = "Streaming"
+                category = "Other",
+                includeUpcomingPayment = false
             )
         )
-    )
 
-    private fun upcomingPaymentUrgencyDashboardState() = dashboardState(
-        monthlyRecurringTotal = 40.0,
-        activeEntryCount = 3,
-        recurringEntries = listOf(
-            savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
-            savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
-            savedEntry(id = 3L, name = "Music", nextPaymentDate = "2026-03-17")
-        ),
-        upcomingPayments = listOf(
-            upcomingPayment(
+        return dashboardState(
+            monthlyRecurringTotal = 35.98,
+            activeEntryCount = 2,
+            recurringEntries = items.recurringEntries,
+            upcomingPayments = items.upcomingPayments
+        )
+    }
+
+    private fun upcomingPaymentUrgencyDashboardState(): DashboardState {
+        val items = upcomingPaymentScenarioItems(
+            UpcomingPaymentScenarioFixture(
                 id = 1L,
                 name = "Rent",
                 amount = 20.0,
@@ -527,14 +629,14 @@ class DashboardScreenTest {
                 category = "Housing",
                 relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
             ),
-            upcomingPayment(
+            UpcomingPaymentScenarioFixture(
                 id = 2L,
                 name = "Water",
                 amount = 10.0,
                 nextPaymentDate = "2026-03-15",
                 relativeDueContext = DashboardRelativeDueContext.DueToday
             ),
-            upcomingPayment(
+            UpcomingPaymentScenarioFixture(
                 id = 3L,
                 name = "Music",
                 amount = 10.0,
@@ -543,22 +645,18 @@ class DashboardScreenTest {
                 relativeDueContext = DashboardRelativeDueContext.DueInDays(daysUntilDue = 2)
             )
         )
-    )
 
-    private fun upcomingPaymentAccessibilitySummaryDashboardState() = dashboardState(
-        monthlyRecurringTotal = 45.0,
-        activeEntryCount = 3,
-        recurringEntries = listOf(
-            savedEntry(id = 1L, name = "Rent", nextPaymentDate = "2026-03-14"),
-            savedEntry(id = 2L, name = "Water", nextPaymentDate = "2026-03-15"),
-            savedEntry(
-                id = 3L,
-                name = "Legacy import",
-                nextPaymentDate = "17/03/2026"
-            )
-        ),
-        upcomingPayments = listOf(
-            upcomingPayment(
+        return dashboardState(
+            monthlyRecurringTotal = 40.0,
+            activeEntryCount = 3,
+            recurringEntries = items.recurringEntries,
+            upcomingPayments = items.upcomingPayments
+        )
+    }
+
+    private fun upcomingPaymentAccessibilitySummaryDashboardState(): DashboardState {
+        val items = upcomingPaymentScenarioItems(
+            UpcomingPaymentScenarioFixture(
                 id = 1L,
                 name = "Rent",
                 amount = 20.0,
@@ -566,14 +664,14 @@ class DashboardScreenTest {
                 category = "Housing",
                 relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
             ),
-            upcomingPayment(
+            UpcomingPaymentScenarioFixture(
                 id = 2L,
                 name = "Water",
                 amount = 10.0,
                 nextPaymentDate = "2026-03-15",
                 relativeDueContext = DashboardRelativeDueContext.DueToday
             ),
-            upcomingPayment(
+            UpcomingPaymentScenarioFixture(
                 id = 3L,
                 name = "Legacy import",
                 amount = 15.0,
@@ -582,16 +680,18 @@ class DashboardScreenTest {
                 relativeDueContext = DashboardRelativeDueContext.DueTomorrow
             )
         )
-    )
 
-    private fun singleUrgentUpcomingPaymentDashboardState() = dashboardState(
-        monthlyRecurringTotal = 20.0,
-        activeEntryCount = 1,
-        recurringEntries = listOf(
-            savedEntry(id = 7L, name = "Rent", nextPaymentDate = "2026-03-14")
-        ),
-        upcomingPayments = listOf(
-            upcomingPayment(
+        return dashboardState(
+            monthlyRecurringTotal = 45.0,
+            activeEntryCount = 3,
+            recurringEntries = items.recurringEntries,
+            upcomingPayments = items.upcomingPayments
+        )
+    }
+
+    private fun singleUrgentUpcomingPaymentDashboardState(): DashboardState {
+        val items = upcomingPaymentScenarioItems(
+            UpcomingPaymentScenarioFixture(
                 id = 7L,
                 name = "Rent",
                 amount = 20.0,
@@ -600,13 +700,20 @@ class DashboardScreenTest {
                 relativeDueContext = DashboardRelativeDueContext.Overdue(daysOverdue = 1)
             )
         )
-    )
+
+        return dashboardState(
+            monthlyRecurringTotal = 20.0,
+            activeEntryCount = 1,
+            recurringEntries = items.recurringEntries,
+            upcomingPayments = items.upcomingPayments
+        )
+    }
 
     private fun savedRecurringEntryCardDashboardState() = dashboardState(
         monthlyRecurringTotal = 15.99,
         activeEntryCount = 1,
-        recurringEntries = listOf(
-            savedEntry(
+        recurringEntries = savedEntryScenarioItems(
+            SavedEntryScenarioFixture(
                 id = 5L,
                 name = "Netflix",
                 amount = 15.99,
@@ -639,8 +746,8 @@ class DashboardScreenTest {
     private fun upcomingPaymentsEmptyStateDashboardState() = dashboardState(
         monthlyRecurringTotal = 15.99,
         activeEntryCount = 1,
-        recurringEntries = listOf(
-            savedEntry(
+        recurringEntries = savedEntryScenarioItems(
+            SavedEntryScenarioFixture(
                 id = 1L,
                 name = "Streaming",
                 nextPaymentDate = "2026-03-31"
