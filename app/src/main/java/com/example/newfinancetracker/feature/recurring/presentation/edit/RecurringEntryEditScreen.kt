@@ -22,9 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.newfinancetracker.R
+import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerComponentDefaults
+import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerSpacing
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryDeleteButton
 import com.example.newfinancetracker.feature.recurring.presentation.form.RecurringEntryFormScreen
@@ -132,7 +133,7 @@ fun RecurringEntryEditScreen(
                 onSaveClicked = { onAction(RecurringEntryEditAction.SaveClicked) },
                 destructiveAction = {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact)
                     ) {
                         if (state.hasDeleteError) {
                             Text(
@@ -162,14 +163,22 @@ private fun RecurringEntryEditLoadingScreen(
 ) {
     Scaffold(
         modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = FinanceTrackerComponentDefaults.topAppBarColors(),
                 title = {
-                    Text(text = stringResource(R.string.recurring_edit_title))
+                    Text(
+                        text = stringResource(R.string.recurring_edit_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
                 },
                 navigationIcon = {
                     TextButton(onClick = onNavigateBack) {
-                        Text(text = stringResource(R.string.recurring_edit_back))
+                        Text(
+                            text = stringResource(R.string.recurring_edit_back),
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 }
             )
@@ -177,11 +186,14 @@ private fun RecurringEntryEditLoadingScreen(
     ) { innerPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(
+                FinanceTrackerSpacing.item,
+                Alignment.CenterVertically
+            ),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = FinanceTrackerSpacing.heroCardPadding)
         ) {
             CircularProgressIndicator()
             Text(
@@ -200,25 +212,36 @@ private fun RecurringEntryEditMissingScreen(
 ) {
     Scaffold(
         modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = FinanceTrackerComponentDefaults.topAppBarColors(),
                 title = {
-                    Text(text = stringResource(R.string.recurring_edit_title))
+                    Text(
+                        text = stringResource(R.string.recurring_edit_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
                 },
                 navigationIcon = {
                     TextButton(onClick = onNavigateBack) {
-                        Text(text = stringResource(R.string.recurring_edit_back))
+                        Text(
+                            text = stringResource(R.string.recurring_edit_back),
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 }
             )
         }
     ) { innerPadding ->
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.item),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp, vertical = 24.dp)
+                .padding(
+                    horizontal = FinanceTrackerSpacing.screenHorizontal,
+                    vertical = FinanceTrackerSpacing.screenVertical
+                )
         ) {
             Text(
                 text = stringResource(R.string.recurring_edit_missing_title),

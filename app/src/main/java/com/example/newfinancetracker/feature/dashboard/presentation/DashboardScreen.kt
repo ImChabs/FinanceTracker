@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -38,9 +37,10 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.newfinancetracker.R
+import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerComponentDefaults
+import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerSpacing
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import com.example.newfinancetracker.feature.recurring.domain.model.BillingFrequency
 import com.example.newfinancetracker.feature.recurring.domain.model.RecurringEntryType
@@ -95,29 +95,36 @@ fun DashboardScreen(
 
     Scaffold(
         modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
     ) { innerPadding ->
         Column(
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+            verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.section),
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp, vertical = 24.dp)
+                .padding(
+                    horizontal = FinanceTrackerSpacing.screenHorizontal,
+                    vertical = FinanceTrackerSpacing.screenVertical
+                )
         ) {
-            Text(
-                text = stringResource(R.string.dashboard_title),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = stringResource(R.string.dashboard_headline),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.86f)
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact)
+            ) {
+                Text(
+                    text = stringResource(R.string.dashboard_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = stringResource(R.string.dashboard_headline),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.82f)
+                )
+            }
 
             SummaryCard(
                 state = state,
@@ -130,9 +137,11 @@ fun DashboardScreen(
 
             Button(
                 onClick = { onAction(DashboardAction.AddRecurringEntryClicked) },
-                modifier = Modifier.semantics {
-                    onClick(label = addRecurringEntryActionLabel, action = null)
-                }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        onClick(label = addRecurringEntryActionLabel, action = null)
+                    }
             ) {
                 Text(text = stringResource(R.string.dashboard_add_recurring_entry))
             }
@@ -191,7 +200,7 @@ private fun UpcomingPaymentsSection(
     onAction: (DashboardAction) -> Unit
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.item)
     ) {
         Text(
             text = stringResource(R.string.dashboard_upcoming_title),
@@ -202,7 +211,8 @@ private fun UpcomingPaymentsSection(
             val accessibilitySummary = stringResource(R.string.dashboard_upcoming_empty)
 
             Card(
-                shape = RoundedCornerShape(24.dp),
+                colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
+                shape = MaterialTheme.shapes.large,
                 modifier = Modifier
                     .fillMaxWidth()
                     .semantics(mergeDescendants = true) {
@@ -213,16 +223,20 @@ private fun UpcomingPaymentsSection(
                     text = stringResource(R.string.dashboard_upcoming_empty),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(20.dp)
+                    modifier = Modifier.padding(FinanceTrackerSpacing.cardPadding)
                 )
             }
         } else {
             Card(
-                shape = RoundedCornerShape(24.dp),
+                colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
+                shape = MaterialTheme.shapes.large,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(
+                        horizontal = FinanceTrackerSpacing.cardPadding,
+                        vertical = FinanceTrackerSpacing.compact
+                    )
                 ) {
                     state.upcomingPayments.forEachIndexed { index, payment ->
                         UpcomingPaymentRow(
@@ -270,17 +284,20 @@ private fun UpcomingPaymentRow(
             }
             .background(
                 color = urgencyStyle.containerColor,
-                shape = RoundedCornerShape(20.dp)
+                shape = MaterialTheme.shapes.medium
             )
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(
+                    horizontal = FinanceTrackerSpacing.item,
+                    vertical = FinanceTrackerSpacing.item
+                )
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact),
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
@@ -363,7 +380,7 @@ private fun SummaryCard(
     val accessibilitySummary = summaryCardAccessibilitySummary(state = state)
 
     Card(
-        shape = RoundedCornerShape(28.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
@@ -374,8 +391,8 @@ private fun SummaryCard(
             }
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(24.dp)
+            verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact),
+            modifier = Modifier.padding(FinanceTrackerSpacing.heroCardPadding)
         ) {
             Text(
                 text = stringResource(R.string.dashboard_summary_label),
@@ -387,7 +404,7 @@ private fun SummaryCard(
                     amount = state.monthlyRecurringTotal,
                     hasMixedCurrencies = state.hasMixedActiveCurrencies
                 ),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -462,7 +479,7 @@ private fun CurrencyMetadataStatus(
     val retryActionLabel = stringResource(R.string.dashboard_currency_retry_action_label)
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact)
     ) {
         Text(
             text = statusText,
@@ -539,7 +556,8 @@ private fun EmptyStateCard() {
     ).joinToAccessibilitySummary()
 
     Card(
-        shape = RoundedCornerShape(24.dp),
+        colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
@@ -547,8 +565,8 @@ private fun EmptyStateCard() {
             }
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(20.dp)
+            verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact),
+            modifier = Modifier.padding(FinanceTrackerSpacing.cardPadding)
         ) {
             Text(
                 text = stringResource(R.string.dashboard_empty_title),
@@ -574,7 +592,8 @@ private fun RecurringEntryCard(
     val editActionLabel = stringResource(R.string.dashboard_saved_entry_edit_action_label)
 
     Card(
-        shape = RoundedCornerShape(24.dp),
+        colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
@@ -587,15 +606,15 @@ private fun RecurringEntryCard(
             }
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(20.dp)
+            verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.item),
+            modifier = Modifier.padding(FinanceTrackerSpacing.cardPadding)
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
