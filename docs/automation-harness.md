@@ -21,10 +21,30 @@ The script:
 - starts a fresh `codex exec` session for every block
 - uses the repository handoff workflow already in place
 - resolves the reasoning effort for each block from the current `handoff/next-block.md`
+- expects the per-block validation workflow inside those WSL sessions to use the bash-native validation scripts in `scripts/`
 - relies on the installed Codex configuration for approval policy while keeping the compatible `--sandbox workspace-write` override
 - keeps terminal output minimal during normal runs
 - keeps runtime artifacts disabled by default for a cleaner working tree
 - enables runtime artifacts only when `--save-logs` is passed explicitly
+
+## Validation Environment Alignment
+
+Because the harness runs WSL/Bash sessions, the Level 1 validation workflow should use the bash-native repo scripts from those sessions:
+
+- `bash scripts/validate-compile.sh`
+- `bash scripts/validate-unit-tests.sh`
+
+`bash scripts/validate-compile.sh` defaults to `:app:compileDebugKotlin` and also accepts an explicit Gradle task override such as `:app:compileDebugAndroidTestKotlin` when the smallest meaningful verification is an `androidTest` or instrumentation compile target.
+
+The existing PowerShell validation scripts remain available for non-WSL Codex sessions on Windows, but the harness path is expected to stay bash-native end to end.
+
+## Archive History Guardrail
+
+The harness now checks `handoff-history/` before the run starts and after every successful block.
+
+- It stops safely if duplicate numeric archive prefixes already exist.
+- It expects each completed block to add exactly one new archive file.
+- It expects that new archive file to use the next numeric prefix after the current maximum.
 
 ## Reasoning effort resolution
 
@@ -85,6 +105,8 @@ Each per-block run manifest JSON records:
 - `last_message_path`
 
 The per-block run manifest is written for both successful and failed block executions so the harness leaves a compact audit artifact even when it stops early on a failure. The run manifest is also written on both successful and failed runs, distinguishes requested count from executed count, reports whether the run completed, and references every per-block manifest artifact produced before the harness exits.
+
+All runtime artifacts advertised as `.json` are emitted as valid JSON, including `codex_config_override_requested` when the recorded `-c` value itself contains quotes.
 
 If `--save-logs` is not enabled, none of those runtime artifact files are created.
 
