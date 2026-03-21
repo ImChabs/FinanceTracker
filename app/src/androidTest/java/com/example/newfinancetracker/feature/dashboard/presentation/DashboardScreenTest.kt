@@ -336,7 +336,7 @@ class DashboardScreenTest {
         currencyCode: String = "USD",
         nextPaymentDate: String,
         category: String = "Utilities",
-        relativeDueContext: DashboardRelativeDueContext = DashboardRelativeDueContext.None
+        relativeDueContext: DashboardRelativeDueContext? = null
     ): DashboardUpcomingPaymentItem = DashboardUpcomingPaymentItem(
         id = id,
         name = name,
@@ -382,7 +382,7 @@ class DashboardScreenTest {
 
     private data class UpcomingPaymentScenarioFixture(
         val savedEntry: SavedEntryScenarioFields,
-        val relativeDueContext: DashboardRelativeDueContext = DashboardRelativeDueContext.None,
+        val relativeDueContext: DashboardRelativeDueContext? = null,
         val includeUpcomingPayment: Boolean = true
     ) {
         constructor(
@@ -395,7 +395,7 @@ class DashboardScreenTest {
             type: RecurringEntryType = RecurringEntryType.RECURRING_EXPENSE,
             isActive: Boolean = true,
             notes: String? = null,
-            relativeDueContext: DashboardRelativeDueContext = DashboardRelativeDueContext.None,
+            relativeDueContext: DashboardRelativeDueContext? = null,
             includeUpcomingPayment: Boolean = true
         ) : this(
             savedEntry = SavedEntryScenarioFields(
@@ -447,37 +447,30 @@ class DashboardScreenTest {
         )
     }
 
+    private fun SavedEntryScenarioFields.toDashboardRecurringEntryItem(): DashboardRecurringEntryItem =
+        savedEntry(
+            id = id,
+            name = name,
+            amount = amount,
+            currencyCode = currencyCode,
+            nextPaymentDate = nextPaymentDate,
+            category = category,
+            type = type,
+            isActive = isActive,
+            notes = notes
+        )
+
     private fun savedEntryScenarioItems(
         vararg fixtures: SavedEntryScenarioFixture
     ): List<DashboardRecurringEntryItem> = fixtures.map { fixture ->
-        savedEntry(
-            id = fixture.savedEntry.id,
-            name = fixture.savedEntry.name,
-            amount = fixture.savedEntry.amount,
-            currencyCode = fixture.savedEntry.currencyCode,
-            nextPaymentDate = fixture.savedEntry.nextPaymentDate,
-            category = fixture.savedEntry.category,
-            type = fixture.savedEntry.type,
-            isActive = fixture.savedEntry.isActive,
-            notes = fixture.savedEntry.notes
-        )
+        fixture.savedEntry.toDashboardRecurringEntryItem()
     }
 
     private fun upcomingPaymentScenarioItems(
         vararg fixtures: UpcomingPaymentScenarioFixture
     ): DashboardScenarioItems = DashboardScenarioItems(
         recurringEntries = fixtures.map { fixture ->
-            savedEntry(
-                id = fixture.savedEntry.id,
-                name = fixture.savedEntry.name,
-                amount = fixture.savedEntry.amount,
-                currencyCode = fixture.savedEntry.currencyCode,
-                nextPaymentDate = fixture.savedEntry.nextPaymentDate,
-                category = fixture.savedEntry.category,
-                type = fixture.savedEntry.type,
-                isActive = fixture.savedEntry.isActive,
-                notes = fixture.savedEntry.notes
-            )
+            fixture.savedEntry.toDashboardRecurringEntryItem()
         },
         upcomingPayments = fixtures
             .filter(UpcomingPaymentScenarioFixture::includeUpcomingPayment)

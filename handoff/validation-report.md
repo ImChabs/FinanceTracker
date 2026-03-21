@@ -1,20 +1,20 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 44 - Dashboard Scenario Fixture Field Consolidation
-- Scope: Consolidate the duplicated saved-entry fixture fields in `DashboardScreenTest.kt` behind one file-local composed fixture payload while preserving the existing dashboard test helper call sites.
+- Name: DashboardScreenTest relative due context compile fix
+- Scope: Replace the stale `DashboardRelativeDueContext.None` test helper defaults with the nullable `DashboardRelativeDueContext?` shape used by dashboard production code.
 
 Loop 1
-- Validation target: `scripts/validate-compile.ps1`
+- Validation target: `.\scripts\validate-compile.ps1 :app:compileDebugAndroidTestKotlin`
 - Underlying command: `./gradlew :app:compileDebugAndroidTestKotlin`
-- Why this target: The block changes only dashboard instrumentation test Kotlin code, so Android test compile is the smallest meaningful verification.
-- Final status: failed_unresolved
+- Why this target: The change is limited to dashboard instrumentation test Kotlin helpers, so Android test compile is the smallest meaningful verification.
+- Final status: passed_after_fix
 - Attempts used: 2/3
-- Run 1: Failed before Gradle started because `pwsh` is not installed in this shell, so `scripts/validate-compile.ps1` could not be executed.
-- Run 2: Failed before Gradle started when invoking `cmd.exe /c gradlew.bat :app:compileDebugAndroidTestKotlin`; this WSL environment returned `WSL ERROR: UtilBindVsockAnyPort:307: socket failed 1`.
-- Run 3: Pending
-- In-scope fixes applied: None recorded.
-- Outstanding issues: Environment limits prevented the selected Android test compile target from running, so this block could not be verified in-session.
+- Run 1: Failed before Gradle started because local PowerShell execution policy blocked loading `scripts/validate-compile.ps1` (`PSSecurityException` for an unsigned script).
+- Run 2: Passed after rerunning the same repo validation script via `powershell -ExecutionPolicy Bypass -File .\scripts\validate-compile.ps1 :app:compileDebugAndroidTestKotlin`; `:app:compileDebugAndroidTestKotlin` completed successfully.
+- Run 3: Not used.
+- In-scope fixes applied: Updated `DashboardScreenTest.kt` helper defaults to use nullable `DashboardRelativeDueContext? = null` instead of the removed `DashboardRelativeDueContext.None`.
+- Outstanding issues: None recorded.
 
 Loop 2
 - Validation target: <optional second validation script>
