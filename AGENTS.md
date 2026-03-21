@@ -83,8 +83,15 @@
 - Always try to verify changes before considering the task complete.
 - Use the smallest meaningful verification for the affected scope.
 - Prefer focused module-level or target-level verification over full project builds.
-- For targeted compile verification in this single-module app, prefer `.\\gradlew.bat :app:compileDebugKotlin`.
-- Use `.\\gradlew.bat :app:testDebugUnitTest` when domain/data logic changes or when adding/updating unit tests.
+- For targeted compile verification in this single-module app, prefer the repo-local validation script for the current shell:
+  - PowerShell/Windows: `.\scripts\validate-compile.ps1`
+  - WSL/Bash: `bash scripts/validate-compile.sh`
+- The default targeted compile task is `:app:compileDebugKotlin`.
+- When the changed scope is limited to `androidTest` or instrumentation/Compose UI test sources, use the same compile validation script with `:app:compileDebugAndroidTestKotlin`.
+- Use the repo-local unit-test validation script for the current shell when domain/data logic changes or when adding/updating unit tests:
+  - PowerShell/Windows: `.\scripts\validate-unit-tests.ps1`
+  - WSL/Bash: `bash scripts/validate-unit-tests.sh`
+- The targeted unit-test task remains `:app:testDebugUnitTest`.
 - Use targeted instrumentation or Compose UI tests only when UI behavior changes warrant them.
 - Avoid `clean` and full rebuilds unless truly necessary.
 - Do not leave compile errors caused by the change.

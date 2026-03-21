@@ -35,6 +35,7 @@ description: Implement one bounded development block in this repository, verify 
 7. Summarize the result clearly.
 8. Overwrite `handoff/next-block.md` with the next-block handoff.
 9. Write a second archival copy of that same handoff into `handoff-history/` as a new file without overwriting prior history files.
+10. Treat the archive step as incomplete unless it creates exactly one new `handoff-history/` file whose numeric prefix is unique and is the next value after the current highest prefix.
 
 ## Verification
 
@@ -71,6 +72,7 @@ description: Implement one bounded development block in this repository, verify 
 - Use one file per archived handoff, not a cumulative history file.
 - Name each archive file as `<archive-sequence>-<block-slug>.md`.
 - `archive-sequence` is the zero-padded numeric prefix and must increase from the highest existing prefix in `handoff-history/`.
+- The archive step is invalid if the chosen prefix already exists or skips past the next available prefix.
 - `block-slug` should describe the block and may include the block number if useful, but the numeric archive sequence is the uniqueness source going forward.
 - Example: `026-block-27-dashboard-filter-bar.md`.
 - Every generated handoff must include an `Execution Recommendation` section.

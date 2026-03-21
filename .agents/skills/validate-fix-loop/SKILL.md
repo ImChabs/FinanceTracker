@@ -20,11 +20,16 @@ description: Run the smallest meaningful validation for the current block, fix i
 
 ## Validation Targets
 
-- Use `scripts/validate-compile.ps1` for targeted compile validation.
-  - Underlying command: `.\\gradlew.bat :app:compileDebugKotlin`
+- Use the repo-local compile validation script that matches the current shell:
+  - PowerShell/Windows: `.\scripts\validate-compile.ps1`
+  - WSL/Bash: `bash scripts/validate-compile.sh`
+  - Default underlying task: `:app:compileDebugKotlin`
   - Default for presentation, navigation, resource, and general Kotlin compile verification.
-- Use `scripts/validate-unit-tests.ps1` for targeted unit-test validation.
-  - Underlying command: `.\\gradlew.bat :app:testDebugUnitTest`
+  - When the changed scope is limited to `androidTest` or instrumentation/Compose UI test sources, use the same compile validation script with `:app:compileDebugAndroidTestKotlin`.
+- Use the repo-local unit-test validation script that matches the current shell:
+  - PowerShell/Windows: `.\scripts\validate-unit-tests.ps1`
+  - WSL/Bash: `bash scripts/validate-unit-tests.sh`
+  - Underlying task: `:app:testDebugUnitTest`
   - Use when domain/data logic changes or when adding/updating unit tests.
 - Run one validation target per loop.
 - If the changed scope genuinely needs both targets, finish the compile loop first and then start a separate unit-test loop.
@@ -34,7 +39,7 @@ description: Run the smallest meaningful validation for the current block, fix i
 
 1. Choose one smallest meaningful validation target for the current loop.
 2. Start from `.agents/skills/validate-fix-loop/validation-report-template.md` and overwrite `handoff/validation-report.md` with the current block name, the selected target, the underlying command, and an initial `in_progress` status before or during the first run.
-3. Run the selected validation script.
+3. Run the selected validation script in the shell that matches the current environment, including any explicit Gradle task override needed for androidTest compile validation.
 4. If it passes, record the pass result for that loop and stop the loop.
 5. If it fails, decide whether the failure is caused by the current block or is a small required adjacent correction.
 6. If the failure is in scope, fix it and rerun the same validation target.

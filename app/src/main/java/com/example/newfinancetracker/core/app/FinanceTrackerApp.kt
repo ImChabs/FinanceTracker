@@ -11,7 +11,10 @@ fun FinanceTrackerApp(
     modifier: Modifier = Modifier
 ) {
     FinanceTrackerTheme {
-        Surface(modifier = modifier) {
+        Surface(
+            modifier = modifier,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.background
+        ) {
             FinanceTrackerNavHost()
         }
     }

@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param()
+param(
+    [string]$GradleTask = ':app:compileDebugKotlin'
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -13,8 +15,8 @@ if (-not (Test-Path $gradleWrapper)) {
 
 Push-Location $repoRoot
 try {
-    Write-Host "Running targeted compile validation: :app:compileDebugKotlin"
-    & $gradleWrapper ':app:compileDebugKotlin'
+    Write-Host "Running targeted compile validation: $GradleTask"
+    & $gradleWrapper $GradleTask
     exit $LASTEXITCODE
 }
 finally {
