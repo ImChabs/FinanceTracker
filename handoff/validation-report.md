@@ -1,29 +1,32 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 50 - Dashboard State Surface Test Coverage
-- Scope: Add targeted dashboard Compose UI tests for loading, empty, and upcoming-empty state surfaces without changing dashboard behavior.
+- Name: Android CI workflow setup
+- Scope: Add a minimal GitHub Actions workflow that reuses the repo compile and unit-test validation scripts and runs Android lint for the single app module.
 
 Loop 1
-- Validation target: `bash scripts/validate-compile.sh :app:compileDebugAndroidTestKotlin`
-- Underlying command: `./gradlew :app:compileDebugAndroidTestKotlin`
-- Why this target: The block only changes `androidTest` Compose UI coverage, so targeted androidTest compile validation is the smallest meaningful verification.
-- Final status: not_run
-- Attempts used: 2/3
-- Run 1: Could not start Gradle because the wrapper attempted to open `/home/ruyebran/.gradle/.../gradle-9.4.1-bin.zip.lck`, which is outside the writable sandbox and returned `FileNotFoundException (Permission denied)`.
-- Run 2: Could not complete after rerunning with `GRADLE_USER_HOME=/tmp/gradle-home` because the wrapper then needed to download `gradle-9.4.1-bin.zip`, and network access is blocked in this environment (`java.net.SocketException: Operation not permitted`).
-- Run 3: Not used.
-- In-scope fixes applied: Reran the same validation target with a writable local `GRADLE_USER_HOME` to separate sandbox cache access from code issues.
-- Outstanding issues: Targeted androidTest compile verification could not be completed in this sandbox because the required Gradle distribution is unavailable locally and cannot be downloaded.
-
-Loop 2
-- Validation target: <optional second validation script>
-- Underlying command: <optional gradle command>
-- Why this target: <why a second loop was needed>
-- Final status: not_run
-- Attempts used: 0/3
-- Run 1: Not used.
+- Validation target: `bash scripts/validate-compile.sh`
+- Underlying command: `./gradlew :app:compileDebugKotlin`
+- Why this target: The workflow reuses the repo's targeted compile validation script, and `AGENTS.md` identifies it as the default compile verification for app Kotlin changes.
+- Final status: failed_unresolved
+- Attempts used: 1/3
+- Run 1: Failed before task execution because the sandboxed environment cannot download the Gradle 9.4.1 distribution required by the wrapper (`java.net.SocketException: Operation not permitted`).
 - Run 2: Not used.
 - Run 3: Not used.
-- In-scope fixes applied: None recorded.
-- Outstanding issues: None recorded.
+- In-scope fixes applied: Normalized `scripts/validate-compile.sh` to LF line endings so the Bash validation entry point now runs correctly on Linux before reaching the Gradle wrapper.
+- Outstanding issues: Local compile verification could not complete in this environment because network access is disabled and the required Gradle distribution is not preinstalled.
+
+Loop 2
+- Validation target: `bash scripts/validate-unit-tests.sh`
+- Underlying command: `./gradlew :app:testDebugUnitTest`
+- Why this target: The workflow reuses the repo's targeted unit-test validation script, so the same entry point is the smallest meaningful verification for the test job.
+- Final status: failed_unresolved
+- Attempts used: 1/3
+- Run 1: Failed before task execution for the same environment reason as Loop 1: the Gradle wrapper could not fetch Gradle 9.4.1 because outbound network access is blocked.
+- Run 2: Not used.
+- Run 3: Not used.
+- In-scope fixes applied: Normalized `scripts/validate-unit-tests.sh` to LF line endings so the Bash validation entry point now runs correctly on Linux before reaching the Gradle wrapper.
+- Outstanding issues: Unit-test verification remains blocked by the sandbox's network restriction.
+
+Notes
+- `:app:lintDebug` was selected for CI because this repository currently declares a single `:app` module and no product flavors. It was not executed locally for the same Gradle-distribution/network constraint.
