@@ -1,3 +1,47 @@
+import org.gradle.api.GradleException
+
+fun readReleaseSigningInput(envName: String, propertyName: String): String? =
+    providers.environmentVariable(envName).orNull?.takeIf(String::isNotBlank)
+        ?: providers.gradleProperty(propertyName).orNull?.takeIf(String::isNotBlank)
+
+val releaseKeystorePath = readReleaseSigningInput(
+    envName = "ANDROID_RELEASE_KEYSTORE_PATH",
+    propertyName = "androidReleaseKeystorePath"
+)
+val releaseStorePassword = readReleaseSigningInput(
+    envName = "ANDROID_RELEASE_STORE_PASSWORD",
+    propertyName = "androidReleaseStorePassword"
+)
+val releaseKeyAlias = readReleaseSigningInput(
+    envName = "ANDROID_RELEASE_KEY_ALIAS",
+    propertyName = "androidReleaseKeyAlias"
+)
+val releaseKeyPassword = readReleaseSigningInput(
+    envName = "ANDROID_RELEASE_KEY_PASSWORD",
+    propertyName = "androidReleaseKeyPassword"
+)
+
+val hasAnyReleaseSigningInput = listOf(
+    releaseKeystorePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).any { !it.isNullOrBlank() }
+
+val hasCompleteReleaseSigningInput = listOf(
+    releaseKeystorePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
+
+if (hasAnyReleaseSigningInput && !hasCompleteReleaseSigningInput) {
+    throw GradleException(
+        "Partial release signing configuration detected. Provide all ANDROID_RELEASE_* " +
+            "environment variables or all androidRelease* Gradle properties."
+    )
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -9,6 +53,17 @@ android {
     namespace = "com.example.newfinancetracker"
     compileSdk {
         version = release(36)
+    }
+
+    if (hasCompleteReleaseSigningInput) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(requireNotNull(releaseKeystorePath))
+                storePassword = requireNotNull(releaseStorePassword)
+                keyAlias = requireNotNull(releaseKeyAlias)
+                keyPassword = requireNotNull(releaseKeyPassword)
+            }
+        }
     }
 
     defaultConfig {
@@ -23,6 +78,9 @@ android {
 
     buildTypes {
         release {
+            if (hasCompleteReleaseSigningInput) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
