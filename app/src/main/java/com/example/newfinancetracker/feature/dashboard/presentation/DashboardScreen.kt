@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -39,6 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.newfinancetracker.R
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerComponentDefaults
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerSpacing
@@ -54,7 +54,7 @@ fun DashboardScreenRoot(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val viewModel: DashboardViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val currencyRetrySuccessMessage = stringResource(R.string.dashboard_currency_retry_success)
     val retryFailureMessage = stringResource(R.string.dashboard_currency_retry_failure)
 
