@@ -17,7 +17,7 @@ env:
 
 jobs:
   compile:
-    name: Compile Debug
+    name: Android CI - Assemble Debug
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -41,7 +41,7 @@ jobs:
         run: bash scripts/validate-compile.sh :app:assembleDebug
 
   unit_tests:
-    name: Unit Tests
+    name: Android CI - Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -75,7 +75,7 @@ jobs:
           if-no-files-found: warn
 
   lint:
-    name: Lint Debug
+    name: Android CI - Lint Debug
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
