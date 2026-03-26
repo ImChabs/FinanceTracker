@@ -46,7 +46,7 @@ class RecurringEntryFormStateTest {
     fun `form state trims fields and preserves id when converting back to domain`() {
         val recurringEntry = RecurringEntryFormState(
             name = "  Rent  ",
-            amount = "1450.00",
+            amount = "1,450.00",
             currencyCode = " eur ",
             category = " Housing ",
             nextPaymentDate = "2026-04-01",
@@ -68,7 +68,7 @@ class RecurringEntryFormStateTest {
     fun `form state can submit when required fields are valid`() {
         val formState = RecurringEntryFormState(
             name = "Netflix",
-            amount = "15.99",
+            amount = "1,250.99",
             category = "Streaming",
             nextPaymentDate = "2026-03-31"
         )
@@ -87,5 +87,17 @@ class RecurringEntryFormStateTest {
         ).toRecurringEntry()
 
         assertEquals(DEFAULT_CURRENCY_CODE, recurringEntry.currencyCode)
+    }
+
+    @Test
+    fun `amount formatting adds grouping separators while preserving decimals`() {
+        assertEquals("1,234,567.80", formatAmountForDisplay("1234567.80"))
+    }
+
+    @Test
+    fun `date picker millis convert back to matching iso date`() {
+        val pickerMillis = isoDateToPickerMillis("2026-04-01")
+
+        assertEquals("2026-04-01", pickerMillis?.let(::pickerMillisToIsoDate))
     }
 }

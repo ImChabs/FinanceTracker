@@ -92,6 +92,27 @@ class RecurringEntryCreateViewModelTest {
         )
     }
 
+    @Test
+    fun `save accepts grouped amount input and persists numeric value`() = runTest(testDispatcher) {
+        val repository = FakeRecurringEntryRepository()
+        val viewModel = RecurringEntryCreateViewModel(
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
+        )
+
+        advanceUntilIdle()
+
+        viewModel.onAction(RecurringEntryCreateAction.NameChanged("Insurance"))
+        viewModel.onAction(RecurringEntryCreateAction.AmountChanged("1,250.75"))
+        viewModel.onAction(RecurringEntryCreateAction.CategoryChanged("Bills"))
+        viewModel.onAction(RecurringEntryCreateAction.NextPaymentDateChanged("2026-05-12"))
+
+        viewModel.onAction(RecurringEntryCreateAction.SaveClicked)
+        advanceUntilIdle()
+
+        assertEquals(1250.75, repository.upsertedEntries.single().amount, 0.0)
+    }
+
     private class FakeRecurringEntryRepository : RecurringEntryRepository {
         private val entries = MutableStateFlow<List<RecurringEntry>>(emptyList())
         val upsertedEntries = mutableListOf<RecurringEntry>()

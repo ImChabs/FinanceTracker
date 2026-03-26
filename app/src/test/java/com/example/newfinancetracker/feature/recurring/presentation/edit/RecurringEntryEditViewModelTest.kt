@@ -117,19 +117,51 @@ class RecurringEntryEditViewModelTest {
         assertEquals("EUR", viewModel.state.value.currencyOptions.last().code)
     }
 
+    @Test
+    fun `save accepts grouped amount input and updates existing entry`() = runTest(testDispatcher) {
+        val repository = FakeRecurringEntryRepository()
+        val viewModel = RecurringEntryEditViewModel(
+            entryId = EXISTING_ENTRY.id,
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
+        )
+
+        advanceUntilIdle()
+        viewModel.onAction(RecurringEntryEditAction.AmountChanged("2,499.99"))
+
+        val effect = async { viewModel.effects.first() }
+        viewModel.onAction(RecurringEntryEditAction.SaveClicked)
+        advanceUntilIdle()
+
+        assertEquals(RecurringEntryEditEffect.NavigateBack, effect.await())
+        assertEquals(2499.99, repository.upsertedEntries.single().amount, 0.0)
+        assertEquals(EXISTING_ENTRY.id, repository.upsertedEntries.single().id)
+    }
+
     private class FakeRecurringEntryRepository(
         private val shouldFailDelete: Boolean = false
     ) : RecurringEntryRepository {
 
         private val entries = MutableStateFlow(listOf(EXISTING_ENTRY))
         val deletedEntryIds = mutableListOf<Long>()
+        val upsertedEntries = mutableListOf<RecurringEntry>()
 
         override fun observeRecurringEntries(): Flow<List<RecurringEntry>> = entries
 
         override suspend fun getRecurringEntry(entryId: Long): RecurringEntry? =
             entries.value.firstOrNull { it.id == entryId }
 
-        override suspend fun upsertRecurringEntry(entry: RecurringEntry): Long = entry.id
+        override suspend fun upsertRecurringEntry(entry: RecurringEntry): Long {
+            upsertedEntries += entry
+            entries.value = entries.value.map { existingEntry ->
+                if (existingEntry.id == entry.id) {
+                    entry
+                } else {
+                    existingEntry
+                }
+            }
+            return entry.id
+        }
 
         override suspend fun deleteRecurringEntry(entryId: Long) {
             if (shouldFailDelete) {

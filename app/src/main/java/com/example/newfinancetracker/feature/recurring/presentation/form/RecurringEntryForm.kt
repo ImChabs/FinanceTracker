@@ -14,14 +14,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -30,16 +32,21 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.newfinancetracker.R
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerComponentDefaults
@@ -124,22 +131,19 @@ fun RecurringEntryFormScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                OutlinedTextField(
-                    value = formState.amount,
+                AmountInputField(
+                    amount = formState.amount,
                     onValueChange = onAmountChanged,
                     label = { Text(text = stringResource(R.string.recurring_create_amount_label)) },
                     placeholder = {
                         Text(text = stringResource(R.string.recurring_create_amount_placeholder))
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     isError = showValidationErrors && parseAmount(formState.amount) == null,
                     supportingText = {
                         if (showValidationErrors && parseAmount(formState.amount) == null) {
                             Text(text = stringResource(R.string.recurring_create_validation_amount))
                         }
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    }
                 )
 
                 CurrencySelectionField(
@@ -167,22 +171,19 @@ fun RecurringEntryFormScreen(
             }
 
             FormSectionCard {
-                OutlinedTextField(
-                    value = formState.nextPaymentDate,
-                    onValueChange = onNextPaymentDateChanged,
+                DateInputField(
+                    rawDate = formState.nextPaymentDate,
+                    onDateSelected = onNextPaymentDateChanged,
                     label = { Text(text = stringResource(R.string.recurring_create_next_payment_label)) },
                     placeholder = {
                         Text(text = stringResource(R.string.recurring_create_next_payment_placeholder))
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     isError = showValidationErrors && !isValidIsoDate(formState.nextPaymentDate),
                     supportingText = {
                         if (showValidationErrors && !isValidIsoDate(formState.nextPaymentDate)) {
                             Text(text = stringResource(R.string.recurring_create_validation_date))
                         }
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    }
                 )
 
                 SelectionSection(
@@ -278,6 +279,144 @@ fun RecurringEntryFormScreen(
                     it()
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AmountInputField(
+    amount: String,
+    onValueChange: (String) -> Unit,
+    label: @Composable () -> Unit,
+    placeholder: @Composable () -> Unit,
+    isError: Boolean,
+    supportingText: @Composable (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    val initialFormattedAmount = formatAmountForDisplay(amount)
+    var textFieldValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = initialFormattedAmount,
+                selection = TextRange(initialFormattedAmount.length)
+            )
+        )
+    }
+
+    LaunchedEffect(amount) {
+        val formattedAmount = formatAmountForDisplay(amount)
+        if (textFieldValue.text != formattedAmount) {
+            val sanitizedSelectionCount = sanitizeAmountInput(
+                textFieldValue.text.take(textFieldValue.selection.end)
+            ).length.coerceAtMost(sanitizeAmountInput(amount).length)
+
+            textFieldValue = TextFieldValue(
+                text = formattedAmount,
+                selection = TextRange(
+                    calculateAmountSelection(
+                        formattedAmount = formattedAmount,
+                        sanitizedSelectionCount = sanitizedSelectionCount
+                    )
+                )
+            )
+        }
+    }
+
+    OutlinedTextField(
+        value = textFieldValue,
+        onValueChange = { updatedValue ->
+            val sanitizedAmount = sanitizeAmountInput(updatedValue.text)
+            val formattedAmount = formatAmountForDisplay(sanitizedAmount)
+            val sanitizedSelectionCount = sanitizeAmountInput(
+                updatedValue.text.take(updatedValue.selection.end)
+            ).length.coerceAtMost(sanitizedAmount.length)
+
+            textFieldValue = updatedValue.copy(
+                text = formattedAmount,
+                selection = TextRange(
+                    calculateAmountSelection(
+                        formattedAmount = formattedAmount,
+                        sanitizedSelectionCount = sanitizedSelectionCount
+                    )
+                )
+            )
+
+            if (sanitizedAmount != amount) {
+                onValueChange(sanitizedAmount)
+            }
+        },
+        label = label,
+        placeholder = placeholder,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        isError = isError,
+        supportingText = supportingText,
+        singleLine = true,
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun DateInputField(
+    rawDate: String,
+    onDateSelected: (String) -> Unit,
+    label: @Composable () -> Unit,
+    placeholder: @Composable () -> Unit,
+    isError: Boolean,
+    supportingText: @Composable (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    var isDatePickerVisible by rememberSaveable { mutableStateOf(false) }
+    val selectedDateMillis = isoDateToPickerMillis(rawDate)
+
+    Box(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = formatIsoDateForDisplay(rawDate),
+            onValueChange = {},
+            label = label,
+            placeholder = placeholder,
+            readOnly = true,
+            isError = isError,
+            supportingText = supportingText,
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { isDatePickerVisible = true }
+        )
+    }
+
+    if (isDatePickerVisible) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedDateMillis
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { isDatePickerVisible = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { selectedMillis ->
+                            onDateSelected(pickerMillisToIsoDate(selectedMillis))
+                        }
+                        isDatePickerVisible = false
+                    }
+                ) {
+                    Text(text = stringResource(R.string.recurring_date_picker_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { isDatePickerVisible = false }) {
+                    Text(text = stringResource(R.string.recurring_date_picker_cancel))
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }
@@ -470,3 +609,25 @@ private fun billingFrequencyLabel(frequency: BillingFrequency): String =
         BillingFrequency.QUARTERLY -> stringResource(R.string.recurring_create_frequency_quarterly)
         BillingFrequency.YEARLY -> stringResource(R.string.recurring_create_frequency_yearly)
     }
+
+private fun calculateAmountSelection(
+    formattedAmount: String,
+    sanitizedSelectionCount: Int
+): Int {
+    if (sanitizedSelectionCount <= 0) {
+        return 0
+    }
+
+    var observedSanitizedCharacters = 0
+    formattedAmount.forEachIndexed { index, character ->
+        if (character.isDigit() || character == '.') {
+            observedSanitizedCharacters += 1
+        }
+
+        if (observedSanitizedCharacters == sanitizedSelectionCount) {
+            return index + 1
+        }
+    }
+
+    return formattedAmount.length
+}

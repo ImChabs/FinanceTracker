@@ -54,7 +54,7 @@
     <string name="recurring_create_category_label">Category</string>
     <string name="recurring_create_category_placeholder">Streaming, housing, utilities...</string>
     <string name="recurring_create_next_payment_label">Next payment date</string>
-    <string name="recurring_create_next_payment_placeholder">YYYY-MM-DD</string>
+    <string name="recurring_create_next_payment_placeholder">Select a date</string>
     <string name="recurring_create_notes_label">Notes</string>
     <string name="recurring_create_notes_placeholder">Optional notes</string>
     <string name="recurring_create_type_label">Entry type</string>
@@ -65,7 +65,7 @@
     <string name="recurring_create_validation_name">Enter a name.</string>
     <string name="recurring_create_validation_amount">Enter an amount greater than 0.</string>
     <string name="recurring_create_validation_category">Enter a category.</string>
-    <string name="recurring_create_validation_date">Enter a valid date in YYYY-MM-DD format.</string>
+    <string name="recurring_create_validation_date">Select a valid date.</string>
     <string name="recurring_create_type_subscription">Subscription</string>
     <string name="recurring_create_type_expense">Recurring expense</string>
     <string name="recurring_create_frequency_weekly">Weekly</string>
@@ -86,6 +86,8 @@
     <string name="recurring_edit_missing_title">This recurring entry is no longer available</string>
     <string name="recurring_edit_missing_body">This recurring entry could not be found. It may have been removed or changed elsewhere.</string>
     <string name="recurring_edit_back_to_dashboard">Back to dashboard</string>
+    <string name="recurring_date_picker_confirm">OK</string>
+    <string name="recurring_date_picker_cancel">Cancel</string>
     <plurals name="dashboard_due_in_days">
         <item quantity="one">Due in %d day</item>
         <item quantity="other">Due in %d days</item>
