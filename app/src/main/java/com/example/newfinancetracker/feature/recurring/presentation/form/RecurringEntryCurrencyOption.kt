@@ -16,49 +16,37 @@ data class RecurringEntryCurrencySelection(
 
 internal fun resolveRecurringEntryCurrencySelection(
     cachedMetadata: List<CurrencyMetadata>,
-    currentCode: String,
-    preferFirstCachedOverDefault: Boolean
+    currentCode: String
 ): RecurringEntryCurrencySelection {
     val normalizedCurrentCode = normalizeCurrencyCode(currentCode)
-    val cachedOptions = cachedMetadata.map { metadata ->
+    val cachedMetadataByCode = cachedMetadata.associateBy { normalizeCurrencyCode(it.code) }
+    val options = SUPPORTED_RECURRING_ENTRY_CURRENCIES.map { code ->
         RecurringEntryCurrencyOption(
-            code = normalizeCurrencyCode(metadata.code),
-            displayName = metadata.displayName
-        )
-    }
-
-    if (cachedOptions.isEmpty()) {
-        val fallbackCode = normalizedCurrentCode.ifBlank { DEFAULT_CURRENCY_CODE }
-        return RecurringEntryCurrencySelection(
-            selectedCode = fallbackCode,
-            options = listOf(RecurringEntryCurrencyOption(code = fallbackCode))
-        )
-    }
-
-    val matchedCode = cachedOptions.firstOrNull { it.code == normalizedCurrentCode }?.code
-    if (matchedCode != null) {
-        return RecurringEntryCurrencySelection(
-            selectedCode = matchedCode,
-            options = cachedOptions
-        )
-    }
-
-    if (normalizedCurrentCode.isBlank() ||
-        (preferFirstCachedOverDefault && normalizedCurrentCode == DEFAULT_CURRENCY_CODE)
-    ) {
-        return RecurringEntryCurrencySelection(
-            selectedCode = cachedOptions.first().code,
-            options = cachedOptions
+            code = code,
+            displayName = cachedMetadataByCode[code]?.displayName ?: recurringEntryCurrencyName(code)
         )
     }
 
     return RecurringEntryCurrencySelection(
-        selectedCode = normalizedCurrentCode,
-        options = listOf(RecurringEntryCurrencyOption(code = normalizedCurrentCode)) + cachedOptions
+        selectedCode = normalizedCurrentCode.takeIf(::isSupportedRecurringEntryCurrencyCode)
+            ?: DEFAULT_CURRENCY_CODE,
+        options = options
     )
 }
 
 internal fun formatRecurringEntryCurrencyOption(option: RecurringEntryCurrencyOption): String =
     option.displayName?.let { "${option.code} - $it" } ?: option.code
 
+internal fun isSupportedRecurringEntryCurrencyCode(code: String): Boolean =
+    normalizeCurrencyCode(code) in SUPPORTED_RECURRING_ENTRY_CURRENCIES
+
 private fun normalizeCurrencyCode(code: String): String = code.trim().uppercase(Locale.US)
+
+private fun recurringEntryCurrencyName(code: String): String =
+    when (code) {
+        "USD" -> "United States Dollar"
+        "PYG" -> "Paraguayan Guarani"
+        else -> code
+    }
+
+private val SUPPORTED_RECURRING_ENTRY_CURRENCIES = listOf("USD", "PYG")

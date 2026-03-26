@@ -166,7 +166,7 @@ fun DashboardScreen(
                     Text(
                         text = stringResource(
                             R.string.dashboard_active_entries_count,
-                            state.activeEntryCount
+                            state.savedEntryCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f)

@@ -57,7 +57,6 @@ fun RecurringEntryCreateScreen(
         onNameChanged = { onAction(RecurringEntryCreateAction.NameChanged(it)) },
         onAmountChanged = { onAction(RecurringEntryCreateAction.AmountChanged(it)) },
         onCurrencyCodeChanged = { onAction(RecurringEntryCreateAction.CurrencyCodeChanged(it)) },
-        onCategoryChanged = { onAction(RecurringEntryCreateAction.CategoryChanged(it)) },
         onNextPaymentDateChanged = {
             onAction(RecurringEntryCreateAction.NextPaymentDateChanged(it))
         },
@@ -82,7 +81,6 @@ private fun RecurringEntryCreateScreenPreview() {
                     name = "Netflix",
                     amount = "15.99",
                     currencyCode = "USD",
-                    category = "Streaming",
                     nextPaymentDate = "2026-03-31",
                     notes = "Standard plan"
                 )

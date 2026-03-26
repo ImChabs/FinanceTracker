@@ -98,23 +98,46 @@ class RecurringEntryEditViewModelTest {
     }
 
     @Test
-    fun `saved currency stays available when cached metadata does not contain it`() = runTest(testDispatcher) {
+    fun `unsupported saved currency falls back to default allowed currency`() = runTest(testDispatcher) {
         val repository = FakeRecurringEntryRepository()
         val viewModel = RecurringEntryEditViewModel(
             entryId = EXISTING_ENTRY.id,
             recurringEntryRepository = repository,
             currencyMetadataRepository = FakeCurrencyMetadataRepository(
                 initialMetadata = listOf(
-                    CurrencyMetadata(code = "EUR", displayName = "Euro")
+                    CurrencyMetadata(code = "EUR", displayName = "Euro"),
+                    CurrencyMetadata(code = "PYG", displayName = "Paraguayan Guarani")
                 )
             )
         )
 
         advanceUntilIdle()
 
-        assertEquals("JPY", viewModel.state.value.form.currencyCode)
-        assertEquals("JPY", viewModel.state.value.currencyOptions.first().code)
-        assertEquals("EUR", viewModel.state.value.currencyOptions.last().code)
+        assertEquals("USD", viewModel.state.value.form.currencyCode)
+        assertEquals(listOf("USD", "PYG"), viewModel.state.value.currencyOptions.map { it.code })
+    }
+
+    @Test
+    fun `save accepts grouped amount input and updates existing entry`() = runTest(testDispatcher) {
+        val repository = FakeRecurringEntryRepository()
+        val viewModel = RecurringEntryEditViewModel(
+            entryId = EXISTING_ENTRY.id,
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
+        )
+
+        advanceUntilIdle()
+        viewModel.onAction(RecurringEntryEditAction.AmountChanged("2,499.99"))
+
+        val effect = async { viewModel.effects.first() }
+        viewModel.onAction(RecurringEntryEditAction.SaveClicked)
+        advanceUntilIdle()
+
+        assertEquals(RecurringEntryEditEffect.NavigateBack, effect.await())
+        assertEquals(2499.99, repository.upsertedEntries.single().amount, 0.0)
+        assertEquals(EXISTING_ENTRY.id, repository.upsertedEntries.single().id)
+        assertEquals(DEFAULT_ALLOWED_CURRENCY, repository.upsertedEntries.single().currencyCode)
+        assertEquals("", repository.upsertedEntries.single().category)
     }
 
     private class FakeRecurringEntryRepository(
@@ -123,13 +146,24 @@ class RecurringEntryEditViewModelTest {
 
         private val entries = MutableStateFlow(listOf(EXISTING_ENTRY))
         val deletedEntryIds = mutableListOf<Long>()
+        val upsertedEntries = mutableListOf<RecurringEntry>()
 
         override fun observeRecurringEntries(): Flow<List<RecurringEntry>> = entries
 
         override suspend fun getRecurringEntry(entryId: Long): RecurringEntry? =
             entries.value.firstOrNull { it.id == entryId }
 
-        override suspend fun upsertRecurringEntry(entry: RecurringEntry): Long = entry.id
+        override suspend fun upsertRecurringEntry(entry: RecurringEntry): Long {
+            upsertedEntries += entry
+            entries.value = entries.value.map { existingEntry ->
+                if (existingEntry.id == entry.id) {
+                    entry
+                } else {
+                    existingEntry
+                }
+            }
+            return entry.id
+        }
 
         override suspend fun deleteRecurringEntry(entryId: Long) {
             if (shouldFailDelete) {
@@ -152,6 +186,8 @@ class RecurringEntryEditViewModelTest {
     }
 
     private companion object {
+        const val DEFAULT_ALLOWED_CURRENCY = "USD"
+
         val EXISTING_ENTRY = RecurringEntry(
             id = 7L,
             name = "Rent",

@@ -89,7 +89,7 @@ class DashboardStateTest {
             state.upcomingPayments.map { it.nextPaymentDate }
         )
         assertEquals(
-            listOf("USD", "EUR", "JPY", "GBP"),
+            listOf("USD", "EUR", "JPY", "GBP", "CAD"),
             state.recurringEntries.map { it.currencyCode }
         )
         assertEquals(
@@ -97,6 +97,8 @@ class DashboardStateTest {
             state.upcomingPayments.map { it.currencyCode }
         )
         assertEquals(null, state.recurringEntries[3].notes)
+        assertEquals(false, state.recurringEntries[4].isActive)
+        assertEquals("Paused", state.recurringEntries[4].notes)
     }
 
     @Test

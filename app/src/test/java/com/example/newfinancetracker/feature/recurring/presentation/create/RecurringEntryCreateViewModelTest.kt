@@ -45,7 +45,7 @@ class RecurringEntryCreateViewModelTest {
             recurringEntryRepository = repository,
             currencyMetadataRepository = FakeCurrencyMetadataRepository(
                 initialMetadata = listOf(
-                    CurrencyMetadata(code = "EUR", displayName = "Euro"),
+                    CurrencyMetadata(code = "PYG", displayName = "Paraguayan Guarani"),
                     CurrencyMetadata(code = "USD", displayName = "United States Dollar")
                 )
             )
@@ -54,12 +54,11 @@ class RecurringEntryCreateViewModelTest {
         advanceUntilIdle()
 
         assertEquals("USD", viewModel.state.value.form.currencyCode)
-        assertEquals(listOf("EUR", "USD"), viewModel.state.value.currencyOptions.map { it.code })
+        assertEquals(listOf("USD", "PYG"), viewModel.state.value.currencyOptions.map { it.code })
 
         viewModel.onAction(RecurringEntryCreateAction.NameChanged("Music Streaming"))
         viewModel.onAction(RecurringEntryCreateAction.AmountChanged("10.99"))
-        viewModel.onAction(RecurringEntryCreateAction.CurrencyCodeChanged("USD"))
-        viewModel.onAction(RecurringEntryCreateAction.CategoryChanged("Entertainment"))
+        viewModel.onAction(RecurringEntryCreateAction.CurrencyCodeChanged("PYG"))
         viewModel.onAction(RecurringEntryCreateAction.NextPaymentDateChanged("2026-05-01"))
         viewModel.onAction(
             RecurringEntryCreateAction.BillingFrequencyChanged(BillingFrequency.MONTHLY)
@@ -73,11 +72,12 @@ class RecurringEntryCreateViewModelTest {
         advanceUntilIdle()
 
         assertEquals(RecurringEntryCreateEffect.NavigateBack, effect.await())
-        assertEquals("USD", repository.upsertedEntries.single().currencyCode)
+        assertEquals("PYG", repository.upsertedEntries.single().currencyCode)
+        assertEquals("", repository.upsertedEntries.single().category)
     }
 
     @Test
-    fun `missing cached metadata falls back to default currency option`() = runTest(testDispatcher) {
+    fun `currency options stay limited when cached metadata is missing`() = runTest(testDispatcher) {
         val viewModel = RecurringEntryCreateViewModel(
             recurringEntryRepository = FakeRecurringEntryRepository(),
             currencyMetadataRepository = FakeCurrencyMetadataRepository()
@@ -87,9 +87,29 @@ class RecurringEntryCreateViewModelTest {
 
         assertEquals(DEFAULT_CURRENCY_CODE, viewModel.state.value.form.currencyCode)
         assertEquals(
-            listOf(DEFAULT_CURRENCY_CODE),
+            listOf("USD", "PYG"),
             viewModel.state.value.currencyOptions.map { it.code }
         )
+    }
+
+    @Test
+    fun `save accepts grouped amount input and persists numeric value`() = runTest(testDispatcher) {
+        val repository = FakeRecurringEntryRepository()
+        val viewModel = RecurringEntryCreateViewModel(
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
+        )
+
+        advanceUntilIdle()
+
+        viewModel.onAction(RecurringEntryCreateAction.NameChanged("Insurance"))
+        viewModel.onAction(RecurringEntryCreateAction.AmountChanged("1,250.75"))
+        viewModel.onAction(RecurringEntryCreateAction.NextPaymentDateChanged("2026-05-12"))
+
+        viewModel.onAction(RecurringEntryCreateAction.SaveClicked)
+        advanceUntilIdle()
+
+        assertEquals(1250.75, repository.upsertedEntries.single().amount, 0.0)
     }
 
     private class FakeRecurringEntryRepository : RecurringEntryRepository {

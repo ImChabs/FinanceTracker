@@ -79,12 +79,6 @@ class RecurringEntryEditViewModel @Inject constructor(
                 }
             }
 
-            is RecurringEntryEditAction.CategoryChanged -> {
-                updateFormState { currentState ->
-                    currentState.copy(category = action.value)
-                }
-            }
-
             RecurringEntryEditAction.DeleteClicked -> {
                 _state.update { currentState ->
                     if (!currentState.canDelete) {
@@ -143,8 +137,7 @@ class RecurringEntryEditViewModel @Inject constructor(
                 _state.update { currentState ->
                     val currencySelection = resolveRecurringEntryCurrencySelection(
                         cachedMetadata = metadata,
-                        currentCode = currentState.form.currencyCode,
-                        preferFirstCachedOverDefault = false
+                        currentCode = currentState.form.currencyCode
                     )
 
                     currentState.copy(
@@ -194,8 +187,7 @@ class RecurringEntryEditViewModel @Inject constructor(
                     val loadedForm = entry.toFormState()
                     val currencySelection = resolveRecurringEntryCurrencySelection(
                         cachedMetadata = latestCurrencyMetadata,
-                        currentCode = loadedForm.currencyCode,
-                        preferFirstCachedOverDefault = false
+                        currentCode = loadedForm.currencyCode
                     )
 
                     currentState.copy(

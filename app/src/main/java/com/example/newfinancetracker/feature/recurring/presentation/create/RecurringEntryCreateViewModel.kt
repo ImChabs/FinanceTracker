@@ -65,12 +65,6 @@ class RecurringEntryCreateViewModel @Inject constructor(
                 }
             }
 
-            is RecurringEntryCreateAction.CategoryChanged -> {
-                updateFormState { currentState ->
-                    currentState.copy(category = action.value)
-                }
-            }
-
             is RecurringEntryCreateAction.NameChanged -> {
                 updateFormState { currentState ->
                     currentState.copy(name = action.value)
@@ -107,8 +101,7 @@ class RecurringEntryCreateViewModel @Inject constructor(
                 _state.update { currentState ->
                     val currencySelection = resolveRecurringEntryCurrencySelection(
                         cachedMetadata = metadata,
-                        currentCode = currentState.form.currencyCode,
-                        preferFirstCachedOverDefault = true
+                        currentCode = currentState.form.currencyCode
                     )
 
                     currentState.copy(
