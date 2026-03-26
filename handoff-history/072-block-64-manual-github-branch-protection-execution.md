@@ -1,21 +1,20 @@
 Next block name
-BLOCK 82 - Manual GitHub Branch Protection Completion
+BLOCK 64 - Manual GitHub Branch Protection Execution
 
 Objective
-Use GitHub access outside this workspace to finish the pending branch-protection application flow from the current validated local baseline: inspect a successful Android CI run, configure the protected `main` branch checks, verify them on a pull request, complete the report, and rerun the complete-mode validator locally.
+Use GitHub access outside this workspace to finish the branch-protection workflow: inspect a successful Android CI run, configure the required checks on the protected branch, verify them on a pull request, complete the application report, and rerun the complete-mode validator locally.
 
 Relevant files
 - .github/workflows/android-ci.yml
 - docs/branch-protection-required-checks.md
-- scripts/validate-branch-protection-checks.sh
 - scripts/validate-branch-protection-application-report.sh
 - scripts/validate-branch-protection-application-report.ps1
 - handoff/branch-protection-application-report.md
 - handoff/validation-report.md
 
 Constraints
-- Treat the 2026-03-26 rerun of `bash scripts/validate-branch-protection-checks.sh` recorded in `handoff/validation-report.md` as the current local baseline unless `.github/workflows/android-ci.yml` or `docs/branch-protection-required-checks.md` changes again before the manual GitHub work starts
-- Perform the workflow-run inspection, branch-protection rule update, and pull-request verification manually on GitHub because they remain impossible from this local workspace
+- Treat the existing preflight result in `handoff/branch-protection-application-report.md` as still valid unless `.github/workflows/android-ci.yml` or `docs/branch-protection-required-checks.md` changes first
+- Perform the live run inspection, branch-rule update, and pull-request verification manually on GitHub because they cannot be completed from this local workspace
 - Preserve the required-check labels `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug` unless GitHub shows different emitted labels on the successful workflow run
 - Limit scope to the manual branch-protection application flow and its report/validation artifacts
 
@@ -34,4 +33,4 @@ Done criteria
 
 ## Execution Recommendation
 - Recommended reasoning effort: low
-- Rationale: The next block remains a manual GitHub checklist plus one final local validator run after the external work is complete.
+- Rationale: The remaining work is still a direct manual GitHub execution checklist followed by one targeted local validator run.

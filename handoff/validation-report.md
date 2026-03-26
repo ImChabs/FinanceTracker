@@ -1,32 +1,34 @@
 # Validation Report
 
 Current block
-- Name: Android CI workflow setup
-- Scope: Add a minimal GitHub Actions workflow that reuses the repo compile and unit-test validation scripts and runs Android lint for the single app module.
+- Name: BLOCK 81 - Branch Protection External Blocker Confirmation
+- Scope: Reconfirm that the manual GitHub branch-protection completion block is still blocked outside this workspace while the current Android CI workflow job labels remain aligned with the documented required checks.
 
 Loop 1
-- Validation target: `bash scripts/validate-compile.sh`
-- Underlying command: `./gradlew :app:compileDebugKotlin`
-- Why this target: The workflow reuses the repo's targeted compile validation script, and `AGENTS.md` identifies it as the default compile verification for app Kotlin changes.
-- Final status: failed_unresolved
+- Validation target: `bash scripts/validate-branch-protection-checks.sh`
+- Underlying command: `bash scripts/validate-branch-protection-checks.sh`
+- Why this target: The only implementable local scope in this block is confirming that the workflow job names still match the documented required branch-protection labels before handing the GitHub-only work forward again.
+- Final status: passed
 - Attempts used: 1/3
-- Run 1: Failed before task execution because the sandboxed environment cannot download the Gradle 9.4.1 distribution required by the wrapper (`java.net.SocketException: Operation not permitted`).
+- Run 1: Passed on 2026-03-26. `bash scripts/validate-branch-protection-checks.sh` confirmed the workflow still emits `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug`, matching `docs/branch-protection-required-checks.md`.
 - Run 2: Not used.
 - Run 3: Not used.
-- In-scope fixes applied: Normalized `scripts/validate-compile.sh` to LF line endings so the Bash validation entry point now runs correctly on Linux before reaching the Gradle wrapper.
-- Outstanding issues: Local compile verification could not complete in this environment because network access is disabled and the required Gradle distribution is not preinstalled.
+- In-scope fixes applied: Refreshed the live next-block handoff and archive so the remaining GitHub-only completion work carries forward from the revalidated local baseline.
+- Outstanding issues: The manual GitHub tasks still cannot be completed from this workspace, so `handoff/branch-protection-application-report.md` intentionally retains placeholders and `bash scripts/validate-branch-protection-application-report.sh complete` remains blocked on external execution.
 
 Loop 2
-- Validation target: `bash scripts/validate-unit-tests.sh`
-- Underlying command: `./gradlew :app:testDebugUnitTest`
-- Why this target: The workflow reuses the repo's targeted unit-test validation script, so the same entry point is the smallest meaningful verification for the test job.
-- Final status: failed_unresolved
-- Attempts used: 1/3
-- Run 1: Failed before task execution for the same environment reason as Loop 1: the Gradle wrapper could not fetch Gradle 9.4.1 because outbound network access is blocked.
+- Validation target: Not run.
+- Underlying command: Not run.
+- Why this target: A second validation loop was not needed because the single relevant local preflight check passed and the remaining acceptance criteria require manual GitHub access.
+- Final status: not_run
+- Attempts used: 0/3
+- Run 1: Not used.
 - Run 2: Not used.
 - Run 3: Not used.
-- In-scope fixes applied: Normalized `scripts/validate-unit-tests.sh` to LF line endings so the Bash validation entry point now runs correctly on Linux before reaching the Gradle wrapper.
-- Outstanding issues: Unit-test verification remains blocked by the sandbox's network restriction.
+- In-scope fixes applied: None recorded.
+- Outstanding issues: None recorded.
 
 Notes
-- `:app:lintDebug` was selected for CI because this repository currently declares a single `:app` module and no product flavors. It was not executed locally for the same Gradle-distribution/network constraint.
+- The current local baseline for the manual completion block is the successful 2026-03-26 rerun of `bash scripts/validate-branch-protection-checks.sh`.
+- This workspace still cannot inspect GitHub Actions runs, edit protected-branch settings, or verify pull-request merge-box checks on GitHub.
+- The required-check labels to configure remain `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug` unless GitHub shows different emitted labels on the successful workflow run.
