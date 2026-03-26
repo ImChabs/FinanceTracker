@@ -12,6 +12,11 @@ Before changing branch protection, run the repo-local label validation command f
 
 Record the manual GitHub-side findings in `handoff/branch-protection-application-report.md` while you complete the steps below so the repository keeps an auditable record of the live run, applied branch rule, and pull-request verification.
 
+After filling out the report, run the repo-local report validator in complete mode for your shell before considering the manual branch-protection work done:
+
+- WSL/Bash: `bash scripts/validate-branch-protection-application-report.sh complete`
+- PowerShell/Windows: `.\scripts\validate-branch-protection-application-report.ps1 -Mode complete`
+
 ## Required check labels
 
 Confirm that the latest successful run from `.github/workflows/android-ci.yml` exposes these exact check names:
@@ -39,6 +44,7 @@ If GitHub displays a different label for any check, update this document and `ha
 10. Save the branch protection rule and record the configured checks in `handoff/branch-protection-application-report.md`.
 11. Open or refresh a pull request targeting the protected branch and confirm the three required checks appear as merge requirements.
 12. Record the pull request URL and final verification result in `handoff/branch-protection-application-report.md`.
+13. Run the repo-local report validator in complete mode and confirm it passes.
 
 ## Verification checklist
 
@@ -48,3 +54,4 @@ If GitHub displays a different label for any check, update this document and `ha
 - The protected branch requires those same checks before merge.
 - A pull request shows those checks in the merge box without any unexpected duplicate or stale check names.
 - `handoff/branch-protection-application-report.md` is fully filled out with the live GitHub verification details.
+- The repo-local report validator passes in complete mode against `handoff/branch-protection-application-report.md`.

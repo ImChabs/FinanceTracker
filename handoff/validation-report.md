@@ -1,19 +1,19 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 55 - Branch Protection Application Report Template
-- Scope: Add a dedicated handoff report for the manual GitHub branch-protection follow-through and update the runbook so the live Actions run, configured checks, and PR verification are recorded in one place.
+- Name: BLOCK 56 - Branch Protection Application Report Validator
+- Scope: Add repo-local validation scripts for the manual branch-protection application report so the GitHub-side follow-through has a repeatable structural check now and a complete-mode validation step after the report is filled out.
 
 Loop 1
-- Validation target: `python3` branch-protection report/runbook structure check
-- Underlying command: `python3 - <<'PY' ... verify handoff/branch-protection-application-report.md headings and docs/branch-protection-required-checks.md references ... PY`
-- Why this target: The changed scope is a manual-report template plus runbook wiring, so the smallest meaningful verification is confirming the new report file contains the expected sections and the runbook points operators to it explicitly.
+- Validation target: `bash scripts/validate-branch-protection-application-report.sh`
+- Underlying command: `bash scripts/validate-branch-protection-application-report.sh`
+- Why this target: The changed scope is a new report-validation helper and runbook update, so the smallest meaningful verification is running the helper in its default structural mode against the current pending report template.
 - Final status: passed
 - Attempts used: 1/3
-- Run 1: Passed. Verified that `handoff/branch-protection-application-report.md` contains the expected manual-completion sections and that `docs/branch-protection-required-checks.md` explicitly instructs operators to update that report while completing the GitHub-side steps.
+- Run 1: Passed. `bash scripts/validate-branch-protection-application-report.sh` confirmed the current report includes the expected sections in structural mode.
 - Run 2: Not used.
 - Run 3: Not used.
-- In-scope fixes applied: Added `handoff/branch-protection-application-report.md` and updated the runbook so manual branch-protection work records the live run URL, observed labels, configured checks, and PR verification result.
+- In-scope fixes applied: Added Bash and PowerShell report-validation scripts and updated the runbook so the eventual manual GitHub follow-through ends with a local complete-mode validation step.
 - Outstanding issues: The actual GitHub Actions run inspection and branch-protection update still require manual GitHub access outside this workspace.
 
 Loop 2
@@ -33,4 +33,4 @@ Notes
 - `Android CI - Assemble Debug`
 - `Android CI - Unit Tests`
 - `Android CI - Lint Debug`
-- The runbook now points to a dedicated handoff report artifact for the final manual GitHub-side completion.
+- The runbook now includes both the preflight label check and a final complete-mode validation command for the manual application report.

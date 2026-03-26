@@ -2,7 +2,7 @@ Next block name
 BLOCK 57 - Manual Branch Protection Check Application
 
 Objective
-Run the repo-local preflight check, inspect the first successful Android CI run on GitHub, apply the documented required checks in branch protection for the protected branch, and fill out the manual application report.
+Run the repo-local preflight check, inspect the first successful Android CI run on GitHub, apply the documented required checks in branch protection for the protected branch, fill out the manual application report, and validate the completed report locally.
 
 Relevant files
 - .github/workflows/android-ci.yml
