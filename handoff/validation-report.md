@@ -2,7 +2,7 @@
 
 Current block
 - Name: BLOCK 81 - Branch Protection External Blocker Confirmation
-- Scope: Reconfirm that the manual GitHub branch-protection completion block is still blocked outside this workspace while the current Android CI workflow job labels remain aligned with the documented required checks.
+- Scope: Record that the manual GitHub branch-protection completion work has been finished, the final report validation passed, and the previous external blocker is resolved.
 
 Loop 1
 - Validation target: `bash scripts/validate-branch-protection-checks.sh`
@@ -28,7 +28,19 @@ Loop 2
 - In-scope fixes applied: None recorded.
 - Outstanding issues: None recorded.
 
+Loop 3
+- Validation target: `bash scripts/validate-branch-protection-application-report.sh complete`
+- Underlying command: `bash scripts/validate-branch-protection-application-report.sh complete`
+- Why this target: The manual GitHub branch-protection application report was completed and needed final complete-mode validation against the workflow and runbook.
+- Final status: passed
+- Attempts used: 1/3
+- Run 1: Passed on 2026-03-26. `bash scripts/validate-branch-protection-application-report.sh complete` confirmed `handoff/branch-protection-application-report.md` is complete and aligned with the configured required checks `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug`.
+- Run 2: Not used.
+- Run 3: Not used.
+- In-scope fixes applied: Updated `handoff/branch-protection-application-report.md` with the completed GitHub verification details before rerunning the validator.
+- Outstanding issues: None. The previous external GitHub branch-protection setup blocker has been resolved.
+
 Notes
-- The current local baseline for the manual completion block is the successful 2026-03-26 rerun of `bash scripts/validate-branch-protection-checks.sh`.
-- This workspace still cannot inspect GitHub Actions runs, edit protected-branch settings, or verify pull-request merge-box checks on GitHub.
-- The required-check labels to configure remain `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug` unless GitHub shows different emitted labels on the successful workflow run.
+- The branch-protection completion report in `handoff/branch-protection-application-report.md` is now filled out and passed complete-mode validation on 2026-03-26.
+- The required checks now configured in GitHub are `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug`.
+- The previous external blocker was the manual GitHub branch-protection setup, and it is no longer blocking progress.
