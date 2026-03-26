@@ -1,19 +1,19 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 54 - Branch Protection Label Validation Script
-- Scope: Add a repo-local validation script for branch-protection required-check labels and update the runbook so manual GitHub branch-protection changes start from a repeatable local preflight check.
+- Name: BLOCK 55 - Branch Protection Application Report Template
+- Scope: Add a dedicated handoff report for the manual GitHub branch-protection follow-through and update the runbook so the live Actions run, configured checks, and PR verification are recorded in one place.
 
 Loop 1
-- Validation target: `bash scripts/validate-branch-protection-checks.sh`
-- Underlying command: `bash scripts/validate-branch-protection-checks.sh`
-- Why this target: The changed scope is a repo-local validation helper and runbook update, so the smallest meaningful verification is running the new script against the current workflow and documentation files.
+- Validation target: `python3` branch-protection report/runbook structure check
+- Underlying command: `python3 - <<'PY' ... verify handoff/branch-protection-application-report.md headings and docs/branch-protection-required-checks.md references ... PY`
+- Why this target: The changed scope is a manual-report template plus runbook wiring, so the smallest meaningful verification is confirming the new report file contains the expected sections and the runbook points operators to it explicitly.
 - Final status: passed
 - Attempts used: 1/3
-- Run 1: Passed. `bash scripts/validate-branch-protection-checks.sh` confirmed the runbook labels match the job names in `.github/workflows/android-ci.yml`: `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug`.
+- Run 1: Passed. Verified that `handoff/branch-protection-application-report.md` contains the expected manual-completion sections and that `docs/branch-protection-required-checks.md` explicitly instructs operators to update that report while completing the GitHub-side steps.
 - Run 2: Not used.
 - Run 3: Not used.
-- In-scope fixes applied: Added Bash and PowerShell branch-protection label validation scripts and updated the runbook to require the local preflight check before manual GitHub configuration.
+- In-scope fixes applied: Added `handoff/branch-protection-application-report.md` and updated the runbook so manual branch-protection work records the live run URL, observed labels, configured checks, and PR verification result.
 - Outstanding issues: The actual GitHub Actions run inspection and branch-protection update still require manual GitHub access outside this workspace.
 
 Loop 2
@@ -33,4 +33,4 @@ Notes
 - `Android CI - Assemble Debug`
 - `Android CI - Unit Tests`
 - `Android CI - Lint Debug`
-- The runbook now has a dedicated repo-local preflight validation command for the manual GitHub branch-protection step.
+- The runbook now points to a dedicated handoff report artifact for the final manual GitHub-side completion.
