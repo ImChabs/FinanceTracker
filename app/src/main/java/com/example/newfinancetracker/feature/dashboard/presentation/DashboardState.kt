@@ -23,7 +23,7 @@ data class DashboardState(
     val isCurrencySyncInProgress: Boolean = false
 ) {
     val isEmpty: Boolean
-        get() = !isLoading && recurringEntries.isEmpty()
+        get() = !isLoading && savedEntryCount == 0
 
     val hasMixedActiveCurrencies: Boolean
         get() = activeCurrencyCodes.size > 1
@@ -75,7 +75,8 @@ internal fun DashboardRelativeDueContext?.toUpcomingPaymentUrgency(): DashboardU
 internal fun List<RecurringEntry>.toDashboardState(
     referenceDate: Date = Date()
 ): DashboardState {
-    val recurringEntryItems = map { entry ->
+    val activeEntries = filter { it.isActive }
+    val recurringEntryItems = activeEntries.map { entry ->
         DashboardRecurringEntryItem(
             id = entry.id,
             name = entry.name,
@@ -89,7 +90,6 @@ internal fun List<RecurringEntry>.toDashboardState(
             notes = entry.notes?.trim()?.ifBlank { null }
         )
     }
-    val activeEntries = filter { it.isActive }
     val upcomingPayments = activeEntries
         .mapNotNull { entry ->
             entry.nextPaymentDate.toIsoSortKey()?.let {
@@ -113,7 +113,7 @@ internal fun List<RecurringEntry>.toDashboardState(
         },
         activeEntryCount = activeEntries.size,
         activeCurrencyCodes = activeEntries.map { it.currencyCode }.toSet(),
-        savedEntryCount = recurringEntryItems.size,
+        savedEntryCount = size,
         recurringEntries = recurringEntryItems,
         upcomingPayments = upcomingPayments
     )

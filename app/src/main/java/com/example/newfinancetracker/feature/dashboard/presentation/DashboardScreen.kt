@@ -159,26 +159,32 @@ fun DashboardScreen(
 
                 else -> {
                     Text(
-                        text = stringResource(R.string.dashboard_entries_title),
+                        text = stringResource(R.string.dashboard_active_entries_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = stringResource(
-                            R.string.dashboard_entries_count,
-                            state.savedEntryCount
+                            R.string.dashboard_active_entries_count,
+                            state.activeEntryCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f)
                     )
 
-                    state.recurringEntries.forEach { entry ->
-                        RecurringEntryCard(
-                            entry = entry,
-                            onClick = {
-                                onAction(DashboardAction.RecurringEntryClicked(entry.id))
-                            }
+                    if (state.recurringEntries.isEmpty()) {
+                        DashboardStateMessageCard(
+                            body = stringResource(R.string.dashboard_active_entries_empty)
                         )
+                    } else {
+                        state.recurringEntries.forEach { entry ->
+                            RecurringEntryCard(
+                                entry = entry,
+                                onClick = {
+                                    onAction(DashboardAction.RecurringEntryClicked(entry.id))
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -597,7 +603,7 @@ private fun RecurringEntryCard(
 ) {
     val accessibilitySummary = entry.toAccessibilitySummary()
     val accessibilityStateDescription = entry.accessibilityStatusLabel()
-    val editActionLabel = stringResource(R.string.dashboard_saved_entry_edit_action_label)
+    val editActionLabel = stringResource(R.string.dashboard_active_entry_edit_action_label)
 
     Card(
         colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
@@ -797,7 +803,7 @@ private fun DashboardRecurringEntryItem.toAccessibilitySummary(): String {
 
     return if (notes.isNullOrBlank()) {
         stringResource(
-            R.string.dashboard_saved_entry_accessibility_summary,
+            R.string.dashboard_active_entry_accessibility_summary,
             name,
             formattedAmount,
             typeLabel,
@@ -809,7 +815,7 @@ private fun DashboardRecurringEntryItem.toAccessibilitySummary(): String {
         )
     } else {
         stringResource(
-            R.string.dashboard_saved_entry_accessibility_summary_with_notes,
+            R.string.dashboard_active_entry_accessibility_summary_with_notes,
             name,
             formattedAmount,
             typeLabel,
@@ -892,18 +898,6 @@ private fun DashboardScreenPreview() {
                         category = "Housing",
                         type = RecurringEntryType.RECURRING_EXPENSE,
                         isActive = true,
-                        notes = null
-                    ),
-                    DashboardRecurringEntryItem(
-                        id = 3L,
-                        name = "Gym Membership",
-                        amount = 29.99,
-                        currencyCode = "JPY",
-                        billingFrequency = BillingFrequency.MONTHLY,
-                        nextPaymentDate = "2026-04-05",
-                        category = "Health",
-                        type = RecurringEntryType.SUBSCRIPTION,
-                        isActive = false,
                         notes = null
                     )
                 )

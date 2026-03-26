@@ -6,6 +6,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasClickAction
@@ -35,7 +36,7 @@ class DashboardScreenTest {
             state = currencyCodeDashboardState()
         )
 
-        composeRule.onAllNodesWithText("Currency: EUR").assertCountEquals(1)
+        composeRule.onAllNodesWithText("Currency: EUR").assertCountEquals(0)
         composeRule.onAllNodesWithText("Currency: JPY").assertCountEquals(2)
     }
 
@@ -48,7 +49,7 @@ class DashboardScreenTest {
 
             composeRule.onAllNodesWithText("€19.99").assertCountEquals(2)
             composeRule.onAllNodesWithText("¥1,200").assertCountEquals(2)
-            composeRule.onAllNodesWithText("US 42.50").assertCountEquals(1)
+            composeRule.onAllNodesWithText("US 42.50").assertCountEquals(0)
         }
     }
 
@@ -105,7 +106,7 @@ class DashboardScreenTest {
 
             composeRule.onAllNodesWithText("Mar 31, 2026 - Streaming").assertCountEquals(1)
             composeRule.onAllNodesWithText("Next payment Mar 31, 2026").assertCountEquals(1)
-            composeRule.onAllNodesWithText("Next payment 31/03/2026").assertCountEquals(1)
+            composeRule.onAllNodesWithText("Next payment 31/03/2026").assertCountEquals(0)
         }
     }
 
@@ -191,7 +192,7 @@ class DashboardScreenTest {
     }
 
     @Test
-    fun dashboardScreen_savedRecurringEntryCardExposesMergedAccessibilitySummaryAndClickAction() {
+    fun dashboardScreen_activeRecurringEntryCardExposesMergedAccessibilitySummaryAndClickAction() {
         withLocale(Locale.US) {
             val actions = mutableListOf<DashboardAction>()
 
@@ -204,7 +205,7 @@ class DashboardScreenTest {
                 "Netflix, \$15.99, Subscription, Monthly, Mar 31, 2026, Streaming, USD, Active, Notes: Family plan"
             ).assert(hasClickAction())
                 .assert(hasStateDescription("Active"))
-                .assert(hasClickLabel("Edit saved recurring entry"))
+                .assert(hasClickLabel("Edit active recurring entry"))
                 .performClick()
 
             assertEquals(listOf(DashboardAction.RecurringEntryClicked(5L)), actions)
@@ -266,11 +267,28 @@ class DashboardScreenTest {
 
         composeRule.onNodeWithText("No recurring entries yet").assertExists()
         composeRule.onNodeWithText(
-            "Add your first subscription or recurring expense to start seeing your monthly total and saved items here."
+            "Add your first subscription or recurring expense to start seeing your monthly total and active entries here."
         ).assertExists()
         composeRule.assertSingleStaticDashboardCard(
-            "No recurring entries yet. Add your first subscription or recurring expense to start seeing your monthly total and saved items here."
+            "No recurring entries yet. Add your first subscription or recurring expense to start seeing your monthly total and active entries here."
         )
+    }
+
+    @Test
+    fun dashboardScreen_inactiveOnlyEntriesShowActiveSectionEmptyStateWithoutFullScreenEmptyState() {
+        composeRule.setDashboardContent(
+            state = dashboardState(
+                savedEntryCount = 1,
+                recurringEntries = emptyList()
+            )
+        )
+
+        composeRule.onNodeWithText("No recurring entries yet").assertDoesNotExist()
+        composeRule.onNodeWithText("Active recurring entries").assertExists()
+        composeRule.onNodeWithText("0 active entries").assertExists()
+        composeRule.onNodeWithText(
+            "No active recurring entries yet. Inactive entries stay saved but will not appear here."
+        ).assertExists()
     }
 
     @Test
