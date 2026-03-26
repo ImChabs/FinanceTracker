@@ -89,7 +89,7 @@ class DashboardStateTest {
             state.upcomingPayments.map { it.nextPaymentDate }
         )
         assertEquals(
-            listOf("USD", "EUR", "JPY", "GBP", "CAD"),
+            listOf("USD", "EUR", "JPY", "GBP"),
             state.recurringEntries.map { it.currencyCode }
         )
         assertEquals(
