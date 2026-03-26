@@ -11,26 +11,26 @@ Preflight
 - Preflight result: pass
 
 GitHub Actions verification
-- Workflow run URL: <fill in URL>
-- Workflow run conclusion: <success|other>
+- Workflow run URL: https://github.com/ImChabs/FinanceTracker/actions/runs/23607589328
+- Workflow run conclusion: success
 - Observed check labels:
-  - <fill in label 1>
-  - <fill in label 2>
-  - <fill in label 3>
-- Labels matched the runbook exactly: <yes|no>
+  - Android CI - Assemble Debug
+  - Android CI - Unit Tests
+  - Android CI - Lint Debug
+- Labels matched the runbook exactly: yes
 
 Branch protection update
-- Branch rule URL or settings location: <fill in URL or note>
+- Branch rule URL or settings location: https://github.com/ImChabs/FinanceTracker/settings/branches
 - Required status checks configured:
-  - <fill in configured check 1>
-  - <fill in configured check 2>
-  - <fill in configured check 3>
-- Require status checks before merging enabled: <yes|no>
+  - Android CI - Assemble Debug
+  - Android CI - Unit Tests
+  - Android CI - Lint Debug
+- Require status checks before merging enabled: yes
 
 Pull request verification
-- Pull request URL: <fill in URL>
-- Merge box showed the expected required checks: <yes|no>
-- Unexpected duplicate or stale checks present: <yes|no>
+- Pull request URL: https://github.com/ImChabs/FinanceTracker/pull/12
+- Merge box showed the expected required checks: yes
+- Unexpected duplicate or stale checks present: no
 
 Notes
 - Local preflight was rerun from the workspace on 2026-03-26 and confirmed the workflow job names still match the documented required-check labels.
