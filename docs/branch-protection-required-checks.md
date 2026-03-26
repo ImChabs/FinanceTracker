@@ -17,6 +17,8 @@ After filling out the report, run the repo-local report validator in complete mo
 - WSL/Bash: `bash scripts/validate-branch-protection-application-report.sh complete`
 - PowerShell/Windows: `.\scripts\validate-branch-protection-application-report.ps1 -Mode complete`
 
+The complete-mode validator checks more than placeholder removal: it also confirms the report's observed check labels and configured required checks still match both the runbook and the workflow job names.
+
 ## Required check labels
 
 Confirm that the latest successful run from `.github/workflows/android-ci.yml` exposes these exact check names:

@@ -1,19 +1,19 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 56 - Branch Protection Application Report Validator
-- Scope: Add repo-local validation scripts for the manual branch-protection application report so the GitHub-side follow-through has a repeatable structural check now and a complete-mode validation step after the report is filled out.
+- Name: BLOCK 57 - Branch Protection Report Label Consistency Validation
+- Scope: Strengthen the manual branch-protection report validator so complete-mode validation confirms the filled report's observed labels and configured checks match the runbook and the workflow job names.
 
 Loop 1
 - Validation target: `bash scripts/validate-branch-protection-application-report.sh`
 - Underlying command: `bash scripts/validate-branch-protection-application-report.sh`
-- Why this target: The changed scope is a new report-validation helper and runbook update, so the smallest meaningful verification is running the helper in its default structural mode against the current pending report template.
+- Why this target: The changed scope is a report-validation enhancement, so the smallest meaningful verification is running the validator in structural mode to confirm the updated helper still accepts the current pending template while preserving the stronger complete-mode logic for the later manual step.
 - Final status: passed
 - Attempts used: 1/3
-- Run 1: Passed. `bash scripts/validate-branch-protection-application-report.sh` confirmed the current report includes the expected sections in structural mode.
+- Run 1: Passed. `bash scripts/validate-branch-protection-application-report.sh` confirmed the current report still validates in structural mode after the helper was extended with stronger complete-mode label checks.
 - Run 2: Not used.
 - Run 3: Not used.
-- In-scope fixes applied: Added Bash and PowerShell report-validation scripts and updated the runbook so the eventual manual GitHub follow-through ends with a local complete-mode validation step.
+- In-scope fixes applied: Extended the Bash and PowerShell report validators so complete mode now compares the filled report's observed labels and configured required checks against both `docs/branch-protection-required-checks.md` and `.github/workflows/android-ci.yml`, and updated the runbook to explain that stronger completion check.
 - Outstanding issues: The actual GitHub Actions run inspection and branch-protection update still require manual GitHub access outside this workspace.
 
 Loop 2
@@ -33,4 +33,4 @@ Notes
 - `Android CI - Assemble Debug`
 - `Android CI - Unit Tests`
 - `Android CI - Lint Debug`
-- The runbook now includes both the preflight label check and a final complete-mode validation command for the manual application report.
+- The final report validator now checks exact label consistency, not just placeholder removal.
