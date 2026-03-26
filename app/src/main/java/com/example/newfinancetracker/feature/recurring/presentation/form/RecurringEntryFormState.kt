@@ -16,7 +16,6 @@ data class RecurringEntryFormState(
     val name: String = "",
     val amount: String = "",
     val currencyCode: String = DEFAULT_CURRENCY_CODE,
-    val category: String = "",
     val nextPaymentDate: String = "",
     val notes: String = "",
     val type: RecurringEntryType = RecurringEntryType.SUBSCRIPTION,
@@ -27,7 +26,6 @@ data class RecurringEntryFormState(
         get() = name.isNotBlank() &&
             parseAmount(amount) != null &&
             currencyCode.isNotBlank() &&
-            category.isNotBlank() &&
             isValidIsoDate(nextPaymentDate)
 }
 
@@ -36,7 +34,6 @@ internal fun RecurringEntry.toFormState(): RecurringEntryFormState =
         name = name,
         amount = amount.toString(),
         currencyCode = currencyCode,
-        category = category,
         nextPaymentDate = nextPaymentDate,
         notes = notes.orEmpty(),
         type = type,
@@ -49,10 +46,14 @@ internal fun RecurringEntryFormState.toRecurringEntry(id: Long = 0L): RecurringE
         id = id,
         name = name.trim(),
         amount = requireNotNull(parseAmount(amount)),
-        currencyCode = currencyCode.trim().uppercase(Locale.US).ifBlank { DEFAULT_CURRENCY_CODE },
+        currencyCode = currencyCode
+            .trim()
+            .uppercase(Locale.US)
+            .takeIf(::isSupportedRecurringEntryCurrencyCode)
+            ?: DEFAULT_CURRENCY_CODE,
         billingFrequency = billingFrequency,
         nextPaymentDate = nextPaymentDate.trim(),
-        category = category.trim(),
+        category = DEFAULT_RECURRING_ENTRY_CATEGORY,
         type = type,
         isActive = isActive,
         notes = notes.trim().ifBlank { null }
@@ -162,5 +163,6 @@ private fun isoDateFormatter(): SimpleDateFormat =
     }
 
 private const val ISO_DATE_PATTERN: String = "yyyy-MM-dd"
+private const val DEFAULT_RECURRING_ENTRY_CATEGORY: String = ""
 private val ISO_DATE_REGEX = Regex("""\d{4}-\d{2}-\d{2}""")
 private val UTC_TIME_ZONE: TimeZone = TimeZone.getTimeZone("UTC")

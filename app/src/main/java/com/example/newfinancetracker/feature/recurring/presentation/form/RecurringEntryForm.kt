@@ -69,7 +69,6 @@ fun RecurringEntryFormScreen(
     onNameChanged: (String) -> Unit,
     onAmountChanged: (String) -> Unit,
     onCurrencyCodeChanged: (String) -> Unit,
-    onCategoryChanged: (String) -> Unit,
     onNextPaymentDateChanged: (String) -> Unit,
     onTypeChanged: (RecurringEntryType) -> Unit,
     onBillingFrequencyChanged: (BillingFrequency) -> Unit,
@@ -150,23 +149,6 @@ fun RecurringEntryFormScreen(
                     selectedCurrencyCode = formState.currencyCode,
                     currencyOptions = currencyOptions,
                     onCurrencySelected = onCurrencyCodeChanged
-                )
-
-                OutlinedTextField(
-                    value = formState.category,
-                    onValueChange = onCategoryChanged,
-                    label = { Text(text = stringResource(R.string.recurring_create_category_label)) },
-                    placeholder = {
-                        Text(text = stringResource(R.string.recurring_create_category_placeholder))
-                    },
-                    isError = showValidationErrors && formState.category.isBlank(),
-                    supportingText = {
-                        if (showValidationErrors && formState.category.isBlank()) {
-                            Text(text = stringResource(R.string.recurring_create_validation_category))
-                        }
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
                 )
             }
 

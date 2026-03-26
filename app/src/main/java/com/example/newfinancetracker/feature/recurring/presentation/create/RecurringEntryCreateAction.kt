@@ -7,7 +7,6 @@ sealed interface RecurringEntryCreateAction {
     data class NameChanged(val value: String) : RecurringEntryCreateAction
     data class AmountChanged(val value: String) : RecurringEntryCreateAction
     data class CurrencyCodeChanged(val value: String) : RecurringEntryCreateAction
-    data class CategoryChanged(val value: String) : RecurringEntryCreateAction
     data class NextPaymentDateChanged(val value: String) : RecurringEntryCreateAction
     data class NotesChanged(val value: String) : RecurringEntryCreateAction
     data class TypeChanged(val value: RecurringEntryType) : RecurringEntryCreateAction

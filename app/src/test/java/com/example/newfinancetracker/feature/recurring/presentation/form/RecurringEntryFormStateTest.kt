@@ -31,7 +31,6 @@ class RecurringEntryFormStateTest {
                 name = "Gym Membership",
                 amount = "29.99",
                 currencyCode = "USD",
-                category = "Health",
                 nextPaymentDate = "2026-05-10",
                 notes = "Bring access card",
                 type = RecurringEntryType.SUBSCRIPTION,
@@ -47,8 +46,7 @@ class RecurringEntryFormStateTest {
         val recurringEntry = RecurringEntryFormState(
             name = "  Rent  ",
             amount = "1,450.00",
-            currencyCode = " eur ",
-            category = " Housing ",
+            currencyCode = " pyg ",
             nextPaymentDate = "2026-04-01",
             notes = "   ",
             type = RecurringEntryType.RECURRING_EXPENSE,
@@ -59,8 +57,8 @@ class RecurringEntryFormStateTest {
         assertEquals(9L, recurringEntry.id)
         assertEquals("Rent", recurringEntry.name)
         assertEquals(1450.0, recurringEntry.amount, 0.0)
-        assertEquals("EUR", recurringEntry.currencyCode)
-        assertEquals("Housing", recurringEntry.category)
+        assertEquals("PYG", recurringEntry.currencyCode)
+        assertEquals("", recurringEntry.category)
         assertNull(recurringEntry.notes)
     }
 
@@ -69,7 +67,6 @@ class RecurringEntryFormStateTest {
         val formState = RecurringEntryFormState(
             name = "Netflix",
             amount = "1,250.99",
-            category = "Streaming",
             nextPaymentDate = "2026-03-31"
         )
 
@@ -82,7 +79,18 @@ class RecurringEntryFormStateTest {
             name = "Cloud Storage",
             amount = "4.99",
             currencyCode = "   ",
-            category = "Productivity",
+            nextPaymentDate = "2026-06-01"
+        ).toRecurringEntry()
+
+        assertEquals(DEFAULT_CURRENCY_CODE, recurringEntry.currencyCode)
+    }
+
+    @Test
+    fun `form state falls back to default currency when conversion receives unsupported code`() {
+        val recurringEntry = RecurringEntryFormState(
+            name = "Cloud Storage",
+            amount = "4.99",
+            currencyCode = "eur",
             nextPaymentDate = "2026-06-01"
         ).toRecurringEntry()
 

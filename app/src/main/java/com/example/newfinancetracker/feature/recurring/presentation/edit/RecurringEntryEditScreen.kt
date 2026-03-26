@@ -124,7 +124,6 @@ fun RecurringEntryEditScreen(
                 onNameChanged = { onAction(RecurringEntryEditAction.NameChanged(it)) },
                 onAmountChanged = { onAction(RecurringEntryEditAction.AmountChanged(it)) },
                 onCurrencyCodeChanged = { onAction(RecurringEntryEditAction.CurrencyCodeChanged(it)) },
-                onCategoryChanged = { onAction(RecurringEntryEditAction.CategoryChanged(it)) },
                 onNextPaymentDateChanged = {
                     onAction(RecurringEntryEditAction.NextPaymentDateChanged(it))
                 },
@@ -295,7 +294,6 @@ private fun RecurringEntryEditScreenPreview() {
                     name = "Rent",
                     amount = "1450.00",
                     currencyCode = "USD",
-                    category = "Housing",
                     nextPaymentDate = "2026-04-01",
                     notes = "Due on the first"
                 )

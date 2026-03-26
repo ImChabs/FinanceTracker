@@ -76,7 +76,7 @@ internal fun List<RecurringEntry>.toDashboardState(
     referenceDate: Date = Date()
 ): DashboardState {
     val activeEntries = filter { it.isActive }
-    val recurringEntryItems = activeEntries.map { entry ->
+    val recurringEntryItems = map { entry ->
         DashboardRecurringEntryItem(
             id = entry.id,
             name = entry.name,

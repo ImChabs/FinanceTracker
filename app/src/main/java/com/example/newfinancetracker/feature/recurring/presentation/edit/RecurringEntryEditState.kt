@@ -7,9 +7,7 @@ import com.example.newfinancetracker.feature.recurring.presentation.form.Recurri
 data class RecurringEntryEditState(
     val entryId: Long,
     val form: RecurringEntryFormState = RecurringEntryFormState(),
-    val currencyOptions: List<RecurringEntryCurrencyOption> = listOf(
-        RecurringEntryCurrencyOption(code = DEFAULT_CURRENCY_CODE)
-    ),
+    val currencyOptions: List<RecurringEntryCurrencyOption> = recurringEntryDefaultCurrencyOptions(),
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
     val isDeleting: Boolean = false,
@@ -25,3 +23,14 @@ data class RecurringEntryEditState(
     val canDelete: Boolean
         get() = !isLoading && !isMissingEntry && !isSaving && !isDeleting
 }
+
+private fun recurringEntryDefaultCurrencyOptions(): List<RecurringEntryCurrencyOption> = listOf(
+    RecurringEntryCurrencyOption(
+        code = DEFAULT_CURRENCY_CODE,
+        displayName = "United States Dollar"
+    ),
+    RecurringEntryCurrencyOption(
+        code = "PYG",
+        displayName = "Paraguayan Guarani"
+    )
+)

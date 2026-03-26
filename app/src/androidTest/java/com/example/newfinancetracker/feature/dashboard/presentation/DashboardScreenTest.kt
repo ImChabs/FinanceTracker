@@ -275,20 +275,26 @@ class DashboardScreenTest {
     }
 
     @Test
-    fun dashboardScreen_inactiveOnlyEntriesShowActiveSectionEmptyStateWithoutFullScreenEmptyState() {
+    fun dashboardScreen_inactiveOnlyEntriesRemainVisibleInSavedEntriesSection() {
         composeRule.setDashboardContent(
             state = dashboardState(
                 savedEntryCount = 1,
-                recurringEntries = emptyList()
+                recurringEntries = savedEntryScenarioItems(
+                    SavedEntryScenarioFixture(
+                        id = 41L,
+                        name = "Paused gym",
+                        nextPaymentDate = "2026-03-19",
+                        isActive = false
+                    )
+                )
             )
         )
 
         composeRule.onNodeWithText("No recurring entries yet").assertDoesNotExist()
-        composeRule.onNodeWithText("Active recurring entries").assertExists()
-        composeRule.onNodeWithText("0 active entries").assertExists()
-        composeRule.onNodeWithText(
-            "No active recurring entries yet. Inactive entries stay saved but will not appear here."
-        ).assertExists()
+        composeRule.onNodeWithText("Saved recurring entries").assertExists()
+        composeRule.onNodeWithText("1 saved entries").assertExists()
+        composeRule.onNodeWithText("Paused gym").assertExists()
+        composeRule.onNodeWithText("Inactive").assertExists()
     }
 
     @Test
