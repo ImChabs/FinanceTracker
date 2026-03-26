@@ -1,14 +1,14 @@
 # Branch Protection Application Report
 
 Status
-- Completion status: pending
+- Completion status: in_progress
 - Protected branch: `main`
-- Checked by: <fill in name>
-- Checked on: <fill in YYYY-MM-DD>
+- Checked by: Codex (local workspace)
+- Checked on: 2026-03-25
 
 Preflight
-- Repo-local label validation command run: <fill in command>
-- Preflight result: <pass|fail>
+- Repo-local label validation command run: `bash scripts/validate-branch-protection-checks.sh`
+- Preflight result: pass
 
 GitHub Actions verification
 - Workflow run URL: <fill in URL>
@@ -33,4 +33,5 @@ Pull request verification
 - Unexpected duplicate or stale checks present: <yes|no>
 
 Notes
-- Record any mismatch between GitHub-emitted labels and the runbook here before changing `docs/branch-protection-required-checks.md` or `handoff/next-block.md`.
+- Local preflight was completed from the workspace on 2026-03-25 and confirmed the workflow job names still match the documented required-check labels.
+- The GitHub Actions run inspection, branch-protection rule update, and pull-request verification remain pending because they require manual GitHub access outside this local workspace.

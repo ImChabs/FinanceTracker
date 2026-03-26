@@ -1,8 +1,8 @@
 Next block name
-BLOCK 66 - Manual GitHub Branch Protection Execution
+BLOCK 61 - Manual GitHub Branch Protection Execution
 
 Objective
-Use GitHub access outside this workspace to complete the branch-protection workflow: inspect a successful Android CI run, configure the required checks on the protected branch, verify them on a pull request, finish the application report, and rerun the complete-mode validator locally.
+Use GitHub access outside this workspace to finish the branch-protection workflow: inspect a successful Android CI run, configure the required checks on the protected branch, verify them on a pull request, complete the application report, and rerun the complete-mode validator locally.
 
 Relevant files
 - .github/workflows/android-ci.yml
@@ -14,7 +14,7 @@ Relevant files
 
 Constraints
 - Treat the existing preflight result in `handoff/branch-protection-application-report.md` as still valid unless `.github/workflows/android-ci.yml` or `docs/branch-protection-required-checks.md` changes first
-- Perform the workflow-run inspection, branch-protection rule update, and pull-request verification manually on GitHub because they remain impossible from this local workspace
+- Perform the live run inspection, branch-rule update, and pull-request verification manually on GitHub because they cannot be completed from this local workspace
 - Preserve the required-check labels `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug` unless GitHub shows different emitted labels on the successful workflow run
 - Limit scope to the manual branch-protection application flow and its report/validation artifacts
 
@@ -33,4 +33,4 @@ Done criteria
 
 ## Execution Recommendation
 - Recommended reasoning effort: low
-- Rationale: The remaining work is still a manual GitHub checklist with one follow-up local validator run after the external steps are completed.
+- Rationale: The remaining work is a direct manual GitHub execution checklist followed by one targeted local validator run.

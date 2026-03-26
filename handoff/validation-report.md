@@ -1,36 +1,34 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 57 - Branch Protection Report Label Consistency Validation
-- Scope: Strengthen the manual branch-protection report validator so complete-mode validation confirms the filled report's observed labels and configured checks match the runbook and the workflow job names.
+- Name: BLOCK 65 - Branch Protection External Blocker Refresh
+- Scope: Reconfirm that the branch-protection application work still requires manual GitHub access outside this workspace, preserve the pending live application report, and rerun the smallest meaningful local validator.
 
 Loop 1
-- Validation target: `bash scripts/validate-branch-protection-application-report.sh`
-- Underlying command: `bash scripts/validate-branch-protection-application-report.sh`
-- Why this target: The changed scope is a report-validation enhancement, so the smallest meaningful verification is running the validator in structural mode to confirm the updated helper still accepts the current pending template while preserving the stronger complete-mode logic for the later manual step.
+- Validation target: `bash scripts/validate-branch-protection-application-report.sh structure`
+- Underlying command: `bash scripts/validate-branch-protection-application-report.sh structure`
+- Why this target: The active work is still blocked on manual GitHub-side actions, so report structure validation is the only local verification that can be run without inventing external evidence.
 - Final status: passed
 - Attempts used: 1/3
-- Run 1: Passed. `bash scripts/validate-branch-protection-application-report.sh` confirmed the current report still validates in structural mode after the helper was extended with stronger complete-mode label checks.
+- Run 1: Passed. `bash scripts/validate-branch-protection-application-report.sh structure` confirmed that the application report is still structurally valid while the GitHub-only fields remain intentionally incomplete.
 - Run 2: Not used.
 - Run 3: Not used.
-- In-scope fixes applied: Extended the Bash and PowerShell report validators so complete mode now compares the filled report's observed labels and configured required checks against both `docs/branch-protection-required-checks.md` and `.github/workflows/android-ci.yml`, and updated the runbook to explain that stronger completion check.
-- Outstanding issues: The actual GitHub Actions run inspection and branch-protection update still require manual GitHub access outside this workspace.
+- In-scope fixes applied: None.
+- Outstanding issues: None locally. The remaining work is still the manual GitHub workflow-run inspection, branch-rule update, and pull-request verification.
 
 Loop 2
-- Validation target: <optional second validation script>
-- Underlying command: <optional gradle command>
-- Why this target: <why a second loop was needed>
+- Validation target: Not run
+- Underlying command: Not run
+- Why this target: Complete-mode validation is still not meaningful until a GitHub operator fills the live run URL, observed labels, configured checks, and pull-request verification details.
 - Final status: not_run
 - Attempts used: 0/3
 - Run 1: Not used.
 - Run 2: Not used.
 - Run 3: Not used.
-- In-scope fixes applied: None recorded.
-- Outstanding issues: None recorded.
+- In-scope fixes applied: None.
+- Outstanding issues: After the manual GitHub work is completed, run `bash scripts/validate-branch-protection-application-report.sh complete`.
 
 Notes
-- Documented required-check labels for branch protection remain:
-- `Android CI - Assemble Debug`
-- `Android CI - Unit Tests`
-- `Android CI - Lint Debug`
-- The final report validator now checks exact label consistency, not just placeholder removal.
+- This workspace still cannot inspect GitHub Actions, edit branch protection settings, or verify a pull request merge box.
+- `handoff/branch-protection-application-report.md` was intentionally left unchanged because its placeholders still require live GitHub data.
+- The documented required-check labels remain `Android CI - Assemble Debug`, `Android CI - Unit Tests`, and `Android CI - Lint Debug`.
