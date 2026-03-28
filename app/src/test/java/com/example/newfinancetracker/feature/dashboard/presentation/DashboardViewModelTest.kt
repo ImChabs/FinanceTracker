@@ -95,6 +95,28 @@ class DashboardViewModelTest {
     }
 
     @Test
+    fun `inactive recurring entries remain in saved dashboard state while excluded from active totals`() = runTest(testDispatcher) {
+        val recurringRepository = FakeRecurringEntryRepository(
+            entries = listOf(INACTIVE_ENTRY)
+        )
+        val currencyRepository = FakeCurrencyMetadataRepository()
+
+        val viewModel = DashboardViewModel(
+            recurringEntryRepository = recurringRepository,
+            currencyMetadataRepository = currencyRepository
+        )
+
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.isLoading)
+        assertEquals(1, viewModel.state.value.savedEntryCount)
+        assertEquals(0, viewModel.state.value.activeEntryCount)
+        assertTrue(viewModel.state.value.upcomingPayments.isEmpty())
+        assertEquals(listOf(41L), viewModel.state.value.recurringEntries.map { it.id })
+        assertFalse(viewModel.state.value.recurringEntries.first().isActive)
+    }
+
+    @Test
     fun `retry currency sync emits success effect and refreshes cached metadata`() = runTest(testDispatcher) {
         val recurringRepository = FakeRecurringEntryRepository(
             entries = listOf(ACTIVE_ENTRY)
@@ -287,6 +309,17 @@ class DashboardViewModelTest {
             category = "Entertainment",
             type = RecurringEntryType.SUBSCRIPTION,
             isActive = true,
+            notes = null
+        )
+        val INACTIVE_ENTRY = RecurringEntry(
+            id = 41L,
+            name = "Paused gym",
+            amount = 10.0,
+            billingFrequency = BillingFrequency.MONTHLY,
+            nextPaymentDate = "2026-03-19",
+            category = "Utilities",
+            type = RecurringEntryType.RECURRING_EXPENSE,
+            isActive = false,
             notes = null
         )
     }

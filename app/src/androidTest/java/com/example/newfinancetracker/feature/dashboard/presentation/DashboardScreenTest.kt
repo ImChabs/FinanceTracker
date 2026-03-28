@@ -298,6 +298,37 @@ class DashboardScreenTest {
     }
 
     @Test
+    fun dashboardScreen_inactiveRecurringEntryCardDispatchesEditAction() {
+        withLocale(Locale.US) {
+            val actions = mutableListOf<DashboardAction>()
+
+            composeRule.setDashboardContent(
+                state = dashboardState(
+                    savedEntryCount = 1,
+                    recurringEntries = savedEntryScenarioItems(
+                        SavedEntryScenarioFixture(
+                            id = 41L,
+                            name = "Paused gym",
+                            nextPaymentDate = "2026-03-19",
+                            isActive = false
+                        )
+                    )
+                ),
+                onAction = actions::add
+            )
+
+            composeRule.assertSingleSavedRecurringEntryCard(
+                "Paused gym, \$10.00, Recurring expense, Monthly, Mar 19, 2026, Utilities, USD, Inactive"
+            ).assert(hasClickAction())
+                .assert(hasClickLabel("Edit active recurring entry"))
+                .assert(hasStateDescription("Inactive"))
+                .performClick()
+
+            assertEquals(listOf(DashboardAction.RecurringEntryClicked(41L)), actions)
+        }
+    }
+
+    @Test
     fun dashboardScreen_upcomingPaymentsEmptyStateShowsVisibleCopyAndMergedAccessibilitySummary() {
         composeRule.setDashboardContent(
             state = upcomingPaymentsEmptyStateDashboardState()
