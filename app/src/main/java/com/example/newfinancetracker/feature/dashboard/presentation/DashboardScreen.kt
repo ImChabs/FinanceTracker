@@ -458,17 +458,11 @@ private fun CurrencyMetadataStatus(
     state: DashboardState,
     onAction: (DashboardAction) -> Unit
 ) {
-    val statusText = currencyMetadataStatusText(state = state) ?: return
     val retryActionLabel = stringResource(R.string.dashboard_currency_retry_action_label)
 
     Column(
         verticalArrangement = Arrangement.spacedBy(FinanceTrackerSpacing.compact)
     ) {
-        Text(
-            text = statusText,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
-        )
 
         if ((state.hasCurrencySyncFailure || state.currencyMetadataCount == 0) &&
             !state.isCurrencySyncInProgress
