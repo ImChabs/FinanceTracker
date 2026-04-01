@@ -68,6 +68,7 @@ fun DashboardScreenRoot(
                         message = currencyRetrySuccessMessage
                     )
                 }
+
                 DashboardEffect.CurrencyMetadataRetryFailed -> {
                     snackbarHostState.showSnackbar(
                         message = retryFailureMessage
@@ -340,12 +341,14 @@ private fun rememberUpcomingPaymentUrgencyStyle(
             secondaryTextColor = colorScheme.onSurfaceVariant,
             dueContextColor = colorScheme.error
         )
+
         DashboardUpcomingPaymentUrgency.DUE_TODAY -> DashboardUpcomingPaymentUrgencyStyle(
             containerColor = colorScheme.primaryContainer.copy(alpha = 0.55f),
             primaryTextColor = colorScheme.onSurface,
             secondaryTextColor = colorScheme.onSurfaceVariant,
             dueContextColor = colorScheme.primary
         )
+
         DashboardUpcomingPaymentUrgency.STANDARD -> DashboardUpcomingPaymentUrgencyStyle(
             containerColor = colorScheme.surface,
             primaryTextColor = colorScheme.onSurface,
@@ -719,6 +722,7 @@ private fun DashboardRelativeDueContext.toDisplayText(): String =
             daysOverdue,
             daysOverdue
         )
+
         DashboardRelativeDueContext.DueToday -> stringResource(R.string.dashboard_due_today)
         DashboardRelativeDueContext.DueTomorrow -> stringResource(R.string.dashboard_due_tomorrow)
         is DashboardRelativeDueContext.DueInDays -> pluralStringResource(
@@ -741,9 +745,11 @@ private fun DashboardUpcomingPaymentUrgency.toAccessibilityDescription(): String
         DashboardUpcomingPaymentUrgency.OVERDUE -> {
             stringResource(R.string.dashboard_upcoming_accessibility_overdue)
         }
+
         DashboardUpcomingPaymentUrgency.DUE_TODAY -> {
             stringResource(R.string.dashboard_upcoming_accessibility_due_today)
         }
+
         DashboardUpcomingPaymentUrgency.STANDARD -> null
     }
 
@@ -835,7 +841,7 @@ internal val UpcomingPaymentUrgencySemanticsKey =
     SemanticsPropertyKey<String>("UpcomingPaymentUrgency")
 
 internal var androidx.compose.ui.semantics.SemanticsPropertyReceiver.upcomingPaymentUrgency
-    by UpcomingPaymentUrgencySemanticsKey
+        by UpcomingPaymentUrgencySemanticsKey
 
 @Preview(showBackground = true)
 @Composable
