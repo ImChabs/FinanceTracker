@@ -6,7 +6,6 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasClickAction
@@ -320,7 +319,7 @@ class DashboardScreenTest {
             composeRule.assertSingleSavedRecurringEntryCard(
                 "Paused gym, \$10.00, Recurring expense, Monthly, Mar 19, 2026, Utilities, USD, Inactive"
             ).assert(hasClickAction())
-                .assert(hasClickLabel("Edit active recurring entry"))
+                .assert(hasClickLabel("Edit inactive recurring entry"))
                 .assert(hasStateDescription("Inactive"))
                 .performClick()
 
