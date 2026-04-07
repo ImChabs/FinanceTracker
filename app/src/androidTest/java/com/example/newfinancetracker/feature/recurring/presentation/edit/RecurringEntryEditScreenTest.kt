@@ -1,6 +1,5 @@
 package com.example.newfinancetracker.feature.recurring.presentation.edit
 
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule

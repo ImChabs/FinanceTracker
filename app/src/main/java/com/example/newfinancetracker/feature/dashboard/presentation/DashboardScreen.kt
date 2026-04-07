@@ -600,7 +600,11 @@ private fun RecurringEntryCard(
 ) {
     val accessibilitySummary = entry.toAccessibilitySummary()
     val accessibilityStateDescription = entry.accessibilityStatusLabel()
-    val editActionLabel = stringResource(R.string.dashboard_active_entry_edit_action_label)
+    val editActionLabel = if (entry.isActive) {
+        stringResource(R.string.dashboard_active_entry_edit_action_label)
+    } else {
+        stringResource(R.string.dashboard_inactive_entry_edit_action_label)
+    }
 
     Card(
         colors = FinanceTrackerComponentDefaults.surfaceCardColors(),
