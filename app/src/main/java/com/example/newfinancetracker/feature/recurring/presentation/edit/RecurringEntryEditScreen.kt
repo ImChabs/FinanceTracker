@@ -20,6 +20,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -158,12 +162,29 @@ fun RecurringEntryEditScreen(
     }
 }
 
+private fun List<String>.joinToAccessibilitySummary(): String = buildString {
+    this@joinToAccessibilitySummary.forEachIndexed { index, segment ->
+        append(segment)
+        if (index == this@joinToAccessibilitySummary.lastIndex) return@forEachIndexed
+        if (segment.endsWith(".") || segment.endsWith("!") || segment.endsWith("?")) {
+            append(' ')
+        } else {
+            append(". ")
+        }
+    }
+}
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun RecurringEntryEditLoadingScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val accessibilitySummary = stringResource(R.string.recurring_edit_loading_accessibility_summary)
+    val accessibilityStateDescription = stringResource(
+        R.string.recurring_edit_loading_accessibility_state
+    )
+
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
@@ -192,6 +213,10 @@ private fun RecurringEntryEditLoadingScreen(
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .fillMaxWidth()
+                .semantics(mergeDescendants = true) {
+                    contentDescription = accessibilitySummary
+                    stateDescription = accessibilityStateDescription
+                }
                 .padding(innerPadding)
                 .padding(horizontal = FinanceTrackerSpacing.heroCardPadding)
                 .padding(top = FinanceTrackerSpacing.heroCardPadding)
@@ -224,6 +249,14 @@ private fun RecurringEntryEditMissingScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val title = stringResource(R.string.recurring_edit_missing_title)
+    val body = stringResource(R.string.recurring_edit_missing_body)
+    val accessibilitySummary = listOf(title, body).joinToAccessibilitySummary()
+    val accessibilityStateDescription = stringResource(
+        R.string.recurring_edit_missing_accessibility_state
+    )
+    val backActionLabel = stringResource(R.string.recurring_edit_back_to_dashboard_action_label)
+
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
@@ -252,6 +285,10 @@ private fun RecurringEntryEditMissingScreen(
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .fillMaxWidth()
+                .semantics(mergeDescendants = true) {
+                    contentDescription = accessibilitySummary
+                    stateDescription = accessibilityStateDescription
+                }
                 .padding(innerPadding)
                 .padding(
                     horizontal = FinanceTrackerSpacing.screenHorizontal,
@@ -263,17 +300,21 @@ private fun RecurringEntryEditMissingScreen(
                 modifier = Modifier.padding(FinanceTrackerSpacing.heroCardPadding)
             ) {
                 Text(
-                    text = stringResource(R.string.recurring_edit_missing_title),
+                    text = title,
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = stringResource(R.string.recurring_edit_missing_body),
+                    text = body,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Button(
                     onClick = onNavigateBack,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics {
+                            onClick(label = backActionLabel, action = null)
+                        }
                 ) {
                     Text(text = stringResource(R.string.recurring_edit_back_to_dashboard))
                 }

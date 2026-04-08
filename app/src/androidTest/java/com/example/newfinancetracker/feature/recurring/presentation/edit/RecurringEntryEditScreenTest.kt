@@ -1,10 +1,18 @@
 package com.example.newfinancetracker.feature.recurring.presentation.edit
 
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import com.example.newfinancetracker.core.designsystem.theme.FinanceTrackerTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -16,7 +24,7 @@ class RecurringEntryEditScreenTest {
     val composeRule = createComposeRule()
 
     @Test
-    fun recurringEntryEditScreen_loadingStateShowsLoadingCopy() {
+    fun recurringEntryEditScreen_loadingStateExposesMergedAccessibilitySummaryAndStateDescription() {
         composeRule.setRecurringEntryEditContent(
             state = RecurringEntryEditState(
                 entryId = 7L,
@@ -24,13 +32,15 @@ class RecurringEntryEditScreenTest {
             )
         )
 
+        composeRule.assertSingleStateCard("Loading recurring entry details.")
+            .assert(hasStateDescription("Recurring entry details are loading"))
+            .assertIsDisplayed()
         composeRule.onNodeWithText("Loading recurring entry...")
             .assertExists()
-            .assertIsDisplayed()
     }
 
     @Test
-    fun recurringEntryEditScreen_missingEntryStateShowsMissingCopy() {
+    fun recurringEntryEditScreen_missingEntryStateExposesMergedAccessibilitySummaryAndActionLabel() {
         composeRule.setRecurringEntryEditContent(
             state = RecurringEntryEditState(
                 entryId = 7L,
@@ -39,6 +49,11 @@ class RecurringEntryEditScreenTest {
             )
         )
 
+        composeRule.assertSingleStateCard(
+            "This recurring entry is no longer available. " +
+                "This recurring entry could not be found. It may have been removed or changed elsewhere."
+        ).assert(hasStateDescription("Recurring entry unavailable"))
+            .assertIsDisplayed()
         composeRule.onNodeWithText("This recurring entry is no longer available")
             .assertExists()
             .assertIsDisplayed()
@@ -48,6 +63,9 @@ class RecurringEntryEditScreenTest {
         composeRule.onNodeWithText("Back to dashboard")
             .assertExists()
             .assertIsDisplayed()
+        composeRule.onNodeWithText("Back to dashboard")
+            .assert(hasClickAction())
+            .assert(hasClickLabel("Return to the dashboard"))
     }
 
     @Test
@@ -172,4 +190,23 @@ class RecurringEntryEditScreenTest {
             }
         }
     }
+
+    private fun ComposeContentTestRule.assertSingleStateCard(
+        contentDescription: String
+    ): SemanticsNodeInteraction = onAllNodes(hasContentDescription(contentDescription))
+        .assertCountEquals(1)
+        .let { onNode(hasContentDescription(contentDescription)) }
+
+    private fun hasStateDescription(description: String): SemanticsMatcher =
+        SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, description)
+
+    private fun hasClickLabel(label: String): SemanticsMatcher =
+        SemanticsMatcher("has click label $label") { semanticsNode ->
+            val config = semanticsNode.config
+            if (SemanticsActions.OnClick !in config) {
+                false
+            } else {
+                config[SemanticsActions.OnClick].label == label
+            }
+        }
 }
