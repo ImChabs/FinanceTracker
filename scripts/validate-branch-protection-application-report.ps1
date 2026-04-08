@@ -25,7 +25,7 @@ if (-not (Test-Path $runbookFile)) {
 }
 
 Write-Host "Validating branch-protection application report ($Mode mode)"
-
+$tempScript = Join-Path ([System.IO.Path]::GetTempPath()) ("validate-branch-protection-report-" + [guid]::NewGuid().ToString() + ".py")
 $script = @'
 from pathlib import Path
 import re
@@ -114,5 +114,13 @@ if mode == "complete":
 print("Branch-protection application report validation passed.")
 '@
 
-python -c $script $reportFile $workflowFile $runbookFile $Mode
+Set-Content -LiteralPath $tempScript -Value $script -NoNewline
+try {
+    python $tempScript $reportFile $workflowFile $runbookFile $Mode
+}
+finally {
+    if (Test-Path $tempScript) {
+        Remove-Item -LiteralPath $tempScript -Force
+    }
+}
 exit $LASTEXITCODE
