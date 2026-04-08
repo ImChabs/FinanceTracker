@@ -17,7 +17,7 @@ if (-not (Test-Path $runbookFile)) {
 }
 
 Write-Host 'Validating branch-protection required-check labels against workflow job names'
-
+$tempScript = Join-Path ([System.IO.Path]::GetTempPath()) ("validate-branch-protection-checks-" + [guid]::NewGuid().ToString() + ".py")
 $script = @'
 from pathlib import Path
 import re
@@ -47,5 +47,13 @@ if workflow_labels != runbook_labels:
 print("Branch-protection required-check labels match the workflow job names.")
 '@
 
-python -c $script $workflowFile $runbookFile
+Set-Content -LiteralPath $tempScript -Value $script -NoNewline
+try {
+    python $tempScript $workflowFile $runbookFile
+}
+finally {
+    if (Test-Path $tempScript) {
+        Remove-Item -LiteralPath $tempScript -Force
+    }
+}
 exit $LASTEXITCODE
