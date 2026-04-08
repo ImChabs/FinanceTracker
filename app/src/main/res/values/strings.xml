@@ -80,6 +80,9 @@
     <string name="recurring_edit_delete_confirm_body">This will permanently remove this recurring entry from your dashboard.</string>
     <string name="recurring_edit_delete_confirm_action">Delete</string>
     <string name="recurring_edit_delete_cancel">Keep entry</string>
+    <string name="recurring_edit_delete_confirm_accessibility_state">Delete confirmation dialog</string>
+    <string name="recurring_edit_delete_confirm_action_label">Delete this recurring entry permanently</string>
+    <string name="recurring_edit_delete_cancel_action_label">Keep this recurring entry</string>
     <string name="recurring_edit_loading">Loading recurring entry...</string>
     <string name="recurring_edit_loading_accessibility_summary">Loading recurring entry details.</string>
     <string name="recurring_edit_loading_accessibility_state">Recurring entry details are loading</string>

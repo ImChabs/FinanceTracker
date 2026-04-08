@@ -93,6 +93,32 @@ class RecurringEntryEditScreenTest {
     }
 
     @Test
+    fun recurringEntryEditScreen_deleteConfirmationExposesAccessibilitySummaryStateAndActionLabels() {
+        composeRule.setRecurringEntryEditContent(
+            state = RecurringEntryEditState(
+                entryId = 7L,
+                isLoading = false,
+                isDeleteConfirmationVisible = true
+            )
+        )
+
+        composeRule.onNode(
+            hasContentDescription(
+                "Delete this recurring entry? This will permanently remove this recurring entry from your dashboard."
+            )
+        ).assertExists()
+            .assert(hasPaneTitle("Delete this recurring entry?"))
+            .assert(hasStateDescription("Delete confirmation dialog"))
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("Delete")
+            .assert(hasClickAction())
+            .assert(hasClickLabel("Delete this recurring entry permanently"))
+        composeRule.onNodeWithText("Keep entry")
+            .assert(hasClickAction())
+            .assert(hasClickLabel("Keep this recurring entry"))
+    }
+
+    @Test
     fun recurringEntryEditScreen_deleteButtonDispatchesDeleteClickedAction() {
         val actions = mutableListOf<RecurringEntryEditAction>()
 
@@ -199,6 +225,9 @@ class RecurringEntryEditScreenTest {
 
     private fun hasStateDescription(description: String): SemanticsMatcher =
         SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, description)
+
+    private fun hasPaneTitle(title: String): SemanticsMatcher =
+        SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, title)
 
     private fun hasClickLabel(label: String): SemanticsMatcher =
         SemanticsMatcher("has click label $label") { semanticsNode ->
