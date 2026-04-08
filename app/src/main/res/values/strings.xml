@@ -81,9 +81,13 @@
     <string name="recurring_edit_delete_confirm_action">Delete</string>
     <string name="recurring_edit_delete_cancel">Keep entry</string>
     <string name="recurring_edit_loading">Loading recurring entry...</string>
+    <string name="recurring_edit_loading_accessibility_summary">Loading recurring entry details.</string>
+    <string name="recurring_edit_loading_accessibility_state">Recurring entry details are loading</string>
     <string name="recurring_edit_missing_title">This recurring entry is no longer available</string>
     <string name="recurring_edit_missing_body">This recurring entry could not be found. It may have been removed or changed elsewhere.</string>
     <string name="recurring_edit_back_to_dashboard">Back to dashboard</string>
+    <string name="recurring_edit_back_to_dashboard_action_label">Return to the dashboard</string>
+    <string name="recurring_edit_missing_accessibility_state">Recurring entry unavailable</string>
     <string name="recurring_date_picker_confirm">OK</string>
     <string name="recurring_date_picker_cancel">Cancel</string>
     <plurals name="dashboard_due_in_days">
