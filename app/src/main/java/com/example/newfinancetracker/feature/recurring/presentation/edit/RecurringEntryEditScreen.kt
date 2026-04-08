@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,21 +68,43 @@ fun RecurringEntryEditScreen(
     modifier: Modifier = Modifier
 ) {
     if (state.isDeleteConfirmationVisible) {
+        val deleteDialogTitle = stringResource(R.string.recurring_edit_delete_confirm_title)
+        val deleteDialogBody = stringResource(R.string.recurring_edit_delete_confirm_body)
+        val deleteDialogSummary = listOf(deleteDialogTitle, deleteDialogBody)
+            .joinToAccessibilitySummary()
+        val deleteDialogStateDescription = stringResource(
+            R.string.recurring_edit_delete_confirm_accessibility_state
+        )
+        val deleteConfirmActionLabel = stringResource(
+            R.string.recurring_edit_delete_confirm_action_label
+        )
+        val deleteDismissActionLabel = stringResource(
+            R.string.recurring_edit_delete_cancel_action_label
+        )
+
         AlertDialog(
             onDismissRequest = { onAction(RecurringEntryEditAction.DeleteDismissed) },
+            modifier = Modifier.semantics {
+                paneTitle = deleteDialogTitle
+                contentDescription = deleteDialogSummary
+                stateDescription = deleteDialogStateDescription
+            },
             shape = MaterialTheme.shapes.large,
             containerColor = MaterialTheme.colorScheme.surface,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
             textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             title = {
-                Text(text = stringResource(R.string.recurring_edit_delete_confirm_title))
+                Text(text = deleteDialogTitle)
             },
             text = {
-                Text(text = stringResource(R.string.recurring_edit_delete_confirm_body))
+                Text(text = deleteDialogBody)
             },
             confirmButton = {
                 TextButton(
-                    onClick = { onAction(RecurringEntryEditAction.DeleteConfirmed) }
+                    onClick = { onAction(RecurringEntryEditAction.DeleteConfirmed) },
+                    modifier = Modifier.semantics {
+                        onClick(label = deleteConfirmActionLabel, action = null)
+                    }
                 ) {
                     Text(
                         text = stringResource(R.string.recurring_edit_delete_confirm_action),
@@ -91,7 +114,10 @@ fun RecurringEntryEditScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { onAction(RecurringEntryEditAction.DeleteDismissed) }
+                    onClick = { onAction(RecurringEntryEditAction.DeleteDismissed) },
+                    modifier = Modifier.semantics {
+                        onClick(label = deleteDismissActionLabel, action = null)
+                    }
                 ) {
                     Text(text = stringResource(R.string.recurring_edit_delete_cancel))
                 }
