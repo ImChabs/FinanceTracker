@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -181,6 +182,30 @@ class RecurringEntryEditScreenTest {
     }
 
     @Test
+    fun recurringEntryEditScreen_deleteConfirmationDismissRequestDispatchesDeleteDismissedAction() {
+        val actions = mutableListOf<RecurringEntryEditAction>()
+
+        composeRule.setRecurringEntryEditContent(
+            state = RecurringEntryEditState(
+                entryId = 7L,
+                isLoading = false,
+                isDeleteConfirmationVisible = true
+            ),
+            onAction = actions::add
+        )
+
+        composeRule.onNode(
+            hasContentDescription(
+                "Delete this recurring entry? This will permanently remove this recurring entry from your dashboard."
+            )
+        ).assertExists()
+            .assert(hasDismissAction())
+            .performSemanticsAction(SemanticsActions.Dismiss)
+
+        assertEquals(listOf(RecurringEntryEditAction.DeleteDismissed), actions)
+    }
+
+    @Test
     fun recurringEntryEditScreen_missingEntryBackActionInvokesNavigateBackCallback() {
         var navigateBackCount = 0
 
@@ -238,4 +263,7 @@ class RecurringEntryEditScreenTest {
                 config[SemanticsActions.OnClick].label == label
             }
         }
+
+    private fun hasDismissAction(): SemanticsMatcher =
+        SemanticsMatcher.keyIsDefined(SemanticsActions.Dismiss)
 }

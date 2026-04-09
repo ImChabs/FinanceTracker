@@ -1,29 +1,29 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 95 - Recurring Entry Edit Delete Confirmation Accessibility Labels
-- Scope: Add delete-confirmation dialog accessibility semantics and targeted instrumentation assertions for the recurring-entry edit screen.
+- Name: BLOCK 96 - Recurring Entry Edit Delete Confirmation Dismiss Request Coverage
+- Scope: Add focused recurring-entry edit screen coverage for the delete confirmation dialog dismiss request path.
 
 Loop 1
 - Validation target: `.\scripts\validate-compile.ps1 -GradleTask :app:compileDebugAndroidTestKotlin`
 - Underlying command: `gradlew.bat :app:compileDebugAndroidTestKotlin`
-- Why this target: The block changes a presentation screen, strings, and androidTest coverage, so androidTest Kotlin compile is the smallest target that verifies the affected sources together.
-- Final status: passed_after_fix
+- Why this target: The block only changes recurring-entry edit `androidTest` coverage, so the androidTest Kotlin compile path is the smallest meaningful verification target.
+- Final status: passed
 - Attempts used: 2/3
-- Run 1: Failed because `RecurringEntryEditScreenTest.kt` used the unavailable `hasPaneTitle` test matcher, which caused `:app:compileDebugAndroidTestKotlin` to fail.
-- Run 2: Passed after replacing the unavailable matcher with a local `PaneTitle` semantics matcher and rerunning the same target. Gradle reported Kotlin daemon fallback warnings but completed `:app:compileDebugAndroidTestKotlin` successfully.
-- Run 3: Pending
-- In-scope fixes applied: Replaced the unavailable `hasPaneTitle` assertion with a local `SemanticsProperties.PaneTitle` matcher in `RecurringEntryEditScreenTest.kt`.
+- Run 1: Could not start because the shell execution policy blocked the unsigned repo-local validation script.
+- Run 2: Passed after rerunning the same repo-local script via `powershell -ExecutionPolicy Bypass -File`. Gradle completed `:app:compileDebugAndroidTestKotlin` successfully once it could access the Android SDK outside the sandbox.
+- Run 3: Not used.
+- In-scope fixes applied: None. The rerun only addressed local shell and sandbox execution constraints.
 - Outstanding issues: None recorded.
 
 Loop 2
-- Validation target: <optional second validation script>
-- Underlying command: <optional gradle command>
-- Why this target: <why a second loop was needed>
-- Final status: not_run
-- Attempts used: 0/3
-- Run 1: Not used.
-- Run 2: Not used.
+- Validation target: `gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.example.newfinancetracker.feature.recurring.presentation.edit.RecurringEntryEditScreenTest`
+- Underlying command: `gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.example.newfinancetracker.feature.recurring.presentation.edit.RecurringEntryEditScreenTest`
+- Why this target: The block adds Compose instrumentation coverage, and a connected device was available, so a single targeted screen test class run was the narrowest direct behavior check beyond compile validation.
+- Final status: failed_unresolved
+- Attempts used: 2/3
+- Run 1: Failed because the connected device went offline during UTP cleanup, and the run stopped after receiving only part of the expected test results.
+- Run 2: Failed again after reconnecting the device with `adb reconnect offline`; the same device dropped offline mid-run and Gradle aborted `:app:connectedDebugAndroidTest`.
 - Run 3: Not used.
 - In-scope fixes applied: None recorded.
-- Outstanding issues: None recorded.
+- Outstanding issues: The connected device `SM-G9650` is not stable enough to complete the targeted instrumentation run and repeatedly transitions to `offline` during execution.
