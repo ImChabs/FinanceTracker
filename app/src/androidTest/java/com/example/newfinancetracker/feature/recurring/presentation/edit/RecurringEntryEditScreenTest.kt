@@ -3,6 +3,7 @@ package com.example.newfinancetracker.feature.recurring.presentation.edit
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.performSemanticsAction
@@ -137,6 +138,36 @@ class RecurringEntryEditScreenTest {
             .performClick()
 
         assertEquals(listOf(RecurringEntryEditAction.DeleteClicked), actions)
+    }
+
+    @Test
+    fun recurringEntryEditScreen_deleteErrorRendersWhenPresent() {
+        composeRule.setRecurringEntryEditContent(
+            state = RecurringEntryEditState(
+                entryId = 7L,
+                isLoading = false,
+                hasDeleteError = true
+            )
+        )
+
+        composeRule.onNodeWithText("Unable to delete the recurring entry. Please try again.")
+            .assertExists()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun recurringEntryEditScreen_deleteButtonIsDisabledWhenDeletionIsUnavailable() {
+        composeRule.setRecurringEntryEditContent(
+            state = RecurringEntryEditState(
+                entryId = 7L,
+                isLoading = false,
+                isSaving = true
+            )
+        )
+
+        composeRule.onNodeWithText("Delete recurring entry")
+            .assertExists()
+            .assertIsNotEnabled()
     }
 
     @Test
