@@ -1,19 +1,19 @@
 # Validation Report
 
 Current block
-- Name: BLOCK 97 - Recurring Entry Edit Delete Error And Availability Coverage
-- Scope: Add focused recurring-entry edit screen coverage for the delete error message and delete button enabled state.
+- Name: BLOCK 98 - Recurring Entry Edit Delete Guard Coverage
+- Scope: Add focused `RecurringEntryEditViewModel` unit coverage proving delete actions are ignored when deletion is unavailable.
 
 Loop 1
-- Validation target: `.\scripts\validate-compile.ps1 -GradleTask :app:compileDebugAndroidTestKotlin`
-- Underlying command: `gradlew.bat :app:compileDebugAndroidTestKotlin`
-- Why this target: The block only changes recurring-entry edit `androidTest` coverage, so the androidTest Kotlin compile path is the smallest meaningful verification target.
+- Validation target: `.\scripts\validate-unit-tests.ps1`
+- Underlying command: `gradlew.bat :app:testDebugUnitTest`
+- Why this target: The block only updates recurring-entry edit unit tests, so the targeted unit-test path is the smallest meaningful verification.
 - Final status: passed
 - Attempts used: 1/3
-- Run 1: Passed via `powershell -ExecutionPolicy Bypass -File .\scripts\validate-compile.ps1 -GradleTask :app:compileDebugAndroidTestKotlin`.
+- Run 1: Passed via `powershell -ExecutionPolicy Bypass -File .\scripts\validate-unit-tests.ps1`. Gradle fell back from the Kotlin daemon after an `AccessDeniedException`, but `:app:testDebugUnitTest` completed successfully.
 - Run 2: Pending
 - Run 3: Pending
-- In-scope fixes applied: None recorded.
+- In-scope fixes applied: Added delete guard coverage and a localized repository call counter in the recurring-entry edit ViewModel test fixture.
 - Outstanding issues: None recorded.
 
 Loop 2
