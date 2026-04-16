@@ -98,6 +98,46 @@ class RecurringEntryEditViewModelTest {
     }
 
     @Test
+    fun `delete clicked leaves state unchanged when deletion is unavailable`() = runTest(testDispatcher) {
+        val repository = FakeRecurringEntryRepository(initialEntries = emptyList())
+        val viewModel = RecurringEntryEditViewModel(
+            entryId = EXISTING_ENTRY.id,
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
+        )
+
+        advanceUntilIdle()
+        val stateBeforeDeleteClick = viewModel.state.value
+
+        viewModel.onAction(RecurringEntryEditAction.DeleteClicked)
+
+        assertTrue(stateBeforeDeleteClick.isMissingEntry)
+        assertFalse(stateBeforeDeleteClick.canDelete)
+        assertEquals(stateBeforeDeleteClick, viewModel.state.value)
+    }
+
+    @Test
+    fun `delete confirmed does not call repository when deletion is unavailable`() = runTest(testDispatcher) {
+        val repository = FakeRecurringEntryRepository(initialEntries = emptyList())
+        val viewModel = RecurringEntryEditViewModel(
+            entryId = EXISTING_ENTRY.id,
+            recurringEntryRepository = repository,
+            currencyMetadataRepository = FakeCurrencyMetadataRepository()
+        )
+
+        advanceUntilIdle()
+        val stateBeforeDeleteConfirm = viewModel.state.value
+
+        viewModel.onAction(RecurringEntryEditAction.DeleteConfirmed)
+        advanceUntilIdle()
+
+        assertTrue(stateBeforeDeleteConfirm.isMissingEntry)
+        assertFalse(stateBeforeDeleteConfirm.canDelete)
+        assertEquals(0, repository.deleteCallCount)
+        assertEquals(stateBeforeDeleteConfirm, viewModel.state.value)
+    }
+
+    @Test
     fun `unsupported saved currency falls back to default allowed currency`() = runTest(testDispatcher) {
         val repository = FakeRecurringEntryRepository()
         val viewModel = RecurringEntryEditViewModel(
@@ -141,10 +181,13 @@ class RecurringEntryEditViewModelTest {
     }
 
     private class FakeRecurringEntryRepository(
+        initialEntries: List<RecurringEntry> = listOf(EXISTING_ENTRY),
         private val shouldFailDelete: Boolean = false
     ) : RecurringEntryRepository {
 
-        private val entries = MutableStateFlow(listOf(EXISTING_ENTRY))
+        private val entries = MutableStateFlow(initialEntries)
+        var deleteCallCount = 0
+            private set
         val deletedEntryIds = mutableListOf<Long>()
         val upsertedEntries = mutableListOf<RecurringEntry>()
 
@@ -166,6 +209,7 @@ class RecurringEntryEditViewModelTest {
         }
 
         override suspend fun deleteRecurringEntry(entryId: Long) {
+            deleteCallCount += 1
             if (shouldFailDelete) {
                 error("Delete failed")
             }
